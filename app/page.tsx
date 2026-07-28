@@ -72,7 +72,6 @@ const cells = [
 
 export default function Home() {
   const [joinOpen, setJoinOpen] = useState(false);
-  const [createOpen, setCreateOpen] = useState(false);
   const [joined, setJoined] = useState(false);
   const [selectedCell, setSelectedCell] = useState(0);
 
@@ -97,7 +96,7 @@ export default function Home() {
           <a href="#academy">Grow</a>
           <a href="#impact">Give</a>
         </nav>
-        <button className="nav-cta" onClick={() => setJoinOpen(true)}>Join Revival <span>↗</span></button>
+        <a className="nav-cta" href="/home">Enter Revival One <span>↗</span></a>
       </header>
 
       <section className="hero" id="top">
@@ -138,7 +137,7 @@ export default function Home() {
               </div>
             </div>
             <div className="app-quick-row">
-              <button onClick={() => setCreateOpen(true)}><b>＋</b><span>Prayer</span></button>
+              <button onClick={() => setJoinOpen(true)}><b>＋</b><span>Prayer</span></button>
               <button onClick={scrollToEvents}><b>⌖</b><span>Events</span></button>
               <button onClick={() => document.getElementById("academy")?.scrollIntoView({ behavior: "smooth" })}><b>△</b><span>Learn</span></button>
             </div>
@@ -273,10 +272,6 @@ export default function Home() {
         <div className="footer-bottom"><span>© 2026 Revival One</span><span>Made for the Kingdom.</span><span><a href="#top">Privacy</a> · <a href="#top">Terms</a></span></div>
       </footer>
 
-      <nav className="mobile-nav" aria-label="Mobile navigation">
-        <a href="#top"><span>⌂</span>Home</a><a href="#movement"><span>◎</span>Community</a><button className="mobile-create" onClick={() => setCreateOpen(true)}>＋</button><a href="#events"><span>◇</span>Events</a><a href="#academy"><span>△</span>Academy</a>
-      </nav>
-
       {joinOpen && (
         <div className="modal-backdrop" role="presentation" onMouseDown={() => setJoinOpen(false)}>
           <div className="join-modal" role="dialog" aria-modal="true" aria-labelledby="join-title" onMouseDown={(event) => event.stopPropagation()}>
@@ -287,14 +282,6 @@ export default function Home() {
         </div>
       )}
 
-      {createOpen && (
-        <div className="modal-backdrop" role="presentation" onMouseDown={() => setCreateOpen(false)}>
-          <div className="create-modal" role="dialog" aria-modal="true" aria-labelledby="create-title" onMouseDown={(event) => event.stopPropagation()}>
-            <button className="modal-close" aria-label="Close" onClick={() => setCreateOpen(false)}>×</button><p className="eyebrow muted">CREATE</p><h2 id="create-title">What are you starting?</h2>
-            <div className="create-grid">{["Prayer", "Event", "Business pitch", "Revival cell"].map((item, index) => <button key={item} onClick={() => { setCreateOpen(false); setJoinOpen(true); }}><span>{["◌", "◇", "↗", "⌖"][index]}</span><b>{item}</b><small>Begin a new {item.toLowerCase()}</small></button>)}</div>
-          </div>
-        </div>
-      )}
     </main>
   );
 }
