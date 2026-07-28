@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useAuth } from "@/app/providers/AuthProvider";
 
 const quickActions = [
   { icon: "◌", label: "Share a prayer", copy: "Let the community stand with you" },
@@ -7,9 +10,11 @@ const quickActions = [
 ];
 
 export default function AppHomePage() {
+  const { user } = useAuth();
+  const firstName = String(user?.user_metadata?.full_name ?? user?.email?.split("@")[0] ?? "Friend").split(/\s+/)[0];
   return (
     <div className="ro-page ro-home-page">
-      <header className="ro-page-heading ro-home-heading"><div><p className="ro-overline">TUESDAY · 28 JULY</p><h1>Good evening, <em>Joshua.</em></h1><p>Here&apos;s what God is doing around you.</p></div><button className="ro-ghost-button">Customize home <span>✦</span></button></header>
+      <header className="ro-page-heading ro-home-heading"><div><p className="ro-overline">YOUR REVIVAL TODAY</p><h1>Good evening, <em>{firstName}.</em></h1><p>Here&apos;s what God is doing around you.</p></div><button className="ro-ghost-button">Customize home <span>✦</span></button></header>
 
       <section className="ro-home-grid">
         <article className="ro-hero-panel">

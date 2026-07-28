@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
+import { AuthProvider } from "./providers/AuthProvider";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -40,5 +41,5 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body>{children}</body></html>;
+  return <html lang="en"><body><AuthProvider>{children}</AuthProvider></body></html>;
 }

@@ -16,7 +16,19 @@ test("renders the Revival One first experience", async () => {
   assert.match(html, /One movement/);
   assert.match(html, /Revival Cells/);
   assert.match(html, /Rev Academy/);
+  assert.match(html, /href="\/home"/);
+  assert.match(html, /href="\/community"/);
+  assert.match(html, /href="\/events"/);
+  assert.match(html, /href="\/academy"/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape/);
+});
+
+test("renders Supabase account routes", async () => {
+  for (const [path, expected] of [["/sign-in", /Enter Revival One/], ["/sign-up", /Join the movement/]]) {
+    const response = await render(path);
+    assert.equal(response.status, 200);
+    assert.match(await response.text(), expected);
+  }
 });
 
 test("renders each premium application route", async () => {

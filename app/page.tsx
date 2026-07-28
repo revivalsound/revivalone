@@ -1,6 +1,14 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Link from "next/link";
+
+const appDestinations = [
+  { href: "/home", number: "01", title: "Home", copy: "Your daily word, prayer pulse, gatherings, and next Kingdom step." },
+  { href: "/community", number: "02", title: "Community", copy: "Find revival cells, share prayer requests, and connect in your city." },
+  { href: "/events", number: "03", title: "Events", copy: "Discover worship nights, outreaches, bootcamps, and conferences." },
+  { href: "/academy", number: "04", title: "Academy", copy: "Grow through biblical courses, leadership paths, and formation tracks." },
+];
 
 const pillars = [
   {
@@ -91,12 +99,12 @@ export default function Home() {
           <span className="brand-crop"><img src="/revival-one-logo.png" alt="Revival One" /></span>
         </a>
         <nav className="desktop-nav" aria-label="Primary navigation">
-          <a href="#movement">Movement</a>
-          <a href="#events">Gather</a>
-          <a href="#academy">Grow</a>
-          <a href="#impact">Give</a>
+          <Link href="/home">Home</Link>
+          <Link href="/community">Community</Link>
+          <Link href="/events">Events</Link>
+          <Link href="/academy">Academy</Link>
         </nav>
-        <a className="nav-cta" href="/home">Enter Revival One <span>↗</span></a>
+        <div className="landing-account-actions"><Link className="nav-sign-in" href="/sign-in">Sign in</Link><Link className="nav-cta" href="/sign-up">Join Revival One <span>→</span></Link></div>
       </header>
 
       <section className="hero" id="top">
@@ -108,7 +116,7 @@ export default function Home() {
           <h1>One movement.<br />One revival.<br /><em>One generation.</em></h1>
           <p className="hero-lede">A digital home for believers to gather, grow, build, and fund Kingdom impact—wherever you are.</p>
           <div className="hero-actions">
-            <button className="primary-button" onClick={() => setJoinOpen(true)}>Join the movement <span>↗</span></button>
+            <Link className="primary-button" href="/sign-up">Join the movement <span>→</span></Link>
             <button className="text-button" onClick={scrollToEvents}>Explore events <span>↓</span></button>
           </div>
           <div className="social-proof">
@@ -137,9 +145,9 @@ export default function Home() {
               </div>
             </div>
             <div className="app-quick-row">
-              <button onClick={() => setJoinOpen(true)}><b>＋</b><span>Prayer</span></button>
-              <button onClick={scrollToEvents}><b>⌖</b><span>Events</span></button>
-              <button onClick={() => document.getElementById("academy")?.scrollIntoView({ behavior: "smooth" })}><b>△</b><span>Learn</span></button>
+              <Link href="/community"><b>＋</b><span>Prayer</span></Link>
+              <Link href="/events"><b>◇</b><span>Events</span></Link>
+              <Link href="/academy"><b>△</b><span>Learn</span></Link>
             </div>
           </div>
           <div className="floating-note note-top"><span>✦</span><p><b>Prayer answered</b><small>2 minutes ago</small></p></div>
@@ -149,6 +157,11 @@ export default function Home() {
 
       <section className="ticker" aria-label="Revival One focus areas">
         <div><span>PRAYER</span><i>✦</i><span>COMMUNITY</span><i>✦</i><span>DISCIPLESHIP</span><i>✦</i><span>KINGDOM ENTERPRISE</span><i>✦</i><span>GENEROSITY</span><i>✦</i><span>REVIVAL</span></div>
+      </section>
+
+      <section className="app-gateway" aria-labelledby="app-gateway-title">
+        <div className="app-gateway-heading"><div><p className="eyebrow muted">ENTER THE DIGITAL HOME</p><h2 id="app-gateway-title">Your revival journey,<br /><em>all in one place.</em></h2></div><p>Every core space is now one tap away. Explore freely, then create an account when you are ready to participate.</p></div>
+        <div className="app-gateway-grid">{appDestinations.map((item) => <Link href={item.href} key={item.href}><span>{item.number}</span><div><h3>{item.title}</h3><p>{item.copy}</p></div><b>↗</b></Link>)}</div>
       </section>
 
       <section className="section movement" id="movement">
@@ -183,7 +196,7 @@ export default function Home() {
       <section className="section events" id="events">
         <div className="section-heading events-heading">
           <div><p className="eyebrow muted">STEP INTO THE ROOM</p><h2>Gatherings that<br /><em>mark generations.</em></h2></div>
-          <button className="outline-button" onClick={() => setJoinOpen(true)}>View all events <span>↗</span></button>
+          <Link className="outline-button" href="/events">View all events <span>→</span></Link>
         </div>
         <div className="event-grid">
           {events.map((event) => (
@@ -236,7 +249,7 @@ export default function Home() {
             <h2>Formed in truth.<br /><em>Ready for impact.</em></h2>
             <p>Go deeper with biblical courses, practical leadership tracks, and learning paths designed for the life you are called to build.</p>
             <div className="academy-stats"><span><b>42</b>COURSES</span><span><b>18</b>TEACHERS</span><span><b>6.8K</b>LEARNERS</span></div>
-            <button className="light-button" onClick={() => setJoinOpen(true)}>Start learning <span>↗</span></button>
+            <Link className="light-button" href="/academy">Start learning <span>→</span></Link>
           </div>
           <div className="course-stack">
             <article className="course-card course-main"><div className="course-art"><span>FEATURED PATH</span><b>01</b></div><p>SPIRITUAL FORMATION</p><h3>Built in the Secret Place</h3><div className="course-progress"><span style={{ width: "64%" }} /></div><small>8 lessons · 64% complete</small></article>
@@ -263,12 +276,12 @@ export default function Home() {
         <p className="eyebrow">THIS IS YOUR INVITATION</p>
         <h2>The fire is spreading.<br /><em>Come carry it.</em></h2>
         <p>Join a generation building, giving, praying, and living for one name.</p>
-        <button className="light-button" onClick={() => setJoinOpen(true)}>Join Revival One <span>↗</span></button>
+        <Link className="light-button" href="/sign-up">Join Revival One <span>→</span></Link>
       </section>
 
       <footer>
         <div className="footer-brand"><span className="brand-crop footer-logo"><img src="/revival-one-logo.png" alt="Revival One" /></span><p>One movement. One revival. One generation.</p></div>
-        <div className="footer-links"><div><b>EXPLORE</b><a href="#movement">Movement</a><a href="#events">Events</a><a href="#academy">Academy</a></div><div><b>CONNECT</b><a href="#movement">Revival Cells</a><a href="#impact">Kingdom Finance</a><a href="mailto:hello@revival.one">Contact</a></div><div><b>FOLLOW</b><a href="#top">Instagram</a><a href="#top">YouTube</a><a href="#top">X / Twitter</a></div></div>
+        <div className="footer-links"><div><b>APP</b><Link href="/home">Home</Link><Link href="/community">Community</Link><Link href="/events">Events</Link><Link href="/academy">Academy</Link></div><div><b>ACCOUNT</b><Link href="/sign-up">Create account</Link><Link href="/sign-in">Sign in</Link><a href="mailto:hello@revival.one">Contact</a></div><div><b>FOLLOW</b><a href="#top">Instagram</a><a href="#top">YouTube</a><a href="#top">X / Twitter</a></div></div>
         <div className="footer-bottom"><span>© 2026 Revival One</span><span>Made for the Kingdom.</span><span><a href="#top">Privacy</a> · <a href="#top">Terms</a></span></div>
       </footer>
 
