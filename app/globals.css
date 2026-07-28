@@ -12,7 +12,7 @@
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; background: var(--black); }
-body { margin: 0; background: var(--black); color: var(--white); font-family: var(--font-geist), Inter, Arial, sans-serif; overflow-x: hidden; }
+body { margin: 0; background: var(--black); color: var(--white); font-family: Inter, "SF Pro Display", Arial, sans-serif; overflow-x: hidden; }
 button, input { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 button { cursor: pointer; }
