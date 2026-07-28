@@ -27,7 +27,9 @@ test("renders Supabase account routes", async () => {
   for (const [path, expected] of [["/sign-in", /Enter Revival One/], ["/sign-up", /Join the movement/]]) {
     const response = await render(path);
     assert.equal(response.status, 200);
-    assert.match(await response.text(), expected);
+    const html = await response.text();
+    assert.match(html, expected);
+    if (path === "/sign-in") assert.doesNotMatch(html, /SECURE SIGN-IN|PRIVATE BY DEFAULT|SUPABASE AUTH/);
   }
 });
 

@@ -50,7 +50,6 @@ export default function SignInPage() {
         <button className="auth-submit" disabled={loading} type="submit"><span>{loading ? "Signing you in…" : "Enter Revival One"}</span><span>→</span></button>
       </form>
       <p className="auth-switch">New to the movement? <Link href="/sign-up">Create your account</Link></p>
-      <div className="auth-trust"><span>SECURE SIGN-IN</span><span>PRIVATE BY DEFAULT</span><span>SUPABASE AUTH</span></div>
     </div></section>
   </>;
 }
