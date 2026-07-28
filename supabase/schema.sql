@@ -76,6 +76,12 @@ $$;
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created after insert on auth.users for each row execute procedure public.handle_new_user();
 
+-- Backfill anyone who created an account before this schema was installed.
+insert into public.profiles (id, full_name, city)
+select id, coalesce(raw_user_meta_data->>'full_name',''), coalesce(raw_user_meta_data->>'city','')
+from auth.users
+on conflict (id) do nothing;
+
 alter table public.profiles enable row level security;
 alter table public.initiatives enable row level security;
 alter table public.event_registrations enable row level security;
