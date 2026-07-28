@@ -29,6 +29,7 @@ test("renders Supabase account routes", async () => {
     assert.equal(response.status, 200);
     const html = await response.text();
     assert.match(html, expected);
+    assert.match(html, /aria-label="Show password"/);
     if (path === "/sign-in") assert.doesNotMatch(html, /SECURE SIGN-IN|PRIVATE BY DEFAULT|SUPABASE AUTH/);
   }
 });

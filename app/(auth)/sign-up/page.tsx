@@ -8,6 +8,7 @@ import { getSupabaseBrowserClient } from "@/app/lib/supabase";
 export default function SignUpPage() {
   const router = useRouter();
   const [form, setForm] = useState({ fullName: "", city: "", email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -46,7 +47,7 @@ export default function SignUpPage() {
         <label>FULL NAME<input required autoComplete="name" value={form.fullName} onChange={(event) => update("fullName", event.target.value)} placeholder="Your full name" /></label>
         <label>CITY<input required autoComplete="address-level2" value={form.city} onChange={(event) => update("city", event.target.value)} placeholder="Lagos, Nigeria" /></label>
         <label>EMAIL ADDRESS<input required type="email" autoComplete="email" value={form.email} onChange={(event) => update("email", event.target.value)} placeholder="you@example.com" /></label>
-        <label>PASSWORD<input required minLength={8} type="password" autoComplete="new-password" value={form.password} onChange={(event) => update("password", event.target.value)} placeholder="At least 8 characters" /></label>
+        <label>PASSWORD<span className="auth-password-field"><input required minLength={8} type={showPassword ? "text" : "password"} autoComplete="new-password" value={form.password} onChange={(event) => update("password", event.target.value)} placeholder="At least 8 characters" /><button className={`auth-eye-button${showPassword ? " is-visible" : ""}`} type="button" aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword} onClick={() => setShowPassword((visible) => !visible)}><span className="auth-eye-icon" aria-hidden="true" /></button></span></label>
         {error && <p className="auth-error" role="alert">{error}</p>}
         {notice && <p className="auth-notice" role="status">{notice}</p>}
         <button className="auth-submit" disabled={loading || Boolean(notice)} type="submit"><span>{loading ? "Creating your account…" : "Join the movement"}</span><span>→</span></button>
