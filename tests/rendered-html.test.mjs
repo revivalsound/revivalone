@@ -50,3 +50,25 @@ test("renders each premium application route", async () => {
     assert.match(html, /Create/);
   }
 });
+
+test("renders the profile and Word details experiences", async () => {
+  const profile = await render("/profile");
+  assert.equal(profile.status, 200);
+  assert.match(await profile.text(), /Preparing your profile/);
+
+  const word = await render("/word/isaiah-40-31");
+  assert.equal(word.status, 200);
+  const wordHtml = await word.text();
+  assert.match(wordHtml, /Strength for/);
+  assert.match(wordHtml, /NIV|NKJV/);
+  assert.match(wordHtml, /Waiting is not/);
+});
+
+test("protects profile data and exposes licensed Bible configuration status", async () => {
+  const profileApi = await render("/api/profile");
+  assert.equal(profileApi.status, 401);
+
+  const bibleApi = await render("/api/bible/passage?version=NIV");
+  assert.equal(bibleApi.status, 503);
+  assert.equal((await bibleApi.json()).configured, false);
+});

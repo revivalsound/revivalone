@@ -75,14 +75,14 @@ export function AppShell({ children }: { children: ReactNode }) {
         </nav>
         <div className="ro-sidebar-spacer" />
         <button className="ro-create-side" onClick={openCreate}><span>＋</span>Create</button>
-        {user ? <div className="ro-user-card"><span className="ro-avatar">{initials}</span><div><b>{displayName}</b><small>{user.email}</small></div><button aria-label="Sign out" title="Sign out" onClick={signOut}>↗</button></div> : <Link className="ro-user-card" href="/sign-in"><span className="ro-avatar">RO</span><div><b>Sign in</b><small>Create and join the movement</small></div><span>→</span></Link>}
+        {user ? <div className="ro-user-card"><Link className="ro-user-profile-link" href="/profile" aria-label="Open your profile"><span className="ro-avatar">{initials}</span><div><b>{displayName}</b><small>{user.email}</small></div></Link><button aria-label="Sign out" title="Sign out" onClick={signOut}>↗</button></div> : <Link className="ro-user-card" href="/sign-in"><span className="ro-avatar">RO</span><div><b>Sign in</b><small>Create and join the movement</small></div><span>→</span></Link>}
       </aside>
 
       <div className="ro-workspace">
         <header className="ro-appbar">
           <Link className="ro-mobile-logo" href="/" aria-label="Revival One landing page"><img src="/revival-one-logo.png" alt="Revival One" /></Link>
           <div className="ro-search"><span>⌕</span><input aria-label="Search Revival One" placeholder="Search people, cells, events, courses…" /><kbd>⌘ K</kbd></div>
-          <div className="ro-app-actions"><button aria-label="Prayer activity">◌</button><button aria-label="Notifications" className="has-alert">♢</button>{user ? <span className="ro-avatar small" title={displayName}>{initials}</span> : <Link className="ro-app-signin" href="/sign-in">Sign in</Link>}</div>
+          <div className="ro-app-actions"><button aria-label="Prayer activity">◌</button><button aria-label="Notifications" className="has-alert">♢</button>{user ? <Link href="/profile" className="ro-avatar small" title="Open profile" aria-label="Open your profile">{initials}</Link> : <Link className="ro-app-signin" href="/sign-in">Sign in</Link>}</div>
         </header>
         <main className="ro-main">{children}</main>
       </div>

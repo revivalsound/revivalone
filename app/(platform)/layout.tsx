@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { AppShell } from "../components/AppShell";
 import "./platform.css";
+import "./profile/profile.css";
+import "./word/word.css";
 
 export const metadata: Metadata = {
   title: "Revival One App",

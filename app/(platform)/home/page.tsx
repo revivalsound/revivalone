@@ -18,7 +18,7 @@ export default function AppHomePage() {
 
       <section className="ro-home-grid">
         <article className="ro-hero-panel">
-          <div className="ro-hero-copy"><p className="ro-overline bright">TODAY&apos;S WORD</p><blockquote>“Those who hope in the Lord will renew their strength. They will soar on wings like eagles.”</blockquote><span>ISAIAH 40:31</span><div><button>Read the chapter</button><button className="icon-only" aria-label="Save scripture">♡</button></div></div>
+          <div className="ro-hero-copy"><p className="ro-overline bright">TODAY&apos;S WORD</p><blockquote>“Those who hope in the Lord will renew their strength. They will soar on wings like eagles.”</blockquote><span>ISAIAH 40:31</span><div><Link href="/word/isaiah-40-31">Read the chapter</Link><button className="icon-only" aria-label="Save scripture">♡</button></div></div>
           <img src="/revival-flame.png" alt="" />
           <div className="ro-scripture-orbit" />
         </article>
