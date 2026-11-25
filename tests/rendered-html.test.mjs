@@ -20,6 +20,7 @@ test("renders the Revival One first experience", async () => {
   assert.match(html, /href="\/community"/);
   assert.match(html, /href="\/events"/);
   assert.match(html, /href="\/academy"/);
+  assert.doesNotMatch(html, /Mobile app navigation/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape/);
 });
 
@@ -36,7 +37,7 @@ test("renders Supabase account routes", async () => {
 
 test("renders each premium application route", async () => {
   const routes = [
-    ["/home", /Good evening/],
+    ["/home", /Welcome to/],
     ["/community", /We carry the flame/],
     ["/events", /Step into/],
     ["/academy", /Formed in truth/],

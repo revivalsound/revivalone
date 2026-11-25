@@ -24,5 +24,5 @@ export default function AuthCallbackPage() {
     complete();
   }, [router]);
 
-  return <main style={{ minHeight:"100vh", display:"grid", placeItems:"center", background:"#050505", color:"white", textAlign:"center", padding:24 }}><div><img src="/revival-flame.png" alt="" style={{ width:120, height:120, objectFit:"contain" }} /><p style={{ color:"#ff8fb4", letterSpacing:".12em", fontSize:11 }}>{message}</p></div></main>;
+  return <main className="rev-auth-status"><div><img src="/revival-flame.png" alt="" width="84" height="84" /><p role="status">{message}</p></div></main>;
 }

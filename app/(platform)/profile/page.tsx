@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CalendarDays, GraduationCap, PlusSquare, UsersRound } from "lucide-react";
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { getSupabaseBrowserClient } from "@/app/lib/supabase";
@@ -83,31 +84,27 @@ export default function ProfilePage() {
     <div className="profile-back-row"><Link href="/home">← Back home</Link><span>MEMBER SINCE {joined.toUpperCase()}</span></div>
 
     <section className="profile-hero">
-      <div className="profile-glow" />
-      <img className="profile-flame" src="/revival-flame.png" alt="" />
       <div className="profile-avatar-wrap">{profile.avatar_url ? <img src={profile.avatar_url} alt={`${profile.full_name} profile`} /> : <span>{initials}</span>}<label className="profile-avatar-edit"><input type="file" accept="image/png,image/jpeg,image/webp" onChange={uploadAvatar} disabled={uploading} /><b>{uploading ? "…" : "+"}</b><i>{uploading ? "Uploading" : "Change photo"}</i></label></div>
-      <div className="profile-identity"><p className="ro-overline bright">REVIVAL ONE MEMBER</p><h1>{profile.full_name || "Your name"}</h1><p>{location}</p><div><span>{profile.ministry_focus || "Discovering my assignment"}</span><span>{profile.church || "Add your church"}</span></div></div>
-      <div className="profile-level"><span>LEVEL 4</span><b>Kingdom Builder</b><div><i style={{ width: "68%" }} /></div><small>680 of 1,000 impact points</small></div>
+      <div className="profile-identity"><h1>{profile.full_name || "Your profile"}</h1><p>{location}</p>{(profile.ministry_focus || profile.church) && <div>{profile.ministry_focus && <span>{profile.ministry_focus}</span>}{profile.church && <span>{profile.church}</span>}</div>}</div>
     </section>
 
     <section className="profile-stats" aria-label="Your Revival One activity">
-      <article><span>◇</span><b>{stats.events}</b><small>EVENTS JOINED</small></article>
-      <article><span>◎</span><b>{stats.cells}</b><small>REVIVAL CELLS</small></article>
-      <article><span>△</span><b>{stats.courses}</b><small>COURSES STARTED</small></article>
-      <article><span>↗</span><b>{stats.initiatives}</b><small>INITIATIVES CREATED</small></article>
+      <article><CalendarDays size={20} aria-hidden="true" /><b>{stats.events}</b><small>Events joined</small></article>
+      <article><UsersRound size={20} aria-hidden="true" /><b>{stats.cells}</b><small>Revival cells</small></article>
+      <article><GraduationCap size={20} aria-hidden="true" /><b>{stats.courses}</b><small>Courses started</small></article>
+      <article><PlusSquare size={20} aria-hidden="true" /><b>{stats.initiatives}</b><small>Initiatives created</small></article>
     </section>
 
     <div className="profile-content-grid">
       <form className="profile-form-card" onSubmit={saveProfile}>
-        <div className="profile-card-heading"><div><p className="ro-overline">PERSONAL PROFILE</p><h2>Tell the movement<br /><em>who you are.</em></h2></div><span>Visible to your community</span></div>
+        <div className="profile-card-heading"><h2>Personal details</h2></div>
         <div className="profile-fields"><label>FULL NAME<input required value={profile.full_name} onChange={(event) => update("full_name", event.target.value)} /></label><label>EMAIL ADDRESS<input value={profile.email} disabled /></label><label>CITY<input value={profile.city} onChange={(event) => update("city", event.target.value)} placeholder="Lagos" /></label><label>COUNTRY<input value={profile.country} onChange={(event) => update("country", event.target.value)} placeholder="Nigeria" /></label><label>CHURCH / COMMUNITY<input value={profile.church} onChange={(event) => update("church", event.target.value)} placeholder="Your local church" /></label><label>MINISTRY FOCUS<input value={profile.ministry_focus} onChange={(event) => update("ministry_focus", event.target.value)} placeholder="Prayer, missions, business…" /></label><label className="profile-bio-field">BIO<textarea rows={5} maxLength={500} value={profile.bio} onChange={(event) => update("bio", event.target.value)} placeholder="Share a little about your faith journey and the assignment on your heart." /><small>{profile.bio.length}/500</small></label></div>
         {error && <p className="profile-error" role="alert">{error}</p>}{message && <p className="profile-success" role="status">{message}</p>}
         <div className="profile-form-actions"><button type="submit" disabled={saving}>{saving ? "Saving…" : "Save changes"}<span>→</span></button><small>Changes sync securely to your Revival One account.</small></div>
       </form>
 
       <aside className="profile-side-column">
-        <section className="profile-calling-card"><span>✦</span><p className="ro-overline">YOUR DECLARATION</p><blockquote>“I carry the presence of God into every room and build what the Kingdom needs next.”</blockquote></section>
-        <section className="profile-account-card"><div><p className="ro-overline">ACCOUNT</p><h3>Security & session</h3></div><p>Signed in as<br /><b>{profile.email}</b></p><Link href="/reset-password">Change password <span>→</span></Link><button type="button" onClick={signOut}>Sign out of Revival One</button></section>
+        <section className="profile-account-card"><h2>Account</h2><p>Signed in as<br /><b>{profile.email}</b></p><Link href="/reset-password">Change password</Link><button type="button" onClick={signOut}>Sign out of Revival One</button></section>
       </aside>
     </div>
   </div>;

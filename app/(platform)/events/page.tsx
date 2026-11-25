@@ -1,20 +1,64 @@
+"use client";
+
+import { useState } from "react";
+import { CalendarDays, MapPin, Video } from "lucide-react";
+import { CreateInitiativeButton } from "@/app/components/AppShell";
+
 const eventCards = [
-  { tag: "PRAYER GATHERING", title: "Tuesday Fire Prayer", place: "Online · Revival One Live", date: "JUL 28", time: "8:00 PM", tone: "fire", status: "Join live" },
-  { tag: "WORSHIP NIGHT", title: "The Upper Room", place: "The Civic Centre · Lagos", date: "AUG 16", time: "6:00 PM", tone: "rose", status: "Registered" },
-  { tag: "GOSPEL BOOTCAMP", title: "Light Up Abuja", place: "Millennium Park · Abuja", date: "SEP 05", time: "3:00 PM", tone: "gold", status: "Register" },
-  { tag: "TENT MEETING", title: "Revival Sound 2026", place: "Tafawa Balewa Square · Lagos", date: "OCT 24", time: "4:00 PM", tone: "violet", status: "Register" },
-  { tag: "BIBLE STUDY", title: "The Book of Acts", place: "Yaba Central Cell · Lagos", date: "AUG 08", time: "5:00 PM", tone: "blue", status: "Join cell" },
-  { tag: "OUTREACH", title: "Love Your City", place: "Ajegunle · Lagos", date: "AUG 29", time: "9:00 AM", tone: "green", status: "Volunteer" },
+  { category: "Prayer gathering", title: "Tuesday Fire Prayer", place: "Online", date: "Jul 28", time: "8:00 PM WAT", online: true },
+  { category: "Worship night", title: "The Upper Room", place: "The Civic Centre · Lagos", date: "Aug 16", time: "6:00 PM WAT", online: false },
+  { category: "Gospel bootcamp", title: "Light Up Abuja", place: "Millennium Park · Abuja", date: "Sep 5", time: "3:00 PM WAT", online: false },
+  { category: "Tent meeting", title: "Revival Sound 2026", place: "Tafawa Balewa Square · Lagos", date: "Oct 24", time: "4:00 PM WAT", online: false },
+  { category: "Bible study", title: "The Book of Acts", place: "Yaba Central Cell · Lagos", date: "Aug 8", time: "5:00 PM WAT", online: false },
+  { category: "Outreach", title: "Love Your City", place: "Ajegunle · Lagos", date: "Aug 29", time: "9:00 AM WAT", online: false },
 ];
 
+const filters = [
+  { key: "all", label: "All formats" },
+  { key: "in-person", label: "In person" },
+  { key: "online", label: "Online" },
+] as const;
+
 export default function EventsPage() {
+  const [filter, setFilter] = useState<typeof filters[number]["key"]>("all");
+  const events = eventCards.filter((event) => filter === "all" || event.online === (filter === "online"));
+
   return (
     <div className="ro-page ro-events-page">
-      <header className="ro-page-heading"><div><p className="ro-overline">GATHERINGS</p><h1>Step into<br /><em>the room.</em></h1><p>Prayer, worship, training, and mission—every gathering is an invitation.</p></div><button className="ro-primary-action">＋ Create an event</button></header>
-      <section className="ro-featured-event"><div className="ro-featured-copy"><span className="ro-live-chip">FEATURED GATHERING</span><p>24–26 OCTOBER · LAGOS</p><h2>Revival Sound<br /><em>2026</em></h2><p>Three days under the tent. One generation marked by the presence of God and sent back into the nations.</p><div><button>Reserve your place <span>↗</span></button><span><b>3,842</b><small>already registered</small></span></div></div><div className="ro-featured-visual"><img src="/revival-flame.png" alt="" /><span className="ro-big-year">26</span><div className="ro-countdown"><span><b>87</b>DAYS</span><i /><span><b>14</b>HOURS</span><i /><span><b>32</b>MINS</span></div></div></section>
+      <header className="ro-page-heading">
+        <div><h1>Step into <em>the room.</em></h1><p>Gather for worship, prayer, training, and local mission.</p></div>
+        <CreateInitiativeButton kind="event">Create an event</CreateInitiativeButton>
+      </header>
 
-      <div className="ro-event-toolbar"><div className="ro-tab-row inline"><button className="active">All events</button><button>Near me</button><button>Online</button><button>My events</button></div><div><button className="ro-filter-button">Any date <span>⌄</span></button><button className="ro-filter-button">All types <span>⌄</span></button></div></div>
-      <section className="ro-event-listing"><div className="ro-section-title"><div><p className="ro-overline">UPCOMING</p><h2>What&apos;s happening next</h2></div><span className="ro-view-switch"><button className="active">▦</button><button>☷</button></span></div><div className="ro-events-grid">{eventCards.map((event) => <article key={event.title}><div className={`ro-event-poster ${event.tone}`}><span>{event.tag}</span><b>{event.title.split(" ").slice(0,2).join(" ")}<br />{event.title.split(" ").slice(2).join(" ")}</b><i>{event.date}</i></div><div className="ro-event-card-body"><span>{event.date}<b>{event.time}</b></span><div><p>{event.tag}</p><h3>{event.title}</h3><small>⌖ {event.place}</small></div><button className={event.status === "Registered" ? "registered" : ""}>{event.status} {event.status !== "Registered" && "→"}</button></div></article>)}</div></section>
+      <section className="rev-event-feature" aria-labelledby="rev-event-feature-title">
+        <div>
+          <CalendarDays size={27} strokeWidth={1.6} aria-hidden="true" />
+          <h2 id="rev-event-feature-title">Gather in person.<br /><em>Reach further together.</em></h2>
+          <p>From a local Bible study to a city-wide gathering, make space for people to show up for one another.</p>
+          <a className="rev-button rev-button--quiet" href="#event-directory">Browse the directory</a>
+        </div>
+      </section>
+
+      <section className="rev-app-section" id="event-directory" aria-labelledby="rev-event-heading">
+        <div className="ro-section-title">
+          <div><h2 id="rev-event-heading">Event directory</h2><p>Example listings. Dates and venues are illustrative.</p></div>
+          <div className="rev-filter-group" aria-label="Filter by event format">
+            {filters.map(({ key, label }) => <button type="button" key={key} aria-pressed={filter === key} onClick={() => setFilter(key)}>{label}</button>)}
+          </div>
+        </div>
+        <div className="rev-collection-list">
+          {events.map((event) => {
+            const Icon = event.online ? Video : MapPin;
+            return (
+              <article className="rev-collection-row rev-event-row" key={event.title}>
+                <span className="rev-row-mark">{event.date}</span>
+                <div><p>{event.category}</p><h3>{event.title}</h3><p><Icon size={14} aria-hidden="true" />{event.place}</p></div>
+                <small>{event.time}</small>
+              </article>
+            );
+          })}
+        </div>
+      </section>
     </div>
   );
 }

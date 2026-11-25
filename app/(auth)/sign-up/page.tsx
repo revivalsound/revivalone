@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/app/lib/supabase";
@@ -35,9 +36,8 @@ export default function SignUpPage() {
 
   return <>
     <section className="auth-visual">
-      <Link className="auth-logo" href="/"><img src="/revival-one-logo.png" alt="Revival One" /></Link>
-      <img className="auth-flame" src="/revival-flame.png" alt="" />
-      <div className="auth-testimony"><p className="auth-kicker">YOUR PLACE IN THE STORY</p><blockquote>One movement. One revival. <em>One generation.</em></blockquote><footer><span>12K</span><p>Believers gathering across 18 cities</p></footer></div>
+      <Link className="rev-brand" href="/"><img src="/revival-flame.png" alt="" width="42" height="42" /><span>Revival <strong>One</strong></span></Link>
+      <div className="auth-testimony"><blockquote>One movement. One revival. <em>One generation.</em></blockquote></div>
     </section>
     <section className="auth-form-side"><div className="auth-panel">
       <Link className="auth-back" href="/">← Back to Revival One</Link>
@@ -47,7 +47,13 @@ export default function SignUpPage() {
         <label>FULL NAME<input required autoComplete="name" value={form.fullName} onChange={(event) => update("fullName", event.target.value)} placeholder="Your full name" /></label>
         <label>CITY<input required autoComplete="address-level2" value={form.city} onChange={(event) => update("city", event.target.value)} placeholder="Lagos, Nigeria" /></label>
         <label>EMAIL ADDRESS<input required type="email" autoComplete="email" value={form.email} onChange={(event) => update("email", event.target.value)} placeholder="you@example.com" /></label>
-        <label>PASSWORD<span className="auth-password-field"><input required minLength={8} type={showPassword ? "text" : "password"} autoComplete="new-password" value={form.password} onChange={(event) => update("password", event.target.value)} placeholder="At least 8 characters" /><button className={`auth-eye-button${showPassword ? " is-visible" : ""}`} type="button" aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword} onClick={() => setShowPassword((visible) => !visible)}><span className="auth-eye-icon" aria-hidden="true" /></button></span></label>
+        <div className="auth-field">
+          <label htmlFor="signup-password">PASSWORD</label>
+          <div className="auth-password-field">
+            <input id="signup-password" required minLength={8} type={showPassword ? "text" : "password"} autoComplete="new-password" value={form.password} onChange={(event) => update("password", event.target.value)} placeholder="At least 8 characters" />
+            <button className="auth-eye-button" type="button" aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword} onClick={() => setShowPassword((visible) => !visible)}>{showPassword ? <EyeOff size={19} aria-hidden="true" /> : <Eye size={19} aria-hidden="true" />}</button>
+          </div>
+        </div>
         {error && <p className="auth-error" role="alert">{error}</p>}
         {notice && <p className="auth-notice" role="status">{notice}</p>}
         <button className="auth-submit" disabled={loading || Boolean(notice)} type="submit"><span>{loading ? "Creating your account…" : "Join the movement"}</span><span>→</span></button>

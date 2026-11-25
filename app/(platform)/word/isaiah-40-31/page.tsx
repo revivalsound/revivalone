@@ -31,8 +31,16 @@ export default function WordDetailsPage() {
   }, [selected]);
 
   async function shareWord() {
-    if (navigator.share) await navigator.share({ title: "Today&apos;s Word · Isaiah 40:31", url: window.location.href });
-    else { await navigator.clipboard.writeText(window.location.href); setShared(true); }
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "Today’s Word · Isaiah 40:31", url: window.location.href });
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(window.location.href);
+        setShared(true);
+      }
+    } catch {
+      // Dismissing the browser’s share sheet leaves the reading unchanged.
+    }
   }
 
   function selectVersion(code: string) {
@@ -45,18 +53,16 @@ export default function WordDetailsPage() {
     <div className="word-topline"><Link href="/home">← Today&apos;s Word</Link><span>DAILY SCRIPTURE · ISAIAH 40:31</span><button type="button" onClick={shareWord}>{shared ? "Link copied ✓" : "Share ↗"}</button></div>
 
     <section className="word-hero">
-      <div className="word-orbit" /><img src="/revival-flame.png" alt="" />
-      <div className="word-hero-copy"><p className="ro-overline bright">TODAY&apos;S WORD</p><h1>Strength for<br /><em>the waiting.</em></h1><p>Isaiah 40:31 is not a promise that faithful people never grow tired. It is an invitation to discover where renewed strength comes from when they do.</p><div className="word-meta"><span>7 MIN READ</span><span>SPIRITUAL FORMATION</span><span>28 JULY 2026</span></div></div>
-      <aside className="word-day"><span>28</span><b>JUL</b><small>DAY 209</small></aside>
+      <div className="word-hero-copy"><h1>Strength for<br /><em>the waiting.</em></h1><p>Isaiah 40:31 is not a promise that faithful people never grow tired. It is an invitation to discover where renewed strength comes from when they do.</p><div className="word-meta"><span>Isaiah 40:31 · 7 min read</span></div></div>
     </section>
 
     <div className="word-layout">
-      <main className="word-reading-column">
+      <div className="word-reading-column">
         <section className="word-scripture-card" id="scripture">
           <div className="word-card-head"><div><p className="ro-overline">THE SCRIPTURE</p><h2>Isaiah 40:31</h2></div><a href={current.link} target="_blank" rel="noreferrer">Open full chapter ↗</a></div>
-          <div className="word-version-tabs" role="tablist" aria-label="Bible translation">{versions.map((version) => <button role="tab" aria-selected={selected === version.code} className={selected === version.code ? "active" : ""} key={version.code} onClick={() => selectVersion(version.code)}><b>{version.code}</b><span>{version.name}</span></button>)}</div>
+          <div className="word-version-tabs" role="group" aria-label="Bible translation">{versions.map((version) => <button type="button" aria-pressed={selected === version.code} className={selected === version.code ? "active" : ""} key={version.code} onClick={() => selectVersion(version.code)}><b>{version.code}</b><span>{version.name}</span></button>)}</div>
           <div className="word-passage" aria-live="polite">
-            {loading ? <div className="word-passage-loading"><span /><span /><span /></div> : passage.content ? <><blockquote>{passage.content}</blockquote><p>{passage.copyright}</p></> : <div className="word-license-note"><span>◎</span><div><b>{current.name}</b><p>The reader is ready for licensed text. Connect a YouVersion Platform App Key to display this translation inside Revival One.</p><a href={passage.externalUrl ?? current.link} target="_blank" rel="noreferrer">Read Isaiah 40:31 in YouVersion <i>↗</i></a></div></div>}
+            {loading ? <p>Loading {current.code}…</p> : passage.content ? <><blockquote>{passage.content}</blockquote><p>{passage.copyright}</p></> : <div className="word-license-note"><div><b>{current.name}</b><p>This translation is unavailable in the in-app reader.</p><a href={passage.externalUrl ?? current.link} target="_blank" rel="noreferrer">Read on YouVersion</a></div></div>}
           </div>
           <div className="word-paraphrase"><span>DEVOTIONAL PARAPHRASE</span><p>Those who place their hope in the Lord receive fresh strength. They rise beyond exhaustion, keep moving through resistance, and are sustained for the long road.</p></div>
         </section>
@@ -76,7 +82,7 @@ export default function WordDetailsPage() {
         <section className="word-practice" id="practice"><div><p className="ro-overline bright">PRACTICE THE WORD</p><h2>Carry it into<br /><em>today.</em></h2></div><ol><li><span>1</span><p><b>Name the weight.</b> Write down the one situation that is draining your strength.</p></li><li><span>2</span><p><b>Wait without noise.</b> Give God ten unhurried minutes before reaching for another solution.</p></li><li><span>3</span><p><b>Take the faithful step.</b> Do the next clear thing, even if the full path is not visible yet.</p></li></ol></section>
 
         <section className="word-prayer" id="prayer"><img src="/revival-flame.png" alt="" /><p className="ro-overline">PRAY THE WORD</p><h2>Father, I bring You the places where I am tired of waiting. Re-anchor my hope in who You are. Exchange my anxiety for Your strength, teach me to recognize today&apos;s grace, and keep me faithful on the road ahead. Amen.</h2><button type="button" onClick={() => setPrayed((value) => !value)}>{prayed ? "Prayer marked ✓" : "I prayed this"} <span>{prayed ? "♥" : "♡"}</span></button></section>
-      </main>
+      </div>
 
       <aside className="word-side-column">
         <nav className="word-contents"><p className="ro-overline">IN THIS READING</p><a href="#scripture" className="active"><span>01</span>The Scripture</a><a href="#understand"><span>02</span>Understand</a><a href="#practice"><span>03</span>Practice</a><a href="#prayer"><span>04</span>Pray</a></nav>

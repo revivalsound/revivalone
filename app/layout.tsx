@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import { AuthProvider } from "./providers/AuthProvider";
+import "@fontsource-variable/manrope";
+import "@fontsource-variable/newsreader";
+import "@fontsource-variable/newsreader/wght-italic.css";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -36,10 +39,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#050505",
+  themeColor: "#181311",
   colorScheme: "dark",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body><AuthProvider>{children}</AuthProvider></body></html>;
+  return <html lang="en" data-type="software"><body><AuthProvider>{children}</AuthProvider></body></html>;
 }
