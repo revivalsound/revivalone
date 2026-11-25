@@ -9,6 +9,7 @@ const Gradient = lazy(() => import("@shadergradient/react").then(({ ShaderGradie
       <ShaderGradientCanvas
         style={{ position: "absolute", inset: 0 }}
         pixelDensity={1}
+        pointerEvents="none"
         powerPreference="low-power"
         fov={45}
       >
