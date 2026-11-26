@@ -6,6 +6,32 @@ import { fetchNotification, markRead, subscribeToNotifications, unreadCount, typ
 import { supabase } from './supabase'
 
 const ALERTS_KEY = 'revival.alerts'
+// The public half of the push key pair (safe to ship; the private half lives only in Vercel).
+const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY ?? 'BIOm0jNf8GNK26jSYLGklog7CfJWTM-jCeqAY810dkRVmC54Wc5QWyaD0ExaVjaHvLuxv55l-N7R1TwNeHq3qWA'
+
+function keyBytes(base64: string) {
+  const padded = (base64 + '='.repeat((4 - (base64.length % 4)) % 4)).replace(/-/g, '+').replace(/_/g, '/')
+  return Uint8Array.from(atob(padded), char => char.charCodeAt(0))
+}
+
+/** Signs this device up for push and saves it to the member's account. */
+async function subscribeDevice(userId: string) {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return
+  const registration = await navigator.serviceWorker.ready
+  const subscription = (await registration.pushManager.getSubscription())
+    ?? await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(VAPID_PUBLIC_KEY) })
+  const json = subscription.toJSON() as { endpoint: string; keys: { p256dh: string; auth: string } }
+  await supabase.from('push_subscriptions').upsert({ user_id: userId, endpoint: json.endpoint, p256dh: json.keys.p256dh, auth: json.keys.auth, user_agent: navigator.userAgent.slice(0, 200) }, { onConflict: 'endpoint' })
+}
+
+async function unsubscribeDevice() {
+  if (!('serviceWorker' in navigator)) return
+  const registration = await navigator.serviceWorker.getRegistration()
+  const subscription = await registration?.pushManager.getSubscription()
+  if (!subscription) return
+  await supabase.from('push_subscriptions').delete().eq('endpoint', subscription.endpoint)
+  await subscription.unsubscribe()
+}
 
 type Value = {
   unread: number
@@ -72,12 +98,20 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     const permission = Notification.permission === 'default' ? await Notification.requestPermission() : Notification.permission
     try { window.localStorage.setItem(ALERTS_KEY, permission === 'granted' ? 'on' : 'off') } catch { /* storage unavailable */ }
     setAlerts(alertsState())
-  }, [])
+    // Sign this device up for push so alerts arrive even when the app is closed.
+    if (permission === 'granted' && user) await subscribeDevice(user.id).catch(() => undefined)
+  }, [user])
 
   const disableAlerts = useCallback(() => {
     try { window.localStorage.setItem(ALERTS_KEY, 'off') } catch { /* storage unavailable */ }
     setAlerts(alertsState())
+    void unsubscribeDevice()
   }, [])
+
+  // Keep this device's push sign-up current (keys can rotate) while alerts are on.
+  useEffect(() => {
+    if (user && alertsState() === 'on') void subscribeDevice(user.id).catch(() => undefined)
+  }, [user])
 
   return (
     <NotificationsContext.Provider value={{ unread, refreshUnread, alerts, enableAlerts, disableAlerts }}>

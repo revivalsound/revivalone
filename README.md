@@ -22,6 +22,9 @@ Optional environment (`.env.local`):
 | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | Browser Supabase client (falls back to the existing project) |
 | `SUPABASE_URL`, `SUPABASE_ANON_KEY` | `api/` functions (same fallback) |
 | `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` | LiveKit project for live prayer walls (`api/prayer-token.ts`) |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Web Push keys (`npx web-push generate-vapid-keys`); `VITE_VAPID_PUBLIC_KEY` is the same public key for the browser |
+| `PUSH_WEBHOOK_SECRET` | Shared secret between the database trigger and `api/push.ts` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Lets `api/push.ts` read members' push devices (server only, never in the browser) |
 
 ## Database
 
@@ -34,7 +37,8 @@ Run these in the Supabase SQL Editor, in order (each is safe to re-run):
 5. `supabase/posts-rich.sql`: formatted text and up to six photos or videos per post
 6. `supabase/profile-v2.sql`: cover photos and a website link on profiles
 7. `supabase/follows.sql`: follows and notifications (new posts, prayer walls and cells from people you follow, and new cells in your city)
-8. `supabase/bible.sql`: Bible highlights and notes, daily-guide progress and journals, member-made Rev Academy courses (and it removes the old demo courses)
+8. `supabase/push.sql`: push notifications to closed apps (device sign-ups, and a trigger that hands each notification to `/api/push`)
+9. `supabase/bible.sql`: Bible highlights and notes, daily-guide progress and journals, member-made Rev Academy courses (and it removes the old demo courses)
 
 ## The Bible
 

@@ -83,7 +83,7 @@ export default function Notifications() {
           <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${alerts === 'on' ? 'bg-primary text-primary-foreground' : 'bg-primary/10 text-primary'}`}>{alerts === 'on' ? <BellBing className="h-5 w-5" /> : <BellOff className="h-5 w-5" />}</span>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold">{alerts === 'on' ? 'Device alerts are on' : 'Get alerts on this device'}</p>
-            <p className="text-xs text-muted-foreground">{alerts === 'blocked' ? 'Alerts are blocked in your browser settings for this site.' : 'A pop-up when someone you follow posts, starts a prayer wall or opens a cell, while Revival One is open.'}</p>
+            <p className="text-xs text-muted-foreground">{alerts === 'blocked' ? 'Alerts are blocked in your browser settings for this site.' : 'A notification on this phone or computer when someone you follow posts, starts a prayer wall or opens a cell, even when Revival One is closed.'}</p>
           </div>
           {alerts === 'on'
             ? <button type="button" onClick={disableAlerts} className="h-10 shrink-0 rounded-full border border-white/[0.1] px-4 text-[13px] font-semibold">Turn off</button>
