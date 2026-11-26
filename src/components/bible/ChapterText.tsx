@@ -81,7 +81,7 @@ function Verse({ verse, notes, highlight, selected, flash, redLetters, verseNumb
           const text = typeof part === 'string' ? part : part.text
           const space = joinSpace(previousText(verse.content, index), text)
           if (typeof part === 'string') return <Fragment key={index}>{space}{part}</Fragment>
-          return <Fragment key={index}>{space}<span className={`${part.wordsOfJesus && redLetters ? 'text-[#ff8fb0]' : ''} ${part.poem ? 'block pl-[1.6em]' : ''}`}>{part.text}</span></Fragment>
+          return <Fragment key={index}>{space}<span className={`${part.wordsOfJesus && redLetters ? 'text-primary-soft' : ''} ${part.poem ? 'block pl-[1.6em]' : ''}`}>{part.text}</span></Fragment>
         }
         if ('lineBreak' in part) return <br key={index} />
         if ('heading' in part) return <span key={index} className="my-2 block font-heading text-[0.78em] font-semibold uppercase tracking-[0.14em] text-primary">{part.heading}</span>

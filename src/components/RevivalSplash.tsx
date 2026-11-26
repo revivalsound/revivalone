@@ -3,7 +3,7 @@ import BrandMark from './brand/BrandMark'
 /** The opening screen: the flame in liquid chrome inside a glass orb (Spyda's splash). */
 export default function RevivalSplash({ message = 'Gathering the flame', leaving = false }: { message?: string; leaving?: boolean }) {
   return (
-    <div className={`revival-splash ${leaving ? 'revival-splash--leaving' : ''}`} role="status" aria-live="polite">
+    <div className={`theme-dark revival-splash ${leaving ? 'revival-splash--leaving' : ''}`} role="status" aria-live="polite">
       <div className="revival-splash__aurora revival-splash__aurora--rose" aria-hidden="true" />
       <div className="revival-splash__aurora revival-splash__aurora--ember" aria-hidden="true" />
       <div className="revival-splash__grain" aria-hidden="true" />

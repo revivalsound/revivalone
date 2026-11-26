@@ -22,10 +22,17 @@ export default {
         'brand-gradient-text': 'linear-gradient(135deg, #ffd1dd 0%, #ff5c8a 100%)',
       },
       colors: {
+        // Theme tokens (see the :root, .dark and .light blocks in index.css).
+        // "white" is the ink colour: white on the dark theme, deep plum on the light one,
+        // so every white/[0.07] border and wash flips with the theme.
+        white: 'rgb(var(--ink) / <alpha-value>)',
         surface: {
-          DEFAULT: '#0f0b0c',
-          raised: '#161012',
+          DEFAULT: 'rgb(var(--surface) / <alpha-value>)',
+          raised: 'rgb(var(--surface-raised) / <alpha-value>)',
         },
+        shell: 'rgb(var(--shell) / <alpha-value>)',
+        plum: 'rgb(var(--plum) / <alpha-value>)',
+        'primary-soft': 'rgb(var(--primary-soft) / <alpha-value>)',
         ember: '#ffb36b',
         lilac: '#d7b8ff',
         border: "hsl(var(--border))",

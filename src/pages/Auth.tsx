@@ -23,7 +23,7 @@ function Showcase({ quote }: { quote: ReactNode }) {
             <p className="mt-2 text-[12px] font-medium leading-5">Healing for the sick</p>
             <p className="mt-1 text-[11px] text-[#1d0a10]/60">214 praying</p>
           </div>
-          <div className="rounded-[18px] border border-white/15 bg-[#12070b] p-4 text-white shadow-[0_24px_50px_rgba(25,2,12,0.4)]">
+          <div className="rounded-[18px] border border-white/15 bg-shell p-4 text-white shadow-[0_24px_50px_rgba(25,2,12,0.4)]">
             <p className="flex items-center gap-1.5 text-[11px] text-white/60"><Users className="h-3.5 w-3.5 text-primary" /> Revival cell</p>
             <p className="mt-2 font-heading text-[14px] font-semibold">Yaba Central</p>
             <p className="mt-1 flex items-center gap-1 text-[11px] text-white/55"><MapPin className="h-3 w-3" /> Fridays · 6:00 PM</p>
@@ -103,11 +103,11 @@ export default function Auth() {
   const busy = loading || sessionLoading
 
   return (
-    <div className="min-h-[100dvh] bg-[#060304] p-2 font-sans text-foreground sm:p-3">
+    <div className="theme-dark min-h-[100dvh] bg-shell p-2 font-sans text-foreground sm:p-3">
       <div className="grid min-h-[calc(100dvh-1rem)] gap-2 sm:min-h-[calc(100dvh-1.5rem)] sm:gap-3 lg:grid-cols-[1.05fr_0.95fr]">
         <Showcase quote={isSignUp ? <>Carry the <span className="text-[#ffd6e1]">flame.</span></> : <>Faith grows <span className="text-[#ffd6e1]">in good company.</span></>} />
 
-        <section className="relative flex flex-col overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#0b0607]">
+        <section className="relative flex flex-col overflow-hidden rounded-[28px] border border-white/[0.08] bg-shell">
           <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[55%] bg-[radial-gradient(60%_70%_at_50%_0%,rgba(176,32,79,0.3),transparent_70%)]" />
 
           <header className="relative z-10 flex items-center justify-between px-5 pt-5 sm:px-7 sm:pt-6">

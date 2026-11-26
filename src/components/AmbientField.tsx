@@ -18,7 +18,7 @@ type AmbientFieldProps = {
  */
 export default function AmbientField({ intensity = 1, className = '' }: AmbientFieldProps) {
   return (
-    <div aria-hidden="true" className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}>
+    <div aria-hidden="true" className={`ambient-field pointer-events-none absolute inset-0 overflow-hidden ${className}`}>
       <div
         className="absolute -left-[22%] -top-[34%] h-[78vh] w-[64vw] rounded-full"
         style={{ background: `radial-gradient(closest-side, rgba(255, 92, 138, ${0.16 * intensity}), rgba(255, 92, 138, 0) 72%)` }}

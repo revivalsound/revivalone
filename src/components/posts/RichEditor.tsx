@@ -108,7 +108,7 @@ function Toolbar({ editor }: { editor: Editor }) {
   }
 
   return (
-    <div className="sticky top-14 z-10 flex flex-wrap items-center gap-1 rounded-t-[21px] border-b border-white/[0.07] bg-[#120c0e]/95 p-2 backdrop-blur-xl" role="toolbar" aria-label="Formatting">
+    <div className="sticky top-14 z-10 flex flex-wrap items-center gap-1 rounded-t-[21px] border-b border-white/[0.07] bg-surface-raised/95 p-2 backdrop-blur-xl" role="toolbar" aria-label="Formatting">
       <select
         aria-label="Text style"
         value={state.block}
@@ -190,7 +190,7 @@ function Palette({ label, swatch, options, onPick, icon }: { label: string; swat
         <ChevronDown className="h-3 w-3 text-muted-foreground" />
       </button>
       {open && (
-        <div className="absolute left-0 top-11 z-20 grid w-44 grid-cols-5 gap-1.5 rounded-2xl border border-white/[0.1] bg-[#161012] p-2.5 shadow-[0_18px_40px_rgba(0,0,0,0.5)]">
+        <div className="absolute left-0 top-11 z-20 grid w-44 grid-cols-5 gap-1.5 rounded-2xl border border-white/[0.1] bg-surface-raised p-2.5 shadow-[0_18px_40px_rgba(0,0,0,0.5)]">
           {options.map(option => (
             <button key={option.name} type="button" title={option.name} aria-label={option.name} onMouseDown={event => event.preventDefault()} onClick={() => { onPick(option.value); setOpen(false) }} className="h-7 w-7 rounded-full border border-white/15 transition-transform hover:scale-110" style={{ background: option.value || 'linear-gradient(135deg, transparent 45%, #ff5c8a 46%, #ff5c8a 54%, transparent 55%)' }} />
           ))}

@@ -23,7 +23,7 @@ export default function AuthCallback() {
   }, [navigate])
 
   return (
-    <main className="grid min-h-[100dvh] place-items-center bg-[radial-gradient(ellipse_at_50%_58%,#2a0c17,hsl(var(--background))_55%)] p-6 text-center">
+    <main className="theme-dark grid min-h-[100dvh] place-items-center bg-[radial-gradient(ellipse_at_50%_58%,#2a0c17,hsl(var(--background))_55%)] p-6 text-center">
       <div>
         <span className="brand-ring brand-ring--on mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-surface"><BrandMark size={52} animated /></span>
         <p role="status" className="mt-6 text-sm text-muted-foreground">{message}</p>

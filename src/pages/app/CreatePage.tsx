@@ -107,7 +107,7 @@ function CreateForm({ kind }: { kind: InitiativeKind }) {
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
       <Link to={kind === 'cell' ? '/community/cells' : '/events'} className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /> Back</Link>
       <header className="mt-6 flex items-start gap-4">
-        <span className="brand-ring brand-ring--on flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#1a0610] text-primary"><page.icon className="h-6 w-6" /></span>
+        <span className="brand-ring brand-ring--on flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-plum text-primary"><page.icon className="h-6 w-6" /></span>
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{page.eyebrow}</p>
           <h1 className="mt-2 font-heading text-[2rem] font-semibold leading-[1.05] tracking-[-0.02em] sm:text-[2.6rem]">{page.title}</h1>

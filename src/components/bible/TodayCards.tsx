@@ -24,7 +24,7 @@ export function useVerseOfTheDay() {
 export function VerseOfTheDayCard() {
   const verse = useVerseOfTheDay()
   return (
-    <Link to="/guide" className="bolt-card bolt-card--hover bolt-card--inset group relative flex min-h-[240px] overflow-hidden rounded-[24px] border border-white/10">
+    <Link to="/guide" className="theme-dark bolt-card bolt-card--hover bolt-card--inset group relative flex min-h-[240px] overflow-hidden rounded-[24px] border border-white/10">
       <img src="/assets/revival-dawn.webp" alt="" className="absolute inset-0 h-full w-full object-cover object-[75%_50%] transition-transform duration-700 group-hover:scale-[1.04]" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/65 to-black/15" />
       <div className="relative mt-auto p-6">

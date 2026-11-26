@@ -23,7 +23,7 @@ export default function ResetPassword() {
   }
 
   return (
-    <main className="grid min-h-[100dvh] place-items-center bg-[radial-gradient(60%_50%_at_50%_0%,rgba(176,32,79,0.28),transparent_70%)] px-5 py-10">
+    <main className="theme-dark grid min-h-[100dvh] place-items-center bg-[radial-gradient(60%_50%_at_50%_0%,rgba(176,32,79,0.28),transparent_70%)] px-5 py-10">
       <div className="w-full max-w-[400px]">
         <Link to="/auth" className="inline-flex h-9 items-center gap-2 rounded-full border border-white/[0.09] bg-white/[0.03] px-3.5 text-xs text-muted-foreground transition-colors hover:bg-white/[0.07] hover:text-foreground"><ArrowLeft className="h-3.5 w-3.5" /> Back to sign in</Link>
         <div className="mt-10 text-center">

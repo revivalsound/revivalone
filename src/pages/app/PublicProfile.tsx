@@ -56,7 +56,7 @@ export default function PublicProfilePage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
-      <section className="relative overflow-hidden rounded-[28px] border border-white/10">
+      <section className="theme-dark relative overflow-hidden rounded-[28px] border border-white/10">
         <div className="absolute inset-0 hero-field-fallback--vivid" />
         <div className="absolute inset-0 hero-field-scrim--vivid" />
         <div className="relative flex flex-col gap-6 p-7 sm:flex-row sm:items-end sm:p-9">

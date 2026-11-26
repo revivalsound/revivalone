@@ -121,6 +121,7 @@ const MAP = {
   GalleryAdd: 'gallery-add',
   VideoFrame: 'video-frame-play-horizontal',
   CloudUpload: 'cloud-upload',
+  Moon: 'moon',
 }
 
 function inner(svg) {

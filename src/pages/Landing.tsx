@@ -47,18 +47,18 @@ import { useAuth } from '../lib/AuthContext'
 
 function MockRailIcon({ icon: Icon, active, badge }: { icon: ElementType; active?: boolean; badge?: string }) {
   return (
-    <span className={`relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${active ? 'bg-[#1a0610] text-primary ring-2 ring-primary shadow-[0_6px_16px_rgba(255,92,138,0.25)]' : 'border border-white/[0.07] bg-white/[0.03] text-muted-foreground'}`}>
+    <span className={`relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${active ? 'bg-plum text-primary ring-2 ring-primary shadow-[0_6px_16px_rgba(255,92,138,0.25)]' : 'border border-white/[0.07] bg-white/[0.03] text-muted-foreground'}`}>
       <Icon className="h-3 w-3" />
-      {badge ? <span className="absolute -right-0.5 -top-0.5 flex h-2.5 min-w-2.5 items-center justify-center rounded-full bg-primary px-0.5 text-[6px] font-bold text-primary-foreground ring-1 ring-[#0a0607]">{badge}</span> : null}
+      {badge ? <span className="absolute -right-0.5 -top-0.5 flex h-2.5 min-w-2.5 items-center justify-center rounded-full bg-primary px-0.5 text-[6px] font-bold text-primary-foreground ring-1 ring-shell">{badge}</span> : null}
     </span>
   )
 }
 
 function AppMockup() {
   return (
-    <div className="relative mx-auto mt-4 overflow-hidden rounded-[26px] border border-white/[0.09] bg-[#0a0607] shadow-[0_28px_90px_rgba(0,0,0,0.45)]">
+    <div className="relative mx-auto mt-4 overflow-hidden rounded-[26px] border border-white/[0.09] bg-shell shadow-[0_28px_90px_rgba(0,0,0,0.45)]">
       <div className="flex h-[440px] select-none sm:h-[500px]" aria-hidden="true">
-        <div className="hidden w-12 shrink-0 flex-col items-center border-r border-white/[0.06] bg-[#0a0607] py-3 sm:flex">
+        <div className="hidden w-12 shrink-0 flex-col items-center border-r border-white/[0.06] bg-shell py-3 sm:flex">
           <img src="/assets/revival-flame-mark.png" alt="" className="mb-3 h-6 w-6 object-contain" />
           <div className="flex flex-1 flex-col items-center gap-2 py-1">
             <MockRailIcon icon={Home} active />
@@ -131,7 +131,7 @@ function AppMockup() {
 
 function RibbonPhoto({ src, label, position = 'center' }: { src: string; label?: string; position?: string }) {
   return (
-    <div className="relative h-[176px] w-[140px] overflow-hidden rounded-[18px] border border-white/25 bg-[#1a0610] shadow-[0_24px_50px_rgba(25,2,12,0.45)]">
+    <div className="relative h-[176px] w-[140px] overflow-hidden rounded-[18px] border border-white/25 bg-plum shadow-[0_24px_50px_rgba(25,2,12,0.45)]">
       <img src={src} alt="" className="h-full w-full object-cover" style={{ objectPosition: position }} loading="lazy" />
       {label && (
         <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-full bg-black/70 px-2 py-1 text-[9px] font-bold text-primary backdrop-blur-sm">
@@ -145,7 +145,7 @@ function RibbonPhoto({ src, label, position = 'center' }: { src: string; label?:
 function RibbonCard({ children, tone = 'light', className = '' }: { children: ReactNode; tone?: 'light' | 'dark' | 'rose'; className?: string }) {
   const tones = {
     light: 'border-white/70 bg-[#fbf3f0] text-[#1d0a10]',
-    dark: 'border-white/15 bg-[#12070b] text-white',
+    dark: 'border-white/15 bg-shell text-white',
     rose: 'border-white/40 bg-primary text-primary-foreground',
   }
   return <div className={`w-[168px] rounded-[18px] border p-3.5 text-left shadow-[0_24px_50px_rgba(25,2,12,0.4)] ${tones[tone]} ${className}`}>{children}</div>
@@ -188,7 +188,7 @@ const ribbon: ReactNode[] = [
     <p className="text-[9px] font-bold uppercase tracking-[0.12em] opacity-70">Daily guide</p>
     <p className="mt-1.5 font-heading text-2xl font-semibold">1,189</p>
     <p className="text-[10px] font-medium">chapters, January to December</p>
-    <span className="mt-2.5 inline-flex items-center gap-1 rounded-full bg-[#070405] px-2.5 py-1 text-[9px] font-bold text-primary"><Heart className="h-2.5 w-2.5" /> Day {guideDayForDate()}</span>
+    <span className="mt-2.5 inline-flex items-center gap-1 rounded-full bg-shell px-2.5 py-1 text-[9px] font-bold text-primary"><Heart className="h-2.5 w-2.5" /> Day {guideDayForDate()}</span>
   </RibbonCard>,
   <RibbonCard key="live" tone="dark">
     <p className="flex items-center gap-1.5 text-[9px] text-white/55"><Video className="h-3 w-3 text-primary" /> The Bible, read aloud</p>
@@ -230,7 +230,7 @@ type CardTone = 'surface' | 'rose' | 'light'
 
 const CARD_TONES: Record<CardTone, { card: string; icon: string; body: string }> = {
   surface: { card: 'border-white/[0.07] bg-surface text-foreground hover:border-primary/30', icon: 'border-primary/25 bg-primary/10 text-primary', body: 'text-muted-foreground' },
-  rose: { card: 'border-primary bg-primary text-primary-foreground', icon: 'border-black/10 bg-[#070405] text-primary', body: 'text-primary-foreground/75' },
+  rose: { card: 'border-primary bg-primary text-primary-foreground', icon: 'border-black/10 bg-shell text-primary', body: 'text-primary-foreground/75' },
   light: { card: 'border-white bg-[#f7eeea] text-[#1d0a10]', icon: 'border-black/10 bg-[#1d0a10] text-primary', body: 'text-[#1d0a10]/65' },
 }
 
@@ -295,7 +295,7 @@ function WordPreview() {
   return (
     <div className="relative mx-auto w-[min(84vw,340px)] sm:w-full sm:max-w-[340px] lg:max-w-[380px]">
       <div aria-hidden="true" className="absolute -inset-6 rounded-[48px] bg-[radial-gradient(closest-side,rgba(224,52,106,0.4),transparent)] blur-2xl" />
-      <Link to="/guide" className="bolt-card bolt-card--hover bolt-card--inset relative block aspect-[4/5] overflow-hidden rounded-[26px] border border-white/10 bg-[#060304] shadow-[0_30px_80px_rgba(0,0,0,0.55)] sm:aspect-[9/14] sm:rounded-[32px]">
+      <Link to="/guide" className="bolt-card bolt-card--hover bolt-card--inset relative block aspect-[4/5] overflow-hidden rounded-[26px] border border-white/10 bg-shell shadow-[0_30px_80px_rgba(0,0,0,0.55)] sm:aspect-[9/14] sm:rounded-[32px]">
         <img src="/assets/revival-dawn.webp" alt="An open Bible lit by morning light through a chapel window" className="absolute inset-0 h-full w-full object-cover object-[78%_50%]" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/35 to-black/90" />
         <div className="relative flex h-full flex-col p-6">
@@ -374,7 +374,7 @@ export default function Landing() {
   const enter = session ? '/home' : '/auth?mode=sign-up'
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background font-sans text-foreground">
+    <div className="theme-dark min-h-screen overflow-x-hidden bg-background font-sans text-foreground">
       <main>
         {/* Hero: one rounded panel holding the nav, the promise and the ribbon. */}
         <section className="p-2 sm:p-3">
@@ -587,7 +587,7 @@ export default function Landing() {
         </section>
 
         <section id="movement" className="px-2 py-8 sm:px-3">
-          <div className="relative mx-auto overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#0b0607] px-5 py-16 sm:rounded-[34px] sm:px-8 sm:py-20">
+          <div className="relative mx-auto overflow-hidden rounded-[28px] border border-white/[0.08] bg-shell px-5 py-16 sm:rounded-[34px] sm:px-8 sm:py-20">
             <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,#ff5c8a,#ffb36b,transparent)]" />
             <div className="relative mx-auto max-w-6xl">
               <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(360px,.82fr)] lg:gap-16">
@@ -668,7 +668,7 @@ export default function Landing() {
             <div className="relative">
               <h2 className="mx-auto max-w-3xl font-heading text-[2.2rem] font-semibold leading-[1.05] tracking-[-0.02em] sm:text-6xl">There’s a place for you here.</h2>
               <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-primary-foreground/75">Pray with someone today. Find your people this week.</p>
-              <Link to={enter} className="group mt-9 inline-flex h-12 items-center gap-3 rounded-full bg-[#070405] pl-6 pr-1.5 whitespace-nowrap font-heading text-[12px] font-semibold uppercase tracking-[0.14em] text-white transition-all hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]">
+              <Link to={enter} className="group mt-9 inline-flex h-12 items-center gap-3 rounded-full bg-shell pl-6 pr-1.5 whitespace-nowrap font-heading text-[12px] font-semibold uppercase tracking-[0.14em] text-white transition-all hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]">
                 Create your account
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform duration-200 group-hover:rotate-45"><ArrowUpRight className="h-4 w-4" /></span>
               </Link>

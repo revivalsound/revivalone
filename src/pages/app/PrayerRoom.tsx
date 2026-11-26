@@ -158,7 +158,7 @@ export default function PrayerRoom() {
       <div ref={audio} hidden />
       <Link to="/community/prayer" className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /> Prayer walls</Link>
 
-      <section className="relative mt-5 overflow-hidden rounded-[30px] border border-white/10">
+      <section className="theme-dark relative mt-5 overflow-hidden rounded-[30px] border border-white/10">
         <div className="absolute inset-0 hero-field-fallback--deep" />
         <div className="absolute inset-0 hero-field-scrim--deep" />
         {phase === 'live' && <div className="hero-strike" />}
@@ -195,7 +195,7 @@ export default function PrayerRoom() {
               <div key={person.id} className={`bolt-card flex flex-col items-center rounded-[24px] border px-4 py-6 text-center transition-colors ${person.speaking ? 'bolt-card--on border-transparent bg-surface-raised' : 'border-white/[0.07] bg-surface'}`}>
                 <span className={`relative rounded-full ${person.speaking ? 'brand-ring brand-ring--on' : ''}`}>
                   <AuthorAvatar author={{ full_name: person.name, avatar_url: person.avatar }} size="h-20 w-20" text="text-xl" />
-                  {person.muted && <span className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-surface bg-[#2a1018] text-white/80"><MicOff /></span>}
+                  {person.muted && <span className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-surface bg-plum text-white/80"><MicOff /></span>}
                 </span>
                 <p className="mt-4 max-w-full truncate text-[13px] font-semibold">{person.local ? 'You' : person.name}</p>
                 <p className="text-[11px] text-muted-foreground">{person.host ? 'Host' : person.speaking ? 'Speaking' : person.muted ? 'Listening' : 'Praying'}</p>

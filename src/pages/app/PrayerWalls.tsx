@@ -55,28 +55,28 @@ export default function PrayerWalls() {
       <CommunityTabs />
 
       {/* Meet-style launcher */}
-      <section className="relative mt-8 overflow-hidden rounded-[30px] border border-white/10">
+      <section className="theme-dark relative mt-8 overflow-hidden rounded-[30px] border border-white/10">
         <div className="absolute inset-0 hero-field-fallback--vivid" />
         <div className="absolute inset-0 hero-field-scrim--vivid" />
         <div className="hero-strike" />
         <div className="relative grid gap-8 p-7 sm:p-10 lg:grid-cols-[1.1fr_1fr] lg:items-center">
           <div>
-            <span className="brand-ring brand-ring--on flex h-14 w-14 items-center justify-center rounded-full bg-[#1a0610] text-primary"><HandHeart className="h-6 w-6" /></span>
+            <span className="brand-ring brand-ring--on flex h-14 w-14 items-center justify-center rounded-full bg-plum text-primary"><HandHeart className="h-6 w-6" /></span>
             <h2 className="mt-6 font-heading text-3xl font-semibold leading-[1.08] tracking-[-0.02em] text-white sm:text-[2.6rem]">Where two or three gather, <span className="text-[#ffd0dd]">He is there.</span></h2>
             <p className="mt-3 max-w-md text-sm leading-6 text-white/75">Everyone joins by voice. When the time frame ends, the wall closes.</p>
           </div>
           <div className="space-y-3">
-            <button type="button" onClick={() => setMode('instant')} className="bolt-card bolt-card--hover group flex w-full items-center gap-4 rounded-[22px] bg-[#070405]/85 p-4 text-left backdrop-blur-xl transition-transform hover:-translate-y-0.5">
+            <button type="button" onClick={() => setMode('instant')} className="bolt-card bolt-card--hover group flex w-full items-center gap-4 rounded-[22px] bg-shell/85 p-4 text-left backdrop-blur-xl transition-transform hover:-translate-y-0.5">
               <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_10px_30px_rgba(255,92,138,0.35)]"><Bolt className="h-5 w-5" /></span>
               <span className="min-w-0 flex-1"><b className="block font-heading text-[15px] font-semibold text-white">Start an instant prayer wall</b><small className="text-xs text-white/60">Open a room now and invite people in.</small></span>
               <ArrowRight className="h-4 w-4 text-white/60 transition-transform group-hover:translate-x-0.5" />
             </button>
-            <button type="button" onClick={() => setMode('schedule')} className="bolt-card bolt-card--hover group flex w-full items-center gap-4 rounded-[22px] bg-[#070405]/85 p-4 text-left backdrop-blur-xl transition-transform hover:-translate-y-0.5">
+            <button type="button" onClick={() => setMode('schedule')} className="bolt-card bolt-card--hover group flex w-full items-center gap-4 rounded-[22px] bg-shell/85 p-4 text-left backdrop-blur-xl transition-transform hover:-translate-y-0.5">
               <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary"><CalendarAdd className="h-5 w-5" /></span>
               <span className="min-w-0 flex-1"><b className="block font-heading text-[15px] font-semibold text-white">Schedule a prayer wall</b><small className="text-xs text-white/60">Pick a time and share the link ahead.</small></span>
               <ArrowRight className="h-4 w-4 text-white/60 transition-transform group-hover:translate-x-0.5" />
             </button>
-            <form onSubmit={join} className="flex items-center gap-2 rounded-[22px] bg-[#070405]/85 p-2 pl-4 backdrop-blur-xl">
+            <form onSubmit={join} className="flex items-center gap-2 rounded-[22px] bg-shell/85 p-2 pl-4 backdrop-blur-xl">
               <LinkIcon className="h-5 w-5 shrink-0 text-primary" />
               <input value={code} onChange={event => { setCode(event.target.value); setCodeError('') }} placeholder="Enter a code or link" aria-label="Prayer wall code" className="h-11 min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/45" />
               <button type="submit" disabled={!code.trim()} className="h-11 shrink-0 rounded-full bg-white px-5 text-sm font-semibold text-[#140609] transition-opacity disabled:opacity-40">Join</button>

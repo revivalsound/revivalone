@@ -29,13 +29,13 @@ export default function Academy() {
         eyebrow="Rev Academy"
         title={<>Formed in truth. <span className="text-primary">Ready for impact.</span></>}
         lede="Audio courses from teachers in the community. Listen episode by episode, wherever you are."
-        action={<Link to="/create/course" className="group inline-flex h-11 shrink-0 items-center gap-2 self-start rounded-full bg-primary pl-5 pr-1.5 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground shadow-[0_12px_32px_rgba(255,92,138,0.24)] transition-all hover:-translate-y-0.5 sm:self-auto">Teach a course <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#070405] text-primary"><Plus className="h-4 w-4" /></span></Link>}
+        action={<Link to="/create/course" className="group inline-flex h-11 shrink-0 items-center gap-2 self-start rounded-full bg-primary pl-5 pr-1.5 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground shadow-[0_12px_32px_rgba(255,92,138,0.24)] transition-all hover:-translate-y-0.5 sm:self-auto">Teach a course <span className="flex h-8 w-8 items-center justify-center rounded-full bg-shell text-primary"><Plus className="h-4 w-4" /></span></Link>}
       />
 
       {error && <div className="mt-6"><Notice tone="error">{error}</Notice></div>}
 
       {featured && (
-        <section className="mt-8 grid overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#0b0607] md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+        <section className="mt-8 grid overflow-hidden rounded-[28px] border border-white/[0.08] bg-shell md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
           <div className="relative flex min-h-[260px] items-center justify-center overflow-hidden">
             {featured.cover_url ? <img src={featured.cover_url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-70" /> : <div className="absolute inset-0 bg-[radial-gradient(60%_60%_at_50%_50%,rgba(176,32,79,0.45),transparent_75%)]" />}
             <div className="absolute inset-[14%] rounded-full border border-white/10 [animation:spin_16s_linear_infinite] [border-style:dashed]" />

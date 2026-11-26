@@ -5,6 +5,8 @@ import {
 } from '../../components/ui/icons'
 import { Notice } from '../../components/ui/kit'
 import ChapterText from '../../components/bible/ChapterText'
+import Sheet from '../../components/ui/Sheet'
+import { useTheme } from '../../lib/theme'
 import BookPicker from '../../components/bible/BookPicker'
 import StudyPanel from '../../components/bible/StudyPanel'
 import { useAuth } from '../../lib/AuthContext'
@@ -48,6 +50,9 @@ export default function BibleReader() {
   const [picking, setPicking] = useState(false)
   const [settings, setSettings] = useState(false)
   const [translationsOpen, setTranslationsOpen] = useState(false)
+  const { theme, setTheme } = useTheme()
+  const closeTranslations = useCallback(() => setTranslationsOpen(false), [])
+  const closeSettings = useCallback(() => setSettings(false), [])
   const [studyOpen, setStudyOpen] = useState(false)
   const [noteOpen, setNoteOpen] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -220,22 +225,9 @@ export default function BibleReader() {
         <button type="button" onClick={() => setPicking(true)} className="inline-flex h-10 min-w-0 items-center gap-2 rounded-full bg-white/[0.05] pl-3 pr-3.5 font-heading text-[14px] font-semibold transition-colors hover:bg-white/[0.09]">
           <Bible className="h-4 w-4 shrink-0 text-primary" /> <span className="truncate">{book.name} {chapterNumber}</span> <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
         </button>
-        <div className="relative">
-          <button type="button" onClick={() => setTranslationsOpen(value => !value)} aria-expanded={translationsOpen} className="inline-flex h-10 items-center gap-1 rounded-full bg-white/[0.05] px-3.5 font-heading text-[13px] font-semibold transition-colors hover:bg-white/[0.09]">
-            {current.short} <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-          </button>
-          {translationsOpen && (
-            <div className="dialog-in absolute left-0 top-12 z-30 w-[min(86vw,340px)] overflow-hidden rounded-[22px] border border-white/[0.1] glass glass-strong p-2 shadow-[0_24px_60px_rgba(0,0,0,0.55)]">
-              {TRANSLATIONS.map(item => (
-                <button key={item.id} type="button" onClick={() => { setTranslationsOpen(false); navigate(`/bible/${item.id}/${bookSlug(book)}/${chapterNumber}${location.hash}`) }} className={`flex w-full items-start gap-3 rounded-[14px] p-3 text-left transition-colors ${item.id === translation ? 'bg-primary/10' : 'hover:bg-white/[0.05]'}`}>
-                  <span className="w-11 shrink-0 font-heading text-[13px] font-semibold text-primary">{item.short}</span>
-                  <span className="min-w-0"><b className="block text-[13px] font-semibold">{item.name}</b><small className="text-[11px] text-muted-foreground">{item.about}</small></span>
-                  {item.id === translation && <Check className="ml-auto h-4 w-4 shrink-0 text-primary" />}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <button type="button" onClick={() => setTranslationsOpen(true)} aria-haspopup="dialog" className="inline-flex h-10 shrink-0 items-center gap-1 rounded-full bg-white/[0.05] px-3.5 font-heading text-[13px] font-semibold transition-colors hover:bg-white/[0.09]">
+          {current.short} <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+        </button>
         <div className="ml-auto flex items-center gap-1">
           {audioUrl && (
             <button type="button" onClick={toggleAudio} aria-label={playing ? 'Pause narration' : 'Listen to this chapter'} className={`inline-flex h-10 items-center gap-2 rounded-full px-3.5 text-[13px] font-semibold transition-colors ${playing ? 'bg-primary text-primary-foreground' : 'bg-white/[0.05] hover:bg-white/[0.09]'}`}>
@@ -243,32 +235,56 @@ export default function BibleReader() {
             </button>
           )}
           <button type="button" onClick={() => setStudyOpen(true)} aria-label="Study notes" className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.05] hover:bg-white/[0.09] lg:hidden"><Notebook className="h-4 w-4 text-primary" /></button>
-          <div className="relative">
-            <button type="button" onClick={() => setSettings(value => !value)} aria-label="Reading settings" aria-expanded={settings} className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.05] hover:bg-white/[0.09]"><Settings className="h-4 w-4" /></button>
-            {settings && (
-              <div className="dialog-in absolute right-0 top-12 z-30 w-64 space-y-4 rounded-[22px] border border-white/[0.1] glass glass-strong p-4 shadow-[0_24px_60px_rgba(0,0,0,0.55)]">
-                <div>
-                  <p className="text-[11px] font-semibold text-muted-foreground">Text size</p>
-                  <div className="mt-2 flex items-center gap-2">
-                    <button type="button" onClick={() => updatePrefs({ size: Math.max(15, prefs.size - 1) })} className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.1] font-scripture text-sm">A</button>
-                    <input type="range" min={15} max={26} value={prefs.size} onChange={event => updatePrefs({ size: Number(event.target.value) })} aria-label="Text size" className="episode-seek h-1.5 flex-1 appearance-none rounded-full bg-white/10" />
-                    <button type="button" onClick={() => updatePrefs({ size: Math.min(26, prefs.size + 1) })} className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.1] font-scripture text-lg">A</button>
-                  </div>
-                </div>
-                <Toggle label="Words of Jesus in pink" on={prefs.redLetters} onChange={value => updatePrefs({ redLetters: value })} />
-                <Toggle label="Verse numbers" on={prefs.verseNumbers} onChange={value => updatePrefs({ verseNumbers: value })} />
-                {data && Object.keys(data.thisChapterAudioLinks ?? {}).length > 1 && (
-                  <label className="block text-[11px] font-semibold text-muted-foreground">Narrator
-                    <select value={prefs.narrator} onChange={event => updatePrefs({ narrator: event.target.value })} className="mt-2 h-10 w-full rounded-full border border-white/[0.09] bg-white/[0.03] px-3 text-xs font-semibold text-foreground outline-none [color-scheme:dark]">
-                      {Object.keys(data.thisChapterAudioLinks ?? {}).map(id => <option key={id} value={id}>{NARRATORS[id] ?? id}</option>)}
-                    </select>
-                  </label>
-                )}
-              </div>
-            )}
-          </div>
+          <button type="button" onClick={() => setSettings(true)} aria-label="Reading settings" aria-haspopup="dialog" className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/[0.05] hover:bg-white/[0.09]"><Settings className="h-4 w-4" /></button>
         </div>
       </div>
+      {translationsOpen && (
+        <Sheet title="Bible version" subtitle="Free translations from the Free Use Bible API" onClose={closeTranslations}>
+          <div className="space-y-1">
+            {TRANSLATIONS.map(item => (
+              <button key={item.id} type="button" onClick={() => { setTranslationsOpen(false); navigate(`/bible/${item.id}/${bookSlug(book)}/${chapterNumber}${location.hash}`) }} className={`flex w-full items-center gap-3 rounded-[18px] p-3.5 text-left transition-colors ${item.id === translation ? 'bg-primary/10 ring-1 ring-primary/30' : 'hover:bg-white/[0.05]'}`}>
+                <span className={`flex h-11 w-12 shrink-0 items-center justify-center rounded-2xl font-heading text-[12px] font-bold ${item.id === translation ? 'bg-primary text-primary-foreground' : 'bg-white/[0.06] text-primary'}`}>{item.short}</span>
+                <span className="min-w-0 flex-1"><b className="block text-[14px] font-semibold">{item.name}</b><small className="block text-[12px] leading-5 text-muted-foreground">{item.about}</small></span>
+                {item.id === translation && <Check className="h-5 w-5 shrink-0 text-primary" />}
+              </button>
+            ))}
+          </div>
+        </Sheet>
+      )}
+      {settings && (
+        <Sheet title="Reading settings" onClose={closeSettings}>
+          <div className="space-y-5 px-2 pb-2">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Page</p>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                {(['light', 'dark'] as const).map(option => (
+                  <button key={option} type="button" onClick={() => setTheme(option)} aria-pressed={theme === option} className={`flex h-14 items-center justify-center gap-2 rounded-2xl border text-sm font-semibold transition-colors ${theme === option ? 'border-primary bg-primary/10 text-foreground' : 'border-white/[0.1] text-muted-foreground hover:text-foreground'}`}>
+                    <span className={`h-6 w-6 rounded-full border ${option === 'light' ? 'border-black/10 bg-[#faf6f4]' : 'border-white/20 bg-[#0a0607]'}`} /> {option === 'light' ? 'Light' : 'Dark'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-[11px] font-semibold text-muted-foreground">Text size</p>
+              <div className="mt-2 flex items-center gap-2">
+                <button type="button" onClick={() => updatePrefs({ size: Math.max(15, prefs.size - 1) })} className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.1] font-scripture text-sm">A</button>
+                <input type="range" min={15} max={26} value={prefs.size} onChange={event => updatePrefs({ size: Number(event.target.value) })} aria-label="Text size" className="episode-seek h-1.5 flex-1 appearance-none rounded-full bg-white/10" />
+                <button type="button" onClick={() => updatePrefs({ size: Math.min(26, prefs.size + 1) })} className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.1] font-scripture text-lg">A</button>
+              </div>
+            </div>
+            <Toggle label="Words of Jesus in pink" on={prefs.redLetters} onChange={value => updatePrefs({ redLetters: value })} />
+            <Toggle label="Verse numbers" on={prefs.verseNumbers} onChange={value => updatePrefs({ verseNumbers: value })} />
+            {data && Object.keys(data.thisChapterAudioLinks ?? {}).length > 1 && (
+              <label className="block text-[11px] font-semibold text-muted-foreground">Narrator
+                <select value={prefs.narrator} onChange={event => updatePrefs({ narrator: event.target.value })} className="mt-2 h-10 w-full rounded-full border border-white/[0.09] bg-white/[0.03] px-3 text-xs font-semibold text-foreground outline-none [color-scheme:dark]">
+                  {Object.keys(data.thisChapterAudioLinks ?? {}).map(id => <option key={id} value={id}>{NARRATORS[id] ?? id}</option>)}
+                </select>
+              </label>
+            )}
+          </div>
+        </Sheet>
+      )}
       {playing && <div className="sticky top-[7.6rem] z-10 h-0.5 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-primary transition-[width] duration-300" style={{ width: `${progress * 100}%` }} /></div>}
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
@@ -363,7 +379,7 @@ export default function BibleReader() {
 
       {studyOpen && (
         <div className="fixed inset-0 z-40 flex items-end bg-black/60 backdrop-blur-sm lg:hidden" onClick={() => setStudyOpen(false)}>
-          <div className="dialog-in h-[78dvh] w-full rounded-t-[28px] border-t border-white/[0.08] bg-[#0f0b0c] p-4" onClick={event => event.stopPropagation()}>
+          <div className="dialog-in h-[78dvh] w-full rounded-t-[28px] border-t border-white/[0.08] bg-surface p-4" onClick={event => event.stopPropagation()}>
             <div className="mb-3 flex items-center justify-between"><p className="font-heading text-lg font-semibold">Study {book.name} {chapterNumber}</p><button type="button" onClick={() => setStudyOpen(false)} aria-label="Close" className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.08]"><X className="h-4 w-4" /></button></div>
             <div className="h-[calc(100%-3rem)]"><StudyPanel translation={translation} book={book.id} chapter={chapterNumber} focusVerse={focusVerse} highlights={[...highlights.values()]} onJump={verse => { setStudyOpen(false); navigate({ hash: `v${verse}` }) }} /></div>
           </div>

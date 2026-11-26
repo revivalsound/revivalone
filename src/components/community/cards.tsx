@@ -28,7 +28,7 @@ export function MediaCover({ initiative, className = '', children }: { initiativ
   const [a, b, c] = paletteFor(seed)
   return (
     <div
-      className={`relative overflow-hidden ${className}`}
+      className={`theme-dark relative overflow-hidden ${className}`}
       onMouseEnter={() => { void video.current?.play().catch(() => undefined) }}
       onMouseLeave={() => { if (video.current) { video.current.pause(); video.current.currentTime = 0 } }}
     >
@@ -107,7 +107,7 @@ export function CellCard({ cell }: { cell: Initiative<'cell'> }) {
       <MediaCover initiative={cell} className="h-36">
         <span className="absolute right-4 top-4 z-[2] inline-flex items-center gap-1 rounded-full bg-black/40 px-2.5 py-1 text-[10px] font-semibold text-white/90 backdrop-blur-md"><Users className="h-3 w-3" /> {cell.member_count ?? 0}{details.max_members ? ` / ${details.max_members}` : ''}</span>
       </MediaCover>
-      <span className="relative z-[2] -mt-7 ml-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/15 bg-[#1a0610] font-heading text-base font-semibold text-primary shadow-[0_10px_30px_rgba(0,0,0,0.45)]">{initials}</span>
+      <span className="relative z-[2] -mt-7 ml-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/15 bg-plum font-heading text-base font-semibold text-primary shadow-[0_10px_30px_rgba(0,0,0,0.45)]">{initials}</span>
       <div className="flex flex-1 flex-col p-5 pt-4">
         <h3 className="font-heading text-lg font-semibold leading-tight">{cell.title}</h3>
         {cellFocuses(details).length > 0 && <div className="mt-2 flex flex-wrap gap-1">{cellFocuses(details).map(item => <span key={item} className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">{item}</span>)}</div>}

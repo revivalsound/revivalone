@@ -109,7 +109,7 @@ export default function CoursePage() {
 
       <Link to="/academy" className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /> Rev Academy</Link>
 
-      <section className="mt-6 grid overflow-hidden rounded-[30px] border border-white/[0.08] bg-[#0b0607] md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+      <section className="mt-6 grid overflow-hidden rounded-[30px] border border-white/[0.08] bg-shell md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
         <div className="p-7 sm:p-10">
           <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary"><Headphones className="h-4 w-4" /> Audio course · {course.category}</p>
           <h1 className="mt-4 font-heading text-[2.2rem] font-semibold leading-[1.04] tracking-[-0.025em] sm:text-[3.2rem]">{course.title}</h1>
@@ -122,7 +122,7 @@ export default function CoursePage() {
 
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <button type="button" onClick={() => (episode ? toggle() : setEpisode(finishedAll ? 1 : upNext))} className="group inline-flex h-14 items-center gap-3 rounded-full bg-primary pl-2 pr-7 font-heading text-[12px] font-semibold uppercase tracking-[0.14em] text-primary-foreground shadow-[0_16px_40px_rgba(255,92,138,0.35)] transition-all hover:-translate-y-0.5 active:scale-[0.98]">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#070405] text-primary">{playing ? <PauseCircle className="h-5 w-5" /> : <Play className="h-5 w-5" />}</span>
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-shell text-primary">{playing ? <PauseCircle className="h-5 w-5" /> : <Play className="h-5 w-5" />}</span>
               {playing ? 'Pause' : episode ? 'Resume' : finishedAll ? 'Listen again' : started ? `Continue · episode ${upNext}` : 'Start listening'}
             </button>
             <span className="text-xs text-muted-foreground">{progress.done.length} of {count} finished</span>

@@ -177,7 +177,7 @@ export default function DailyGuide() {
           </div>
 
           {/* Verse of the day */}
-          <Link to={votd ? readerPath(votd) : '#'} className="bolt-card bolt-card--hover bolt-card--inset group relative block overflow-hidden rounded-[28px] border border-white/10">
+          <Link to={votd ? readerPath(votd) : '#'} className="theme-dark bolt-card bolt-card--hover bolt-card--inset group relative block overflow-hidden rounded-[28px] border border-white/10">
             <img src="/assets/revival-dawn.webp" alt="" className="absolute inset-0 h-full w-full object-cover object-[75%_50%] transition-transform duration-700 group-hover:scale-[1.03]" />
             <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/30" />
             <div className="relative p-7 sm:p-9">

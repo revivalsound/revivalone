@@ -107,12 +107,12 @@ export default function ProfilePage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
-      <section className="relative overflow-hidden rounded-[28px] border border-white/10">
+      <section className="theme-dark relative overflow-hidden rounded-[28px] border border-white/10">
         <div className="absolute inset-0 hero-field-fallback--vivid" />
         <div className="absolute inset-0 hero-field-scrim--vivid" />
         <div className="relative flex flex-col gap-6 p-7 sm:flex-row sm:items-end sm:p-9">
           <div className="brand-ring brand-ring--on relative h-28 w-28 shrink-0 rounded-full">
-            <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-[#1a0610] font-heading text-3xl font-semibold text-primary">
+            <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-plum font-heading text-3xl font-semibold text-primary">
               {profile.avatar_url ? <img src={profile.avatar_url} alt={`${profile.full_name} profile`} className="h-full w-full object-cover" /> : initials}
             </div>
             <label className="absolute -bottom-1 -right-1 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground ring-4 ring-[#7a1438] transition-transform hover:scale-105" title="Change photo">

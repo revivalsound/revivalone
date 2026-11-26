@@ -298,7 +298,7 @@ export default function CellChat() {
 
       {showInfo && (
         <div className="fixed inset-0 z-40 flex justify-end bg-black/60 backdrop-blur-sm lg:hidden" onClick={() => setShowInfo(false)}>
-          <div className="dialog-in h-full w-[88%] max-w-sm overflow-y-auto border-l border-white/[0.08] bg-[#0f0b0c] p-5" onClick={event => event.stopPropagation()}>
+          <div className="dialog-in h-full w-[88%] max-w-sm overflow-y-auto border-l border-white/[0.08] bg-surface p-5" onClick={event => event.stopPropagation()}>
             <button type="button" onClick={() => setShowInfo(false)} aria-label="Close" className="mb-4 ml-auto flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.08] text-muted-foreground"><X className="h-4 w-4" /></button>
             {info}
           </div>

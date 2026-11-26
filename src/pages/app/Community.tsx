@@ -29,7 +29,7 @@ export default function RevivalCells() {
         eyebrow="Community"
         title={<>Faith has <span className="text-primary">an address.</span></>}
         lede="Revival cells are small groups for prayer, Scripture and serving the place you call home. Open one to join its group chat."
-        action={<Link to="/create/cell" className="group inline-flex h-11 shrink-0 items-center gap-2 self-start rounded-full bg-primary pl-5 pr-1.5 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground shadow-[0_12px_32px_rgba(255,92,138,0.24)] transition-all hover:-translate-y-0.5 sm:self-auto">Start a cell <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#070405] text-primary"><ArrowRight className="h-4 w-4" /></span></Link>}
+        action={<Link to="/create/cell" className="group inline-flex h-11 shrink-0 items-center gap-2 self-start rounded-full bg-primary pl-5 pr-1.5 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground shadow-[0_12px_32px_rgba(255,92,138,0.24)] transition-all hover:-translate-y-0.5 sm:self-auto">Start a cell <span className="flex h-8 w-8 items-center justify-center rounded-full bg-shell text-primary"><ArrowRight className="h-4 w-4" /></span></Link>}
       />
       <CommunityTabs />
 

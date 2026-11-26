@@ -12,7 +12,7 @@ export function PrimaryPill({ to, children, className = '', onClick }: { to: str
       className={`group inline-flex h-12 items-center justify-between gap-3 rounded-full bg-primary pl-6 pr-1.5 whitespace-nowrap font-heading text-[12px] font-semibold uppercase tracking-[0.14em] text-primary-foreground shadow-[0_14px_40px_rgba(255,92,138,0.26)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_46px_rgba(255,92,138,0.36)] active:translate-y-0 active:scale-[0.98] ${className}`}
     >
       {children}
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#070405] text-primary transition-transform duration-200 group-hover:rotate-45">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-shell text-primary transition-transform duration-200 group-hover:rotate-45">
         <ArrowUpRight className="h-4 w-4" />
       </span>
     </Link>
@@ -21,7 +21,7 @@ export function PrimaryPill({ to, children, className = '', onClick }: { to: str
 
 /** The dark glass pill that sits beside the pink one. */
 export function SecondaryPill({ href, to, children, className = '' }: { href?: string; to?: string; children: ReactNode; className?: string }) {
-  const classes = `inline-flex h-12 items-center justify-center gap-2 rounded-full border border-white/15 bg-[#1a0610]/55 px-6 whitespace-nowrap font-heading text-[12px] font-semibold uppercase tracking-[0.14em] text-white backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#1a0610]/75 active:translate-y-0 active:scale-[0.98] ${className}`
+  const classes = `inline-flex h-12 items-center justify-center gap-2 rounded-full border border-white/15 bg-plum/55 px-6 whitespace-nowrap font-heading text-[12px] font-semibold uppercase tracking-[0.14em] text-white backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-plum/75 active:translate-y-0 active:scale-[0.98] ${className}`
   return to ? <Link to={to} className={classes}>{children}</Link> : <a href={href} className={classes}>{children}</a>
 }
 

@@ -42,13 +42,15 @@ let SELECT = `${BASE}, body_html, media`
  * Formatted text and media arrive with supabase/posts-rich.sql. Until it has
  * run, fall back to the plain columns so the feed keeps working.
  */
-let richChecked = false
 export let richPosts = true
-async function ensureColumns() {
-  if (richChecked) return
-  richChecked = true
-  const { error } = await supabase.from('posts').select('body_html, media').limit(1)
-  if (error?.code === '42703') { richPosts = false; SELECT = BASE }
+let columnsCheck: Promise<void> | null = null
+// Every request waits on the same check, so none can run ahead of it.
+function ensureColumns() {
+  columnsCheck ??= (async () => {
+    const { error } = await supabase.from('posts').select('body_html, media').limit(1)
+    if (error?.code === '42703') { richPosts = false; SELECT = BASE }
+  })()
+  return columnsCheck
 }
 
 /** Thrown when supabase/posts.sql hasn't been run yet, so screens can say so plainly. */

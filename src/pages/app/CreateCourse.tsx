@@ -73,7 +73,7 @@ export default function CreateCourse() {
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
       <Link to="/academy" className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /> Rev Academy</Link>
       <header className="mt-6 flex items-start gap-4">
-        <span className="brand-ring brand-ring--on flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#1a0610] text-primary"><Headphones className="h-6 w-6" /></span>
+        <span className="brand-ring brand-ring--on flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-plum text-primary"><Headphones className="h-6 w-6" /></span>
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Teach a course</p>
           <h1 className="mt-2 font-heading text-[2rem] font-semibold leading-[1.05] tracking-[-0.02em] sm:text-[2.6rem]">Teach what God <span className="text-primary">has taught you.</span></h1>
