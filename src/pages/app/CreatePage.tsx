@@ -5,7 +5,7 @@ import { Notice, inputClass } from '../../components/ui/kit'
 import MediaPicker from '../../components/community/MediaPicker'
 import { CellCard, EventCard } from '../../components/community/cards'
 import { useAuth } from '../../lib/AuthContext'
-import { createInitiative, uploadMedia, type Format, type Initiative, type InitiativeKind } from '../../lib/community'
+import { createInitiative, fetchInitiative, updateInitiative, uploadMedia, type Format, type Initiative, type InitiativeKind } from '../../lib/community'
 
 const EVENT_CATEGORIES = ['Worship night', 'Prayer gathering', 'Conference', 'Outreach', 'Tent meeting', 'Bible study', 'Youth night']
 const TRACKS = ['Evangelism', 'Prayer', 'Leadership', 'Discipleship', 'Worship', 'Missions']
@@ -16,7 +16,7 @@ type Values = {
   title: string; description: string; city: string; date: string
   category: string; format: Format; venue: string; online_link: string; start_time: string; end_time: string; capacity: string
   track: string; weeks: string; days: string[]; outcomes: [string, string, string]
-  focuses: string[]; area: string; meeting_day: string; max_members: string
+  focuses: string[]; area: string; meeting_days: string[]; max_members: string
 }
 
 const PAGES: Record<InitiativeKind, { eyebrow: string; title: ReactNode; lede: string; icon: typeof Fire; submit: string }> = {
@@ -34,7 +34,7 @@ const EMPTY: Values = {
   title: '', description: '', city: '', date: nextWeek(),
   category: EVENT_CATEGORIES[0], format: 'in_person', venue: '', online_link: '', start_time: '18:00', end_time: '20:00', capacity: '',
   track: TRACKS[0], weeks: '4', days: ['Saturday'], outcomes: ['', '', ''],
-  focuses: [FOCUSES[0]], area: '', meeting_day: 'Thursday', max_members: '',
+  focuses: [FOCUSES[0]], area: '', meeting_days: ['Thursday'], max_members: '',
 }
 
 export default function CreatePage() {
@@ -43,11 +43,13 @@ export default function CreatePage() {
   return <CreateForm key={kind} kind={kind} />
 }
 
-function CreateForm({ kind }: { kind: InitiativeKind }) {
+export function CreateForm({ kind, existing }: { kind: InitiativeKind; existing?: Initiative }) {
   const navigate = useNavigate()
   const { user } = useAuth()
   const page = PAGES[kind]
-  const [values, setValues] = useState<Values>(EMPTY)
+  const [values, setValues] = useState<Values>(() => (existing ? valuesFrom(existing) : EMPTY))
+  // When editing, the current cover stays unless it is replaced or removed.
+  const [keepMedia, setKeepMedia] = useState(Boolean(existing?.media_url))
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState('')
   const [saving, setSaving] = useState<'' | 'uploading' | 'saving'>('')
@@ -67,7 +69,7 @@ function CreateForm({ kind }: { kind: InitiativeKind }) {
   function details(): Initiative['details'] {
     if (kind === 'event') return { category: values.category, format: values.format, venue: online ? '' : values.venue.trim(), online_link: online || values.format === 'hybrid' ? values.online_link.trim() : '', start_time: values.start_time, end_time: values.end_time, capacity: number(values.capacity) }
     if (kind === 'bootcamp') return { track: values.track, format: values.format, venue: online ? '' : values.venue.trim(), weeks: Number(values.weeks), days: values.days, start_time: values.start_time, capacity: number(values.capacity), outcomes: values.outcomes.map(item => item.trim()).filter(Boolean) }
-    return { focus: values.focuses.join(' · '), focuses: values.focuses, area: online ? '' : values.area.trim(), format: values.format, meeting_day: values.meeting_day, start_time: values.start_time, max_members: number(values.max_members) }
+    return { focus: values.focuses.join(' · '), focuses: values.focuses, area: online ? '' : values.area.trim(), format: values.format, meeting_day: values.meeting_days[0] ?? '', meeting_days: values.meeting_days, start_time: values.start_time, max_members: number(values.max_members) }
   }
 
   const draft = {
@@ -76,7 +78,7 @@ function CreateForm({ kind }: { kind: InitiativeKind }) {
     description: values.description || 'Your description will appear here.',
     city: online ? 'Online' : values.city || 'Your city',
     starts_at: values.date,
-    media_url: preview, media_type: file ? (file.type.startsWith('video/') ? 'video' : 'image') : '',
+    media_url: preview || (keepMedia ? existing?.media_url ?? '' : ''), media_type: file ? (file.type.startsWith('video/') ? 'video' : 'image') : keepMedia ? existing?.media_type ?? '' : '',
     details: details(), member_count: 1,
   } as Initiative
 
@@ -84,13 +86,23 @@ function CreateForm({ kind }: { kind: InitiativeKind }) {
     event.preventDefault()
     if (!user) return
     if (kind === 'cell' && values.focuses.length === 0) { setError('Choose at least one focus for the cell.'); return }
+    if (kind === 'cell' && values.meeting_days.length === 0) { setError('Choose at least one day the cell meets.'); return }
     if (kind === 'bootcamp' && values.days.length === 0) { setError('Choose at least one day the bootcamp meets.'); return }
     if ((kind === 'event') && values.end_time && values.end_time <= values.start_time) { setError('The end time needs to be after the start time.'); return }
     setError('')
     try {
-      let media = { url: '', type: '' as '' | 'image' | 'video' }
+      let media = { url: keepMedia ? existing?.media_url ?? '' : '', type: (keepMedia ? existing?.media_type ?? '' : '') as '' | 'image' | 'video' }
       if (file) { setSaving('uploading'); media = await uploadMedia(user.id, file) }
       setSaving('saving')
+      if (existing) {
+        await updateInitiative(existing.id, {
+          title: values.title.trim(), description: values.description.trim(),
+          city: online ? 'Online' : values.city.trim(), starts_at: values.date,
+          media_url: media.url, media_type: media.type, details: details(),
+        })
+        navigate(kind === 'cell' ? `/community/cells/${existing.id}` : '/events', { replace: true, state: { saved: true } })
+        return
+      }
       const created = await createInitiative({
         owner_id: user.id, kind, title: values.title.trim(), description: values.description.trim(),
         city: online ? 'Online' : values.city.trim(), starts_at: values.date,
@@ -105,20 +117,32 @@ function CreateForm({ kind }: { kind: InitiativeKind }) {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
-      <Link to={kind === 'cell' ? '/community/cells' : '/events'} className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /> Back</Link>
+      <Link to={existing && kind === 'cell' ? `/community/cells/${existing.id}` : kind === 'cell' ? '/community/cells' : '/events'} className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /> Back</Link>
       <header className="mt-6 flex items-start gap-4">
         <span className="brand-ring brand-ring--on flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-plum text-primary"><page.icon className="h-6 w-6" /></span>
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{page.eyebrow}</p>
-          <h1 className="mt-2 font-heading text-[2rem] font-semibold leading-[1.05] tracking-[-0.02em] sm:text-[2.6rem]">{page.title}</h1>
-          <p className="mt-2 max-w-xl text-[15px] leading-7 text-muted-foreground">{page.lede}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{existing ? `Edit ${kind === 'cell' ? 'cell' : kind === 'bootcamp' ? 'bootcamp' : 'event'}` : page.eyebrow}</p>
+          <h1 className="mt-2 font-heading text-[2rem] font-semibold leading-[1.05] tracking-[-0.02em] sm:text-[2.6rem]">{existing ? <>Update <span className="text-primary">{existing.title}.</span></> : page.title}</h1>
+          <p className="mt-2 max-w-xl text-[15px] leading-7 text-muted-foreground">{existing ? 'Change anything below and save. Members see the update straight away.' : page.lede}</p>
         </div>
       </header>
 
       <form onSubmit={submit} className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-5">
           <Panel step="1" title="Cover">
-            <MediaPicker file={file} onChange={setFile} label={kind === 'cell' ? 'A photo or short video of your group or neighbourhood' : 'Cover image or promo video'} />
+            {existing?.media_url && keepMedia && !file ? (
+              <div>
+                <p className="text-xs font-medium text-foreground/90">Current cover</p>
+                <div className="relative mt-2 overflow-hidden rounded-[20px] border border-white/[0.09] bg-black">
+                  {existing.media_type === 'video' ? <video src={existing.media_url} controls muted playsInline className="aspect-video w-full object-cover" /> : <img src={existing.media_url} alt="Current cover" className="aspect-video w-full object-cover" />}
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button type="button" onClick={() => setKeepMedia(false)} className="inline-flex h-10 items-center gap-2 rounded-full border border-white/[0.1] px-4 text-[13px] font-semibold hover:bg-white/[0.05]">Replace or remove</button>
+                </div>
+              </div>
+            ) : (
+              <MediaPicker file={file} onChange={setFile} label={kind === 'cell' ? 'A photo or short video of your group or neighbourhood' : 'Cover image or promo video'} />
+            )}
           </Panel>
 
           <Panel step="2" title="The basics">
@@ -146,7 +170,7 @@ function CreateForm({ kind }: { kind: InitiativeKind }) {
           <Panel step="3" title={kind === 'cell' ? 'When you meet' : 'When'}>
             {kind === 'cell' ? (
               <>
-                <Chips label="Meeting day" options={DAYS} value={values.meeting_day} onChange={value => set('meeting_day', value)} />
+                <MultiChips label="Meeting days" hint="choose every day you meet" max={7} options={DAYS} values={values.meeting_days} onChange={value => set('meeting_days', value)} />
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Field label="Time"><input required type="time" value={values.start_time} onChange={event => set('start_time', event.target.value)} className={`${inputClass} px-4 [color-scheme:dark]`} /></Field>
                   <Field label="First meeting"><input required type="date" value={values.date} onChange={event => set('date', event.target.value)} className={`${inputClass} px-4 [color-scheme:dark]`} /></Field>
@@ -210,7 +234,7 @@ function CreateForm({ kind }: { kind: InitiativeKind }) {
           </div>
           {error && <Notice tone="error">{error}</Notice>}
           <button type="submit" disabled={Boolean(saving)} className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primary font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground shadow-[0_12px_32px_rgba(255,92,138,0.28)] transition-all hover:-translate-y-0.5 disabled:opacity-60">
-            {saving ? <><Loader className="h-4 w-4 animate-spin" /> {saving === 'uploading' ? 'Uploading media…' : 'Publishing…'}</> : <>{page.submit} <ArrowRight className="h-4 w-4" /></>}
+            {saving ? <><Loader className="h-4 w-4 animate-spin" /> {saving === 'uploading' ? 'Uploading media…' : existing ? 'Saving…' : 'Publishing…'}</> : <>{existing ? 'Save changes' : page.submit} <ArrowRight className="h-4 w-4" /></>}
           </button>
           <p className="text-center text-[11px] text-muted-foreground">{kind === 'cell' ? 'Your cell appears in Revival cells and you become its leader.' : 'It appears in the Events directory straight away.'}</p>
         </aside>
@@ -278,4 +302,46 @@ function MultiChips({ label, hint, max, options, values, onChange }: { label: st
       </div>
     </div>
   )
+}
+
+/** Fills the form from an event, bootcamp or cell that already exists. */
+function valuesFrom(item: Initiative): Values {
+  const details = item.details as Record<string, unknown>
+  const text = (key: string, fallback = '') => (typeof details[key] === 'string' ? (details[key] as string) : fallback)
+  const list = (key: string) => (Array.isArray(details[key]) ? (details[key] as string[]) : [])
+  const count = (key: string) => (typeof details[key] === 'number' ? String(details[key]) : '')
+  const outcomes = list('outcomes')
+  const days = list('meeting_days').length ? list('meeting_days') : text('meeting_day') ? [text('meeting_day')] : []
+  const focuses = list('focuses').length ? list('focuses') : text('focus') ? [text('focus')] : []
+  return {
+    ...EMPTY,
+    title: item.title, description: item.description, city: item.city === 'Online' ? '' : item.city, date: item.starts_at.slice(0, 10),
+    category: text('category', EMPTY.category), format: (text('format', 'in_person') as Format), venue: text('venue'), online_link: text('online_link'),
+    start_time: text('start_time', EMPTY.start_time), end_time: text('end_time', EMPTY.end_time), capacity: count('capacity'),
+    track: text('track', EMPTY.track), weeks: count('weeks') || EMPTY.weeks, days: list('days').length ? list('days') : EMPTY.days,
+    outcomes: [outcomes[0] ?? '', outcomes[1] ?? '', outcomes[2] ?? ''],
+    focuses: focuses.slice(0, 5), area: text('area'), meeting_days: days, max_members: count('max_members'),
+  }
+}
+
+/** /community/cells/:id/edit: the cell's creator edits it with the same form. */
+export function EditCell() {
+  const { id = '' } = useParams()
+  const { user } = useAuth()
+  const [cell, setCell] = useState<Initiative | null | undefined>(undefined)
+  useEffect(() => { fetchInitiative(id).then(setCell).catch(() => setCell(null)) }, [id])
+
+  if (cell === undefined) {
+    return <div className="flex min-h-[60vh] items-center justify-center"><Loader className="h-6 w-6 animate-spin text-primary" /></div>
+  }
+  if (!cell || cell.kind !== 'cell') return <Navigate to="/community/cells" replace />
+  if (cell.owner_id !== user?.id) {
+    return (
+      <div className="mx-auto max-w-xl px-4 py-20 text-center">
+        <h1 className="font-heading text-3xl font-semibold">Only the cell’s creator can edit it</h1>
+        <Link to={`/community/cells/${cell.id}`} className="mt-7 inline-flex h-11 items-center gap-2 rounded-full bg-primary px-5 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground"><ArrowLeft className="h-4 w-4" /> Back to the cell</Link>
+      </div>
+    )
+  }
+  return <CreateForm key={cell.id} kind="cell" existing={cell} />
 }

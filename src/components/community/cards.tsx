@@ -1,7 +1,7 @@
 import { useRef, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, CalendarDays, Chat, Check, Clock, Fire, MapPin, Play, Users, Video } from '../ui/icons'
-import { cellFocuses, FORMAT_LABEL, formatDay, formatTime, type BootcampDetails, type CellDetails, type EventDetails, type Initiative } from '../../lib/community'
+import { cellFocuses, cellSchedule, FORMAT_LABEL, formatDay, formatTime, type BootcampDetails, type CellDetails, type EventDetails, type Initiative } from '../../lib/community'
 
 /* Generated cover art for listings without media: a warm mesh tinted per category. */
 const PALETTES = [
@@ -100,7 +100,7 @@ export function EventCard({ initiative, going, onToggleGoing }: { initiative: In
 /** Revival cell listing; opens the cell's group chat. */
 export function CellCard({ cell }: { cell: Initiative<'cell'> }) {
   const details = cell.details as Partial<CellDetails>
-  const schedule = [details.meeting_day && `${details.meeting_day}s`, formatTime(details.start_time)].filter(Boolean).join(' · ')
+  const schedule = cellSchedule(details)
   const initials = cell.title.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]?.toUpperCase()).join('')
   return (
     <Link to={`/community/cells/${cell.id}`} className="bolt-card bolt-card--hover bolt-card--inset group relative flex flex-col overflow-hidden rounded-[26px] border border-white/[0.07] bg-surface transition-[transform,border-color] duration-300 hover:-translate-y-0.5 hover:border-white/[0.14]">

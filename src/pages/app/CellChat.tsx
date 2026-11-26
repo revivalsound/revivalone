@@ -1,13 +1,13 @@
 import { Fragment, useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, Chat, Clock, Loader, LogOut, MapPin, Users, X } from '../../components/ui/icons'
+import { ArrowLeft, ArrowRight, Chat, Clock, Loader, LogOut, MapPin, Pen, Users, X } from '../../components/ui/icons'
 import { Notice } from '../../components/ui/kit'
 import { AuthorAvatar } from '../../components/posts/PostCard'
 import { MediaCover } from '../../components/community/cards'
 import { useAuth } from '../../lib/AuthContext'
 import { supabase } from '../../lib/supabase'
 import {
-  cellFocuses, fetchInitiative, fetchMembers, fetchMessages, formatTime, isMember, joinCell, leaveCell, sendMessage, subscribeToCell,
+  cellFocuses, cellSchedule, fetchInitiative, fetchMembers, fetchMessages, formatTime, isMember, joinCell, leaveCell, sendMessage, subscribeToCell,
   type CellDetails, type ChatAuthor, type ChatMessage, type Initiative,
 } from '../../lib/community'
 
@@ -152,8 +152,9 @@ export default function CellChat() {
     if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); void send() }
   }
 
+  const isCreator = Boolean(user && cell && cell.owner_id === user.id)
   const details = (cell?.details ?? {}) as Partial<CellDetails>
-  const schedule = [details.meeting_day && `${details.meeting_day}s`, formatTime(details.start_time)].filter(Boolean).join(' · ')
+  const schedule = cellSchedule(details)
   const place = details.format === 'online' ? 'Online' : [details.area, cell?.city].filter(Boolean).join(', ')
 
   // Group messages by day, and run consecutive messages from one person together.
@@ -206,6 +207,9 @@ export default function CellChat() {
           </ul>
         </div>
       )}
+      {isCreator && (
+        <Link to={`/community/cells/${cell.id}/edit`} className="flex h-11 w-full items-center justify-center gap-2 rounded-full bg-primary text-[13px] font-semibold text-primary-foreground"><Pen className="h-4 w-4" /> Edit cell</Link>
+      )}
       {role && role !== 'leader' && (
         <button type="button" onClick={leave} disabled={busy} className="flex h-10 w-full items-center justify-center gap-2 rounded-full text-[13px] font-semibold text-red-300 transition-colors hover:bg-red-500/10"><LogOut className="h-4 w-4" /> Leave this cell</button>
       )}
@@ -222,6 +226,7 @@ export default function CellChat() {
             <h1 className="truncate font-heading text-[15px] font-semibold">{cell.title}</h1>
             <p className="truncate text-[11px] text-muted-foreground">{members.length || cell.member_count || 0} members{schedule ? ` · meets ${schedule}` : ''}</p>
           </div>
+          {isCreator && <Link to={`/community/cells/${cell.id}/edit`} aria-label="Edit cell" className="inline-flex h-9 items-center gap-1.5 rounded-full border border-white/[0.09] px-3 text-xs font-semibold text-foreground/85 transition-colors hover:bg-white/[0.06]"><Pen className="h-3.5 w-3.5 text-primary" /> <span className="hidden sm:inline">Edit</span></Link>}
           <button type="button" onClick={() => setShowInfo(true)} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-white/[0.09] px-3 text-xs font-semibold text-foreground/85 transition-colors hover:bg-white/[0.06] lg:hidden"><Users className="h-4 w-4 text-primary" /> Info</button>
         </header>
 

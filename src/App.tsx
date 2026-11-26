@@ -27,6 +27,7 @@ const CellChat = lazy(() => import('./pages/app/CellChat'))
 const PrayerWalls = lazy(() => import('./pages/app/PrayerWalls'))
 const PrayerRoom = lazy(() => import('./pages/app/PrayerRoom'))
 const CreatePage = lazy(() => import('./pages/app/CreatePage'))
+const EditCell = lazy(() => import('./pages/app/CreatePage').then(module => ({ default: module.EditCell })))
 const CoursePage = lazy(() => import('./pages/app/CoursePage'))
 
 const SPLASH_SEEN_KEY = 'revival.splashSeen'
@@ -97,6 +98,7 @@ export default function App() {
               <Route path="/community" element={<Navigate to="/community/cells" replace />} />
               <Route path="/community/cells" element={<Community />} />
               <Route path="/community/cells/:id" element={<CellChat />} />
+              <Route path="/community/cells/:id/edit" element={<RequireAuth><EditCell /></RequireAuth>} />
               <Route path="/community/prayer" element={<PrayerWalls />} />
               <Route path="/prayer/:code" element={<PrayerRoom />} />
               <Route path="/create/post" element={<RequireAuth><CreatePost /></RequireAuth>} />

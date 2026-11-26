@@ -8,7 +8,7 @@ export type Format = 'in_person' | 'online' | 'hybrid'
 
 export type EventDetails = { category: string; format: Format; venue: string; online_link: string; start_time: string; end_time: string; capacity: number | null }
 export type BootcampDetails = { track: string; format: Format; venue: string; weeks: number; days: string[]; start_time: string; capacity: number | null; outcomes: string[] }
-export type CellDetails = { focus: string; focuses: string[]; area: string; format: Format; meeting_day: string; start_time: string; max_members: number | null }
+export type CellDetails = { focus: string; focuses: string[]; area: string; format: Format; meeting_day: string; meeting_days: string[]; start_time: string; max_members: number | null }
 
 export type Initiative<K extends InitiativeKind = InitiativeKind> = {
   id: string
@@ -68,6 +68,13 @@ export async function fetchUpcoming(): Promise<Initiative<'event' | 'bootcamp'>[
     throw new Error(error.message)
   }
   return (data ?? []) as Initiative<'event' | 'bootcamp'>[]
+}
+
+/** Saves changes to an event, bootcamp or cell you created. */
+export async function updateInitiative(id: string, patch: Partial<Pick<Initiative, 'title' | 'description' | 'city' | 'starts_at' | 'media_url' | 'media_type' | 'details'>>) {
+  const { data, error } = await supabase.from('initiatives').update({ ...patch, updated_at: new Date().toISOString() }).eq('id', id).select(INITIATIVE).single()
+  if (error) fail(error)
+  return data as Initiative
 }
 
 export async function createInitiative(input: Pick<Initiative, 'kind' | 'title' | 'description' | 'city' | 'starts_at' | 'media_url' | 'media_type' | 'details'> & { owner_id: string }) {
@@ -196,6 +203,24 @@ export function wallStatus(wall: Pick<PrayerWall, 'starts_at' | 'ends_at'>, now 
 /** A cell's focuses: the list (up to five), or the single focus older cells were created with. */
 export function cellFocuses(details: Partial<CellDetails>) {
   return details.focuses?.length ? details.focuses : details.focus ? [details.focus] : []
+}
+
+const WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+/** The days a cell meets, in week order (older cells stored a single day). */
+export function cellDays(details: Partial<CellDetails>) {
+  const days = details.meeting_days?.length ? details.meeting_days : details.meeting_day ? [details.meeting_day] : []
+  return [...days].sort((a, b) => WEEK.indexOf(a) - WEEK.indexOf(b))
+}
+
+/** "Tuesdays & Thursdays · 6:30 PM", "Every day · 7:00 AM". */
+export function cellSchedule(details: Partial<CellDetails>) {
+  const days = cellDays(details)
+  const label = days.length === 7 ? 'Every day'
+    : days.length === 1 ? `${days[0]}s`
+    : days.length === 2 ? `${days[0]}s & ${days[1]}s`
+    : days.map(day => day.slice(0, 3)).join(', ')
+  return [label, formatTime(details.start_time)].filter(Boolean).join(' · ')
 }
 
 /* ── formatting ── */
