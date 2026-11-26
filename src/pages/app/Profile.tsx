@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, CalendarDays, Camera, GraduationCap, Loader, LogOut, MapPin, PlusCircle, Users } from '../../components/ui/icons'
+import { ArrowRight, CalendarDays, Camera, Eye, GraduationCap, Loader, LogOut, MapPin, PlusCircle, Users } from '../../components/ui/icons'
 import { Deck, Notice, inputClass } from '../../components/ui/kit'
 import { useAuth } from '../../lib/AuthContext'
 import { api, supabase } from '../../lib/supabase'
@@ -174,6 +174,7 @@ export default function ProfilePage() {
           <p className="mt-3 text-sm text-muted-foreground">Signed in as</p>
           <p className="mt-0.5 truncate text-sm font-semibold">{profile.email || user?.email}</p>
           <div className="mt-6 space-y-2">
+            {user && <Link to={`/u/${user.id}`} className="flex h-11 items-center justify-center gap-2 rounded-full bg-primary/10 text-sm font-semibold text-primary transition-colors hover:bg-primary/15"><Eye className="h-4 w-4" /> View public profile</Link>}
             <Link to="/reset-password" className="flex h-11 items-center justify-center rounded-full border border-white/[0.1] bg-surface text-sm font-semibold transition-colors hover:bg-white/[0.07]">Change password</Link>
             <button type="button" onClick={signOut} className="flex h-11 w-full items-center justify-center gap-2 rounded-full text-sm font-semibold text-red-300 transition-colors hover:bg-red-500/10"><LogOut className="h-4 w-4" /> Sign out</button>
           </div>

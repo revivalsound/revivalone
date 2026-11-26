@@ -187,7 +187,8 @@ export default function AppShell() {
 
   useEffect(() => { try { window.localStorage.setItem('revival.rail', collapsed ? '1' : '0') } catch { /* storage unavailable */ } }, [collapsed])
 
-  const section = SECTION_TITLES[pathname] ?? (pathname.startsWith('/word') ? 'Today’s Word' : 'Revival One')
+  const section = SECTION_TITLES[pathname]
+    ?? (pathname.startsWith('/word') ? 'Today’s Word' : pathname.startsWith('/post') ? 'Post' : pathname.startsWith('/u/') ? 'Member' : 'Revival One')
   const openCreate = (kind?: CreationKind) => setCreating({ kind })
 
   return (

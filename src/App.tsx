@@ -16,6 +16,8 @@ const Events = lazy(() => import('./pages/app/Events'))
 const Academy = lazy(() => import('./pages/app/Academy'))
 const Word = lazy(() => import('./pages/app/Word'))
 const Profile = lazy(() => import('./pages/app/Profile'))
+const PostPage = lazy(() => import('./pages/app/PostPage'))
+const PublicProfile = lazy(() => import('./pages/app/PublicProfile'))
 
 const SPLASH_SEEN_KEY = 'revival.splashSeen'
 
@@ -85,6 +87,8 @@ export default function App() {
               <Route path="/events" element={<Events />} />
               <Route path="/academy" element={<Academy />} />
               <Route path="/word/:slug" element={<Word />} />
+              <Route path="/post/:id" element={<PostPage />} />
+              <Route path="/u/:id" element={<PublicProfile />} />
               <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

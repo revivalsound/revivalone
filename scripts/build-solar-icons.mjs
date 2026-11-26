@@ -97,6 +97,13 @@ const MAP = {
   Widget: 'widget-2',
   X: { file: 'close-circle', glyph: 1.8 },
   Zap: 'bolt',
+  Briefcase: 'case-round',
+  Question: 'question-circle',
+  Notebook: 'notebook-bookmark',
+  PenNew: 'pen-new-round',
+  Trash: 'trash-bin-trash',
+  HandMoney: 'hand-money',
+  GraphUp: 'graph-up',
 }
 
 function inner(svg) {
