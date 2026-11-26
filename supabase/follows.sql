@@ -1,6 +1,14 @@
 -- Revival One: follow preachers, teachers and members, and get notified.
 -- Run once in the Supabase SQL Editor after posts.sql and community.sql. Safe to re-run.
 
+create extension if not exists pg_trgm;
+
+-- A city, ready to compare: lower case, letters only.
+create or replace function public.city_key(value text)
+returns text language sql immutable as $$
+  select regexp_replace(lower(coalesce(value, '')), '[^a-z]', '', 'g');
+$$;
+
 /* ── Follows ── */
 
 create table if not exists public.follows (
@@ -114,7 +122,9 @@ begin
     insert into public.notifications (user_id, actor_id, type, title, body, link)
     select p.id, new.owner_id, 'cell_nearby', 'A new revival cell in ' || new.city, new.title, '/community/cells/' || new.id
     from public.profiles p
-    where lower(trim(p.city)) = lower(trim(new.city))
+    -- Forgiving of spaces and small spelling differences ("Portharcort" ~ "Port Harcourt").
+    where coalesce(p.city, '') <> ''
+      and similarity(public.city_key(p.city), public.city_key(new.city)) >= 0.5
       and p.id <> new.owner_id
       and not exists (select 1 from public.follows f where f.followee_id = new.owner_id and f.follower_id = p.id);
   end if;

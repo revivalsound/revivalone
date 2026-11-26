@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState, type ElementType } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { AtSign, BellBing, BellOff, Check, Fire, HandHeart, Loader, MapPin, PenNew, UserPlus, Users } from '../../components/ui/icons'
 import { Notice } from '../../components/ui/kit'
 import { AuthorAvatar } from '../../components/posts/PostCard'
+import SuggestedPeople from '../../components/social/SuggestedPeople'
 import { useAuth } from '../../lib/AuthContext'
 import { useNotifications } from '../../lib/notifications'
 import { fetchNotifications, markAllRead, markRead, SocialNotReady, subscribeToNotifications, type AppNotification, type NotificationType } from '../../lib/social'
@@ -137,10 +138,10 @@ export default function Notifications() {
         <div className="mt-8 rounded-[26px] border border-dashed border-white/[0.1] bg-surface/60 px-6 py-14 text-center">
           <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-primary/25 bg-primary/10 text-primary"><BellBing className="h-6 w-6" /></span>
           <h2 className="mt-5 font-heading text-xl font-semibold">{filter === 'unread' ? 'You’re all caught up' : 'Nothing here yet'}</h2>
-          <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">Follow preachers, teachers and friends. When they post, start a prayer wall or open a cell, you’ll hear about it here. New cells in your city show up too.</p>
-          <Link to="/home" className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-primary px-5 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground">Find people in the feed</Link>
+          <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">Follow preachers, teachers and friends below. When they post, start a prayer wall or open a cell, or when someone follows or tags you, it shows up here. New cells in your city do too. Your own posts don’t notify you.</p>
         </div>
       )}
+      {items !== null && <div className="mt-6"><SuggestedPeople limit={8} /></div>}
     </div>
   )
 }

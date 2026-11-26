@@ -58,6 +58,17 @@ export async function fetchFollowingIds(me: string) {
   return (data ?? []).map(row => row.followee_id as string)
 }
 
+/** Members you don't follow yet, newest first: for "People to follow". */
+export async function fetchSuggestedPeople(me: string, limit = 8) {
+  const [{ data, error }, following] = await Promise.all([
+    supabase.from('profiles').select(PERSON).neq('id', me).order('created_at', { ascending: false }).limit(60),
+    fetchFollowingIds(me).catch(() => [] as string[]),
+  ])
+  if (error) fail(error)
+  const skip = new Set(following)
+  return ((data ?? []) as Person[]).filter(person => !skip.has(person.id) && person.full_name).slice(0, limit)
+}
+
 /* ── Notifications ── */
 
 export type NotificationType = 'follow' | 'post' | 'prayer_wall' | 'cell' | 'cell_nearby' | 'mention'

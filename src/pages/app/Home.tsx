@@ -5,6 +5,7 @@ import { ArrowRight, PenNew, UserCheck } from '../../components/ui/icons'
 import { Notice } from '../../components/ui/kit'
 import PostCard, { KIND_META, PostCardSkeleton } from '../../components/posts/PostCard'
 import { useAuth } from '../../lib/AuthContext'
+import SuggestedPeople from '../../components/social/SuggestedPeople'
 import { ComingUpCard, PrayerWallsCard, TodaysReadingsCard, VerseOfTheDayCard } from '../../components/bible/TodayCards'
 import { fetchFollowingIds } from '../../lib/social'
 import { fetchFeed, FeedNotReady, PAGE_SIZE, POST_KINDS, type Post, type PostKind } from '../../lib/posts'
@@ -152,6 +153,7 @@ export default function Home() {
         <aside className="space-y-4 lg:sticky lg:top-20 lg:h-fit">
           <VerseOfTheDayCard />
           <TodaysReadingsCard />
+          <SuggestedPeople limit={4} compact />
           <PrayerWallsCard />
           <ComingUpCard />
         </aside>
