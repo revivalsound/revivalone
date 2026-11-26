@@ -1,4 +1,4 @@
-import { useState, type ElementType, type ReactNode } from 'react'
+import { useEffect, useState, type ElementType, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ArrowRight,
@@ -38,7 +38,9 @@ import BrandMark from '../components/brand/BrandMark'
 import HeroField from '../components/HeroField'
 import { useCardDeck } from '../components/landing/useCardDeck'
 import { BoltDisclosure, Deck, Eyebrow, HeadlineChip, PrimaryPill, SecondaryPill } from '../components/ui/kit'
-import { COURSES, TODAYS_WORD } from '../lib/content'
+import { formatReference, guideDay, guideDayForDate, readingLabel } from '../lib/bible'
+import { fetchCourses, type Course } from '../lib/academy'
+import { useVerseOfTheDay } from '../components/bible/TodayCards'
 import { useAuth } from '../lib/AuthContext'
 
 /* ── Hero mockup: a faithful miniature of the real Revival One app (icon rail, home) ── */
@@ -87,27 +89,27 @@ function AppMockup() {
           </div>
 
           <div className="min-h-0 flex-1 space-y-3 overflow-hidden px-3 pt-4 sm:px-6">
-            <p className="font-heading text-lg font-semibold leading-tight sm:text-xl">Welcome back, <span className="text-primary">Ada.</span></p>
+            <p className="font-heading text-lg font-semibold leading-tight sm:text-xl">Welcome back, <span className="text-primary">friend.</span></p>
             <div className="grid gap-2.5 sm:grid-cols-[1.4fr_1fr]">
               <div className="relative overflow-hidden rounded-[16px] border border-white/10">
                 <img src="/assets/revival-dawn.webp" alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-transparent" />
                 <div className="relative p-3.5 sm:p-4">
-                  <p className="flex items-center gap-1 text-[8px] font-semibold uppercase tracking-[0.14em] text-primary"><BookOpen className="h-2.5 w-2.5" /> Today’s Word · Isaiah 40:31</p>
-                  <p className="mt-2 font-heading text-[15px] font-semibold leading-tight">Strength for the waiting.</p>
-                  <p className="mt-1 max-w-[12rem] text-[9px] leading-4 text-white/70">Find renewed strength when the road ahead feels long.</p>
-                  <span className="mt-3 inline-flex h-5 items-center gap-1 rounded-full bg-primary px-2 text-[8px] font-bold text-primary-foreground">Read the chapter <ArrowRight className="h-2.5 w-2.5" /></span>
+                  <p className="flex items-center gap-1 text-[8px] font-semibold uppercase tracking-[0.14em] text-primary"><BookOpen className="h-2.5 w-2.5" /> Daily guide · Day {guideDayForDate()}</p>
+                  <p className="mt-2 font-heading text-[15px] font-semibold leading-tight">{guideDay(guideDayForDate()).readings.map(readingLabel).join(", ")}</p>
+                  <p className="mt-1 max-w-[12rem] text-[9px] leading-4 text-white/70">Today’s readings in the whole-Bible guide.</p>
+                  <span className="mt-3 inline-flex h-5 items-center gap-1 rounded-full bg-primary px-2 text-[8px] font-bold text-primary-foreground">Start reading <ArrowRight className="h-2.5 w-2.5" /></span>
                 </div>
               </div>
               <div className="rounded-[16px] border border-white/[0.07] bg-surface-raised p-3.5">
                 <HandHeart className="h-4 w-4 text-primary" />
-                <p className="mt-2 font-heading text-[12px] font-semibold">Pray with someone today.</p>
-                <p className="mt-1 text-[9px] leading-4 text-muted-foreground">214 people are praying for healing.</p>
-                <span className="mt-2.5 inline-flex h-5 items-center gap-1 rounded-full border border-white/[0.1] px-2 text-[8px] font-semibold text-foreground/85"><Heart className="h-2.5 w-2.5 text-primary" /> I’m praying</span>
+                <p className="mt-2 font-heading text-[12px] font-semibold">Pray together, live.</p>
+                <p className="mt-1 text-[9px] leading-4 text-muted-foreground">Start a prayer wall or join one with a code.</p>
+                <span className="mt-2.5 inline-flex h-5 items-center gap-1 rounded-full border border-white/[0.1] px-2 text-[8px] font-semibold text-foreground/85"><Heart className="h-2.5 w-2.5 text-primary" /> Join a wall</span>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-              {[[Users, 'Revival cells', '5 near you'], [CalendarDays, 'Events', 'Fire Prayer · Tue'], [GraduationCap, 'Rev Academy', '6 courses'], [HandHeart, 'Prayer wall', '4 requests']].map(([Icon, title, copy]) => {
+              {[[Users, 'Revival cells', 'Group chat'], [CalendarDays, 'Events', 'Host or join'], [GraduationCap, 'Rev Academy', 'Audio courses'], [HandHeart, 'Prayer wall', 'Live rooms']].map(([Icon, title, copy]) => {
                 const I = Icon as ElementType
                 return (
                   <div key={String(title)} className="rounded-[14px] border border-white/[0.07] bg-surface p-2.5">
@@ -153,50 +155,45 @@ const ribbon: ReactNode[] = [
   <RibbonPhoto key="dawn-a" src="/assets/revival-dawn.webp" position="85% 50%" />,
   <RibbonCard key="prayer">
     <p className="flex items-center gap-1.5 text-[10px] font-semibold"><HandHeart className="h-3 w-3 text-[#e11d5c]" /> Prayer wall</p>
-    <p className="mt-2 rounded-lg bg-black/[0.05] px-2 py-1.5 text-[10px] font-medium leading-4">Courage to share the Gospel this week</p>
+    <p className="mt-2 rounded-lg bg-black/[0.05] px-2 py-1.5 text-[10px] font-medium leading-4">A live audio room with a purpose and a time frame</p>
     <div className="mt-2 flex overflow-hidden rounded-full border border-black/10 text-[9px] font-semibold">
-      <span className="flex-1 px-2 py-1 text-center text-black/40">128</span>
-      <span className="flex-1 bg-[#1d0a10] px-2 py-1 text-center text-primary">Praying</span>
+      <span className="flex-1 px-2 py-1 text-center text-black/40">abc-defg-hij</span>
+      <span className="flex-1 bg-[#1d0a10] px-2 py-1 text-center text-primary">Join</span>
     </div>
   </RibbonCard>,
   <RibbonCard key="event" tone="dark" className="w-[180px]">
-    <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-primary">Worship night</p>
-    <p className="mt-1.5 font-heading text-[15px] font-semibold leading-tight">The Upper Room</p>
-    <p className="mt-1 flex items-center gap-1 text-[9px] text-white/55"><MapPin className="h-2.5 w-2.5" /> Civic Centre · Lagos</p>
-    <div className="mt-3 flex items-center justify-between">
-      <span className="rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1 text-[9px] font-semibold">Dec 13</span>
+    <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-primary">Events</p>
+    <p className="mt-1.5 font-heading text-[15px] font-semibold leading-tight">Host a worship night</p>
+    <p className="mt-1 flex items-center gap-1 text-[9px] text-white/55"><MapPin className="h-2.5 w-2.5" /> In person, online or hybrid</p>
+    <div className="mt-3 flex items-center justify-end">
       <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[9px] font-bold text-primary-foreground"><Zap className="h-2.5 w-2.5" /> I’ll be there</span>
     </div>
   </RibbonCard>,
   <RibbonCard key="cells" tone="dark" className="w-[196px]">
     <p className="font-heading text-[13px] font-semibold">Revival cells</p>
-    <p className="mt-0.5 text-[9px] text-white/55">5 communities near you</p>
+    <p className="mt-0.5 text-[9px] text-white/55">Small groups with their own chat</p>
     <div className="mt-3 space-y-1.5">
-      {[['Victoria Island', 'Thu'], ['Lekki Phase 1', 'Sat'], ['Yaba Central', 'Fri']].map(([name, day]) => (
-        <div key={name} className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1.5 text-[9px]">
-          <span className="font-medium">{name}</span>
-          <span className="font-bold text-primary">{day}</span>
-        </div>
+      {['Pray together', 'Study the Word', 'Serve your city'].map(line => (
+        <div key={line} className="rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1.5 text-[9px] font-medium">{line}</div>
       ))}
     </div>
   </RibbonCard>,
-  <RibbonPhoto key="word" src="/assets/revival-dawn.webp" position="72% 70%" label="Isaiah 40:31" />,
+  <RibbonPhoto key="word" src="/assets/revival-dawn.webp" position="72% 70%" label="Verse of the day" />,
   <RibbonCard key="academy">
     <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#e11d5c]">Rev Academy</p>
-    <p className="mt-1.5 font-heading text-[14px] font-semibold leading-tight">Built in the Secret Place</p>
-    <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-black/10"><span className="block h-full w-[62%] rounded-full bg-[#e11d5c]" /></div>
-    <p className="mt-1.5 text-[10px] font-medium">Lesson 5 of 8</p>
+    <p className="mt-1.5 font-heading text-[14px] font-semibold leading-tight">Audio courses, episode by episode</p>
+    <div className="mt-2.5 flex gap-1">{[1, 2, 3, 4, 5].map(number => <span key={number} className={`flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-bold ${number < 3 ? 'bg-[#e11d5c] text-white' : 'border border-black/15 text-black/50'}`}>{number}</span>)}</div>
   </RibbonCard>,
   <RibbonCard key="together" tone="rose">
-    <p className="text-[9px] font-bold uppercase tracking-[0.12em] opacity-70">This week</p>
-    <p className="mt-1.5 font-heading text-2xl font-semibold">492</p>
-    <p className="text-[10px] font-medium">prayers lifted together</p>
-    <span className="mt-2.5 inline-flex items-center gap-1 rounded-full bg-[#070405] px-2.5 py-1 text-[9px] font-bold text-primary"><Heart className="h-2.5 w-2.5" /> Join in</span>
+    <p className="text-[9px] font-bold uppercase tracking-[0.12em] opacity-70">Daily guide</p>
+    <p className="mt-1.5 font-heading text-2xl font-semibold">1,189</p>
+    <p className="text-[10px] font-medium">chapters, January to December</p>
+    <span className="mt-2.5 inline-flex items-center gap-1 rounded-full bg-[#070405] px-2.5 py-1 text-[9px] font-bold text-primary"><Heart className="h-2.5 w-2.5" /> Day {guideDayForDate()}</span>
   </RibbonCard>,
   <RibbonCard key="live" tone="dark">
-    <p className="flex items-center gap-1.5 text-[9px] text-white/55"><Video className="h-3 w-3 text-primary" /> Online · 8:00 PM</p>
-    <p className="mt-2 font-heading text-lg font-semibold leading-tight">Tuesday Fire Prayer</p>
-    <p className="text-[10px] text-white/60">Join from anywhere</p>
+    <p className="flex items-center gap-1.5 text-[9px] text-white/55"><Video className="h-3 w-3 text-primary" /> The Bible, read aloud</p>
+    <p className="mt-2 font-heading text-lg font-semibold leading-tight">Listen to any chapter</p>
+    <p className="text-[10px] text-white/60">Berean Standard Bible narration</p>
   </RibbonCard>,
   <RibbonPhoto key="dawn-b" src="/assets/revival-dawn.webp" position="40% 80%" />,
 ]
@@ -238,13 +235,13 @@ const CARD_TONES: Record<CardTone, { card: string; icon: string; body: string }>
 }
 
 const FEATURES: { id: string; tone?: CardTone; icon: ElementType; title: string; desc: string }[] = [
-  { id: 'word', tone: 'rose', icon: Bible, title: 'Today’s Word, every day', desc: 'A daily passage with study notes, practice and a prayer to carry into the day.' },
-  { id: 'prayer', icon: HandHeart, title: 'A living prayer wall', desc: 'Share a request, and see who is praying with you.' },
+  { id: 'word', tone: 'rose', icon: Bible, title: 'The whole Bible in a year', desc: 'A daily guide from January to December, with a verse of the day, study notes and a journal.' },
+  { id: 'prayer', icon: HandHeart, title: 'Live prayer walls', desc: 'Start one now, schedule one, or join with a code, and pray together by voice.' },
   { id: 'cells', icon: Users, title: 'Revival cells near you', desc: 'Small groups that pray, study and serve the city they live in.' },
   { id: 'events', icon: CalendarDays, title: 'Gatherings worth showing up for', desc: 'Worship nights, prayer, bootcamps and outreach, in person or online.' },
   { id: 'academy', icon: GraduationCap, title: 'Rev Academy', desc: 'Courses in Scripture, prayer, leadership and Kingdom business.' },
   { id: 'create', icon: Plus, title: 'Start something', desc: 'Host an event, a gospel bootcamp or a cell in a few taps.' },
-  { id: 'translations', tone: 'light', icon: BookOpen, title: 'Your translation', desc: 'Read in NIV, NKJV, NLT or AMP.' },
+  { id: 'translations', tone: 'light', icon: BookOpen, title: 'Your Bible, your way', desc: 'BSB, KJV, WEB and more, with highlights, notes, cross references and audio.' },
   { id: 'profile', icon: UserHands, title: 'A home for your journey', desc: 'Your church, your focus, the cells and events you belong to.' },
 ]
 
@@ -294,22 +291,22 @@ function FeatureDeck() {
 /* ── Today's Word showcase: a story-format card with the flame in liquid metal ── */
 
 function WordPreview() {
+  const verse = useVerseOfTheDay()
   return (
     <div className="relative mx-auto w-[min(84vw,340px)] sm:w-full sm:max-w-[340px] lg:max-w-[380px]">
       <div aria-hidden="true" className="absolute -inset-6 rounded-[48px] bg-[radial-gradient(closest-side,rgba(224,52,106,0.4),transparent)] blur-2xl" />
-      <Link to={`/word/${TODAYS_WORD.slug}`} className="bolt-card bolt-card--hover bolt-card--inset relative block aspect-[4/5] overflow-hidden rounded-[26px] border border-white/10 bg-[#060304] shadow-[0_30px_80px_rgba(0,0,0,0.55)] sm:aspect-[9/14] sm:rounded-[32px]">
+      <Link to="/guide" className="bolt-card bolt-card--hover bolt-card--inset relative block aspect-[4/5] overflow-hidden rounded-[26px] border border-white/10 bg-[#060304] shadow-[0_30px_80px_rgba(0,0,0,0.55)] sm:aspect-[9/14] sm:rounded-[32px]">
         <img src="/assets/revival-dawn.webp" alt="An open Bible lit by morning light through a chapel window" className="absolute inset-0 h-full w-full object-cover object-[78%_50%]" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/35 to-black/90" />
         <div className="relative flex h-full flex-col p-6">
           <div className="flex items-center justify-between">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-black/55 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary backdrop-blur-md"><Sunrise className="h-3.5 w-3.5" /> Today’s Word</span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-black/55 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary backdrop-blur-md"><Sunrise className="h-3.5 w-3.5" /> Verse of the day</span>
             <BrandMark size={44} animated />
           </div>
           <div className="mt-auto">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/60">{TODAYS_WORD.reference}</p>
-            <p className="mt-2 font-heading text-3xl font-semibold leading-[1.05] tracking-[-0.02em]">Strength for <span className="text-primary">the waiting.</span></p>
-            <p className="mt-3 text-sm leading-6 text-white/75">{TODAYS_WORD.paraphrase}</p>
-            <span className="mt-5 inline-flex h-10 items-center gap-2 rounded-full bg-primary px-4 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground">Read today’s Word <ArrowRight className="h-3.5 w-3.5" /></span>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/60">{verse ? formatReference(verse) : 'Today'}</p>
+            <p className="mt-3 line-clamp-6 font-scripture text-[1.35rem] leading-[1.55] text-white">{verse?.text ? `“${verse.text}”` : '…'}</p>
+            <span className="mt-5 inline-flex h-10 items-center gap-2 rounded-full bg-primary px-4 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground">Open today’s guide <ArrowRight className="h-3.5 w-3.5" /></span>
           </div>
         </div>
       </Link>
@@ -560,13 +557,13 @@ export default function Landing() {
               <h2 className="max-w-2xl font-heading text-[2.2rem] font-semibold leading-[1.08] tracking-[-0.02em] sm:text-5xl">
                 Start every day <HeadlineChip icon={BookOpen} tone="rose" /> in Scripture.
               </h2>
-              <p className="mt-6 max-w-xl text-base leading-7 text-muted-foreground">One passage, read slowly. Understand it, practise it, then pray it — in about seven minutes.</p>
+              <p className="mt-6 max-w-xl text-base leading-7 text-muted-foreground">Open your Bible and read the whole of it this year: three readings a day, a verse to carry, and a place to write what God is saying.</p>
               <Deck className="mt-8 grid gap-3 sm:grid-cols-2">
                 {[
-                  ['Four translations', 'NIV, NKJV, NLT and AMP, side by side.'],
-                  ['Phrase by phrase', 'What the promise is forming in you.'],
-                  ['Practise it today', 'Three small steps you can take before tonight.'],
-                  ['Pray the Word', 'A written prayer, and a place to mark it prayed.'],
+                  ['Ten free translations', 'The Berean Standard Bible, KJV, WEB and more.'],
+                  ['Listen as you read', 'Every chapter of the BSB, narrated.'],
+                  ['Study notes', 'Tyndale notes, classic commentaries and cross references.'],
+                  ['Highlight and journal', 'Your highlights, notes and reflections, saved to you.'],
                 ].map(([title, copy]) => (
                   <div key={title} className="rounded-[20px] border border-white/[0.07] bg-surface p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25">
                     <h3 className="font-heading text-base font-semibold">{title}</h3>
@@ -574,7 +571,7 @@ export default function Landing() {
                   </div>
                 ))}
               </Deck>
-              <PrimaryPill to={`/word/${TODAYS_WORD.slug}`} className="mt-8">Read today’s Word</PrimaryPill>
+              <PrimaryPill to="/guide" className="mt-8">Open today’s guide</PrimaryPill>
             </div>
             <WordPreview />
           </div>
@@ -584,24 +581,9 @@ export default function Landing() {
           <div className="mb-12 px-4 text-center">
             <Eyebrow>Rev Academy</Eyebrow>
             <h2 className="mx-auto max-w-3xl font-heading text-[2.2rem] font-semibold leading-[1.08] tracking-[-0.02em] sm:text-5xl">Formed in truth. Ready for impact.</h2>
-            <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-muted-foreground">Courses taught by pastors and practitioners from across the movement.</p>
+            <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-muted-foreground">Audio courses taught by members of the movement, episode by episode.</p>
           </div>
-          <div className="relative overflow-hidden">
-            <div className="flex w-max gap-4 animate-marquee hover:[animation-play-state:paused]">
-              {[...COURSES, ...COURSES].map((course, index) => (
-                <Link to={`/academy/${course.slug}`} key={`${course.title}-${index}`} className="group flex aspect-[4/5] w-[220px] flex-col rounded-[22px] border border-white/[0.08] bg-surface p-5 shadow-[0_18px_45px_rgba(0,0,0,0.3)] transition-colors hover:border-primary/30 sm:w-[260px]">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-full border border-primary/25 bg-primary/10 text-primary"><GraduationCap className="h-5 w-5" /></span>
-                  <p className="mt-6 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">{course.category}</p>
-                  <h3 className="mt-2 font-heading text-xl font-semibold leading-tight">{course.title}</h3>
-                  <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted-foreground">{course.summary}</p>
-                  <div className="mt-auto flex items-center justify-between border-t border-white/[0.07] pt-4 text-xs text-muted-foreground">
-                    <span>{course.teacher}</span>
-                    <span className="font-semibold text-foreground">{course.lessons} episodes</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
+          <AcademyStrip />
         </section>
 
         <section id="movement" className="px-2 py-8 sm:px-3">
@@ -709,3 +691,36 @@ export default function Landing() {
   )
 }
 
+
+/** Real Rev Academy courses, or an invitation to teach the first one. */
+function AcademyStrip() {
+  const [courses, setCourses] = useState<Course[] | null>(null)
+  useEffect(() => { fetchCourses().then(setCourses).catch(() => setCourses([])) }, [])
+  if (courses === null) return <div className="h-40" />
+  if (!courses.length) {
+    return (
+      <div className="flex justify-center px-4">
+        <Link to="/academy" className="inline-flex h-12 items-center gap-2 rounded-full border border-white/[0.12] bg-surface px-6 font-heading text-[12px] font-semibold uppercase tracking-[0.14em] hover:bg-surface-raised"><GraduationCap className="h-4 w-4 text-primary" /> Explore Rev Academy</Link>
+      </div>
+    )
+  }
+  const loop = courses.length > 3 ? [...courses, ...courses] : courses
+  return (
+    <div className="relative overflow-hidden">
+      <div className={`flex gap-4 ${courses.length > 3 ? 'w-max animate-marquee hover:[animation-play-state:paused]' : 'justify-center px-4'}`}>
+        {loop.map((course, index) => (
+          <Link to={`/academy/${course.slug}`} key={`${course.id}-${index}`} className="group flex aspect-[4/5] w-[220px] flex-col rounded-[22px] border border-white/[0.08] bg-surface p-5 shadow-[0_18px_45px_rgba(0,0,0,0.3)] transition-colors hover:border-primary/30 sm:w-[260px]">
+            <span className="flex h-11 w-11 items-center justify-center rounded-full border border-primary/25 bg-primary/10 text-primary"><GraduationCap className="h-5 w-5" /></span>
+            <p className="mt-6 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">{course.category}</p>
+            <h3 className="mt-2 font-heading text-xl font-semibold leading-tight">{course.title}</h3>
+            <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted-foreground">{course.description}</p>
+            <div className="mt-auto flex items-center justify-between border-t border-white/[0.07] pt-4 text-xs text-muted-foreground">
+              <span className="truncate">{course.teacher}</span>
+              <span className="font-semibold text-foreground">{course.episodes.length} episodes</span>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  )
+}

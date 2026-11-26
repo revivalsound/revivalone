@@ -41,57 +41,33 @@ function fail(error: { code?: string; message: string }): never {
   throw new Error(error.message)
 }
 
-// In local dev, before the table exists, the screens fall back to sample posts so the
-// design can be reviewed. The samples are never bundled into production.
-async function samples(): Promise<Post[] | null> {
-  if (!import.meta.env.DEV) return null
-  const module = await import('./sample-posts')
-  return module.SAMPLE_POSTS
-}
-
-async function withSamples<T>(load: () => Promise<T>, fallback: (posts: Post[]) => T): Promise<T> {
-  try {
-    return await load()
-  } catch (error) {
-    const posts = error instanceof FeedNotReady ? await samples() : null
-    if (posts) return fallback(posts)
-    throw error
-  }
-}
-
 export const PAGE_SIZE = 12
 
-export function fetchFeed(kind: PostKind | 'all', page = 0) {
-  return withSamples(async () => {
-    let query = supabase.from('posts').select(SELECT).order('created_at', { ascending: false }).range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
-    if (kind !== 'all') query = query.eq('kind', kind)
-    const { data, error } = await query
-    if (error) fail(error)
-    return (data ?? []) as unknown as Post[]
-  }, posts => page > 0 ? [] : posts.filter(post => kind === 'all' || post.kind === kind))
+export async function fetchFeed(kind: PostKind | 'all', page = 0) {
+  let query = supabase.from('posts').select(SELECT).order('created_at', { ascending: false }).range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
+  if (kind !== 'all') query = query.eq('kind', kind)
+  const { data, error } = await query
+  if (error) fail(error)
+  return (data ?? []) as unknown as Post[]
 }
 
-export function fetchPost(id: string) {
-  if (!UUID.test(id)) return samples().then(posts => posts?.find(post => post.id === id) ?? null)
-  return withSamples(async () => {
-    const { data, error } = await supabase.from('posts').select(SELECT).eq('id', id).maybeSingle()
-    if (error) fail(error)
-    return data as unknown as Post | null
-  }, posts => posts.find(post => post.id === id) ?? null)
+export async function fetchPost(id: string) {
+  if (!UUID.test(id)) return null
+  const { data, error } = await supabase.from('posts').select(SELECT).eq('id', id).maybeSingle()
+  if (error) fail(error)
+  return data as unknown as Post | null
 }
 
-export function fetchAuthorPosts(authorId: string, { exclude, limit = 24 }: { exclude?: string; limit?: number } = {}) {
-  return withSamples(async () => {
-    let query = supabase.from('posts').select(SELECT).eq('author_id', authorId).order('created_at', { ascending: false }).limit(limit)
-    if (exclude) query = query.neq('id', exclude)
-    const { data, error } = await query
-    if (error) fail(error)
-    return (data ?? []) as unknown as Post[]
-  }, posts => posts.filter(post => post.author_id === authorId && post.id !== exclude).slice(0, limit))
+export async function fetchAuthorPosts(authorId: string, { exclude, limit = 24 }: { exclude?: string; limit?: number } = {}) {
+  let query = supabase.from('posts').select(SELECT).eq('author_id', authorId).order('created_at', { ascending: false }).limit(limit)
+  if (exclude) query = query.neq('id', exclude)
+  const { data, error } = await query
+  if (error) fail(error)
+  return (data ?? []) as unknown as Post[]
 }
 
 /** Posts by other writers on the same theme: shared tags first, then the same kind. */
-export function fetchSimilar(post: Post, limit = 3) {
+export async function fetchSimilar(post: Post, limit = 3) {
   const rank = (candidates: Post[]) => {
     const seen = new Set<string>()
     return candidates
@@ -102,16 +78,14 @@ export function fetchSimilar(post: Post, limit = 3) {
       .slice(0, limit)
       .map(({ candidate }) => candidate)
   }
-  return withSamples(async () => {
-    const others = () => supabase.from('posts').select(SELECT).neq('author_id', post.author_id).order('created_at', { ascending: false }).limit(12)
-    const [byTag, byKind] = await Promise.all([
-      post.tags.length ? others().overlaps('tags', post.tags) : Promise.resolve({ data: [], error: null }),
-      others().eq('kind', post.kind),
-    ])
-    if (byTag.error) fail(byTag.error)
-    if (byKind.error) fail(byKind.error)
-    return rank([...(byTag.data ?? []), ...(byKind.data ?? [])] as unknown as Post[])
-  }, rank)
+  const others = () => supabase.from('posts').select(SELECT).neq('author_id', post.author_id).order('created_at', { ascending: false }).limit(12)
+  const [byTag, byKind] = await Promise.all([
+    post.tags.length ? others().overlaps('tags', post.tags) : Promise.resolve({ data: [], error: null }),
+    others().eq('kind', post.kind),
+  ])
+  if (byTag.error) fail(byTag.error)
+  if (byKind.error) fail(byKind.error)
+  return rank([...(byTag.data ?? []), ...(byKind.data ?? [])] as unknown as Post[])
 }
 
 export async function createPost(input: NewPost) {
@@ -128,18 +102,12 @@ export async function deletePost(id: string) {
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export async function fetchPublicProfile(id: string): Promise<PublicProfile | null> {
-  if (!UUID.test(id)) return sampleProfile(id)
+  if (!UUID.test(id)) return null
   const { data, error } = await supabase.from('profiles')
     .select('id, full_name, avatar_url, city, country, church, ministry_focus, bio, created_at')
     .eq('id', id).maybeSingle()
   if (error) throw new Error(error.message)
-  return (data as PublicProfile | null) ?? sampleProfile(id)
-}
-
-// Sample authors exist only in local dev; anywhere else an unknown id is simply missing.
-async function sampleProfile(id: string): Promise<PublicProfile | null> {
-  const sample = (await samples())?.find(post => post.author_id === id)?.author
-  return sample ? { country: '', church: sample.church ?? '', ministry_focus: '', bio: 'A sample writer for previewing the feed in local development.', created_at: '2026-01-01T00:00:00Z', ...sample } : null
+  return (data as PublicProfile | null) ?? null
 }
 
 /* ── formatting ── */

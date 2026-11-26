@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
-import { CalendarDays, Check, Clock, MapPin, Video, Zap } from '../../components/ui/icons'
+import { Link, useLocation } from 'react-router-dom'
+import { ArrowRight, CalendarDays, Check, Clock, MapPin, Video, Zap } from '../../components/ui/icons'
 import { Deck } from '../../components/ui/kit'
 import { CreateButton, PageHeader } from '../../components/app/AppShell'
 import { EventCard, MediaCover } from '../../components/community/cards'
-import { EXAMPLE_EVENTS, fetchUpcoming, formatDay, formatTime, type EventDetails, type Initiative } from '../../lib/community'
+import { fetchUpcoming, formatDay, formatTime, type EventDetails, type Initiative } from '../../lib/community'
 
 const FILTERS = [
   { key: 'all', label: 'Everything' },
@@ -18,19 +18,18 @@ const GOING_KEY = 'revival.going'
 export default function Events() {
   const { state } = useLocation() as { state?: { created?: string } }
   const [filter, setFilter] = useState<typeof FILTERS[number]['key']>('all')
-  const [real, setReal] = useState<Initiative<'event' | 'bootcamp'>[]>([])
+  const [real, setReal] = useState<Initiative<'event' | 'bootcamp'>[] | null>(null)
   const [going, setGoing] = useState<string[]>(() => {
     try { return JSON.parse(window.localStorage.getItem(GOING_KEY) || '[]') } catch { return [] }
   })
 
   useEffect(() => { fetchUpcoming().then(setReal).catch(() => setReal([])) }, [])
 
-  // Real listings first, then the examples, all in date order within each group.
-  const all = [...real, ...EXAMPLE_EVENTS.slice().sort((a, b) => a.starts_at.localeCompare(b.starts_at))]
+  const all = real ?? []
   const shown = all.filter(item => filter === 'all'
     || (filter === 'online' ? item.details.format === 'online' : item.kind === filter))
-  const featured = all.find(item => item.id === state?.created) ?? real.find(item => item.media_url) ?? real[0] ?? EXAMPLE_EVENTS.find(item => item.title === 'The Upper Room') ?? all[0]
-  const featuredDetails = featured.details as Partial<EventDetails>
+  const featured = all.find(item => item.id === state?.created) ?? all.find(item => item.media_url) ?? all[0]
+  const featuredDetails = (featured?.details ?? {}) as Partial<EventDetails>
 
   const toggleGoing = (id: string) => setGoing(current => {
     const next = current.includes(id) ? current.filter(item => item !== id) : [...current, id]
@@ -47,6 +46,7 @@ export default function Events() {
         action={<CreateButton kind="event">Create an event</CreateButton>}
       />
 
+      {featured && (
       <section className="bolt-card bolt-card--inset bolt-card--hover group relative mt-8 overflow-hidden rounded-[30px] border border-white/10">
         <MediaCover initiative={featured} className="min-h-[360px] sm:min-h-[420px]">
           <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-transparent" />
@@ -67,12 +67,13 @@ export default function Events() {
           </div>
         </MediaCover>
       </section>
+      )}
 
       <section className="mt-12" aria-labelledby="directory-heading">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 id="directory-heading" className="font-heading text-2xl font-semibold">Coming up</h2>
-            <p className="mt-1 text-sm text-muted-foreground">{real.length ? 'Gatherings from the community, plus a few example listings.' : 'Example listings for now. Create one and it appears here.'}</p>
+            <p className="mt-1 text-sm text-muted-foreground">Gatherings and bootcamps from the community, soonest first.</p>
           </div>
           <div className="flex gap-1 overflow-x-auto rounded-full border border-white/[0.08] bg-white/[0.03] p-1" role="group" aria-label="Filter listings">
             {FILTERS.map(({ key, label }) => (
@@ -84,7 +85,15 @@ export default function Events() {
         <Deck key={filter} className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {shown.map(item => <EventCard key={item.id} initiative={item} going={going.includes(item.id)} onToggleGoing={() => toggleGoing(item.id)} />)}
         </Deck>
-        {shown.length === 0 && <p className="mt-6 rounded-[24px] border border-dashed border-white/[0.1] px-5 py-10 text-center text-sm text-muted-foreground">Nothing here yet.</p>}
+        {real === null && <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{[0, 1, 2].map(index => <div key={index} className="h-80 animate-pulse rounded-[26px] bg-surface" />)}</div>}
+        {real !== null && shown.length === 0 && (
+          <div className="mt-6 rounded-[26px] border border-dashed border-white/[0.1] bg-surface/60 px-6 py-14 text-center">
+            <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-primary/25 bg-primary/10 text-primary"><CalendarDays className="h-6 w-6" /></span>
+            <h3 className="mt-5 font-heading text-xl font-semibold">{all.length ? 'Nothing matches that filter' : 'No upcoming gatherings yet'}</h3>
+            <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">Host a worship night, a prayer gathering or a gospel bootcamp and it will appear here.</p>
+            <Link to="/create/event" className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-primary px-5 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground">Create an event <ArrowRight className="h-4 w-4" /></Link>
+          </div>
+        )}
       </section>
     </div>
   )

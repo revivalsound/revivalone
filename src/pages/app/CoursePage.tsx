@@ -3,14 +3,16 @@ import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, Back15, Check, Forward15, GraduationCap, Headphones, PauseCircle, Play, PlayCircle, Playlist, SkipNext, SkipPrevious, User } from '../../components/ui/icons'
 import EpisodeDots from '../../components/academy/EpisodeDots'
 import BrandMark from '../../components/brand/BrandMark'
-import { audioFor, clock, courseBySlug, courseSeconds, episodeSeconds, nextEpisode, runtime, saveProgress, useCourseProgress } from '../../lib/academy'
+import { useAuth } from '../../lib/AuthContext'
+import { clock, courseSeconds, fetchCourse, fetchProgress, nextEpisode, runtime, saveProgress, useCourseProgress, type Course } from '../../lib/academy'
 
 const SPEEDS = [1, 1.25, 1.5, 2]
 
 export default function CoursePage() {
   const { slug = '' } = useParams()
-  const course = courseBySlug(slug)
-  const { progress, markDone } = useCourseProgress(slug)
+  const { user } = useAuth()
+  const [course, setCourse] = useState<Course | null | undefined>(undefined)
+  const { progress, markDone } = useCourseProgress(course?.id, user?.id)
   const audio = useRef<HTMLAudioElement>(null)
   const [episode, setEpisode] = useState<number | null>(null)
   const [playing, setPlaying] = useState(false)
@@ -19,21 +21,29 @@ export default function CoursePage() {
   const [speed, setSpeed] = useState(1)
   const [justFinished, setJustFinished] = useState<number | null>(null)
 
+  useEffect(() => { fetchCourse(slug).then(setCourse).catch(() => setCourse(null)) }, [slug])
+  useEffect(() => { if (user) void fetchProgress(user.id).catch(() => undefined) }, [user])
+
   // Load the chosen episode and play it.
   useEffect(() => {
     const element = audio.current
-    if (!element || episode === null) return
-    element.src = audioFor(slug, episode)
-    const resume = progress.current === episode ? progress.position : 0
+    const item = course?.episodes.find(entry => entry.number === episode)
+    if (!element || !course || !item) return
+    element.src = item.audio_url
+    const resume = progress.current === item.number ? progress.position : 0
     element.currentTime = resume
     element.playbackRate = speed
     void element.play().catch(() => setPlaying(false))
-    saveProgress(slug, current => ({ ...current, current: episode }))
+    saveProgress(user?.id, course.id, current => ({ ...current, current: item.number }), { immediate: true })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [episode, slug])
+  }, [episode, course])
 
   useEffect(() => { if (audio.current) audio.current.playbackRate = speed }, [speed])
   useEffect(() => () => audio.current?.pause(), [])
+
+  if (course === undefined) {
+    return <div className="flex min-h-[60vh] items-center justify-center"><span className="brand-ring brand-ring--on flex h-14 w-14 items-center justify-center rounded-full bg-surface"><Headphones className="h-6 w-6 text-primary" /></span></div>
+  }
 
   if (!course) {
     return (
@@ -45,6 +55,7 @@ export default function CoursePage() {
   }
 
   const count = course.episodes.length
+  const lastNumber = course.episodes.at(-1)?.number ?? count
   const upNext = nextEpisode(course, progress)
   const finishedAll = progress.done.length === count
   const started = progress.done.length > 0 || progress.position > 0
@@ -74,10 +85,11 @@ export default function CoursePage() {
     setJustFinished(episode)
     setPlaying(false)
     // Carry on to the next episode after a short pause.
-    if (episode < count) window.setTimeout(() => setEpisode(current => (current === episode ? episode + 1 : current)), 1800)
+    const following = course!.episodes.find(item => item.number > episode)
+    if (following) window.setTimeout(() => setEpisode(current => (current === episode ? following.number : current)), 1800)
   }
 
-  const current = episode ? course.episodes[episode - 1] : null
+  const current = episode ? course.episodes.find(item => item.number === episode) ?? null : null
 
   return (
     <div className={`mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10 ${episode ? 'pb-48 lg:pb-36' : ''}`}>
@@ -90,7 +102,7 @@ export default function CoursePage() {
         onTimeUpdate={event => {
           setTime(event.currentTarget.currentTime)
           const position = event.currentTarget.currentTime
-          if (episode && Math.floor(position) % 5 === 0) saveProgress(slug, value => ({ ...value, current: episode, position }))
+          if (episode && Math.floor(position) % 5 === 0) saveProgress(user?.id, course.id, value => ({ ...value, current: episode, position }))
         }}
         onEnded={ended}
       />
@@ -101,11 +113,11 @@ export default function CoursePage() {
         <div className="p-7 sm:p-10">
           <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary"><Headphones className="h-4 w-4" /> Audio course · {course.category}</p>
           <h1 className="mt-4 font-heading text-[2.2rem] font-semibold leading-[1.04] tracking-[-0.025em] sm:text-[3.2rem]">{course.title}</h1>
-          <p className="mt-4 max-w-lg text-[15px] leading-7 text-muted-foreground">{course.summary}</p>
+          <p className="mt-4 max-w-lg text-[15px] leading-7 text-muted-foreground">{course.description}</p>
           <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1.5"><User className="h-4 w-4 text-primary" /> {course.teacher}</span>
+            {course.teacher && <span className="flex items-center gap-1.5"><User className="h-4 w-4 text-primary" /> {course.teacher}</span>}
             <span className="flex items-center gap-1.5"><Playlist className="h-4 w-4 text-primary" /> {count} episodes</span>
-            <span className="flex items-center gap-1.5"><Headphones className="h-4 w-4 text-primary" /> {runtime(courseSeconds(slug))} total</span>
+            <span className="flex items-center gap-1.5"><Headphones className="h-4 w-4 text-primary" /> {runtime(courseSeconds(course))} total</span>
           </div>
 
           <div className="mt-8 flex flex-wrap items-center gap-4">
@@ -131,12 +143,12 @@ export default function CoursePage() {
       <section className="mt-10" aria-labelledby="episodes-heading">
         <h2 id="episodes-heading" className="font-heading text-2xl font-semibold">Episodes</h2>
         <ol className="mt-5 space-y-2.5">
-          {course.episodes.map((item, index) => {
-            const number = index + 1
+          {course.episodes.map(item => {
+            const number = item.number
             const done = progress.done.includes(number)
             const active = number === episode
             return (
-              <li key={item.title}>
+              <li key={item.id}>
                 <button type="button" onClick={() => play(number)} aria-current={active ? 'true' : undefined} className={`bolt-card group flex w-full items-center gap-4 rounded-[22px] border p-4 text-left transition-colors sm:p-5 ${active ? 'bolt-card--on border-transparent bg-surface-raised' : 'bolt-card--hover border-white/[0.07] bg-surface hover:bg-surface-raised'}`}>
                   <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full font-heading text-sm font-semibold transition-colors duration-500 ${done ? 'bg-primary text-primary-foreground shadow-[0_6px_18px_rgba(255,92,138,0.35)]' : active ? 'border border-primary text-primary' : 'border border-white/[0.1] text-foreground/70'}`}>
                     {active && playing ? <Equalizer small /> : number}
@@ -145,7 +157,7 @@ export default function CoursePage() {
                     <span className="block font-heading text-[15px] font-semibold">{item.title}</span>
                     <span className="mt-0.5 line-clamp-2 block text-xs leading-5 text-muted-foreground">{item.summary}</span>
                   </span>
-                  <span className="hidden shrink-0 text-xs text-muted-foreground sm:block">{done ? <span className="inline-flex items-center gap-1 text-primary"><Check className="h-3.5 w-3.5" strokeWidth={2.4} /> Finished</span> : clock(episodeSeconds(slug, number))}</span>
+                  <span className="hidden shrink-0 text-xs text-muted-foreground sm:block">{done ? <span className="inline-flex items-center gap-1 text-primary"><Check className="h-3.5 w-3.5" strokeWidth={2.4} /> Finished</span> : clock(item.duration_seconds)}</span>
                   <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors ${active ? 'bg-primary text-primary-foreground' : 'border border-white/[0.08] text-foreground group-hover:border-primary/40 group-hover:text-primary'}`}>
                     {active && playing ? <PauseCircle className="h-5 w-5" /> : <PlayCircle className="h-5 w-5" />}
                   </span>
@@ -154,7 +166,7 @@ export default function CoursePage() {
             )
           })}
         </ol>
-        <p className="mt-6 flex items-center gap-2 text-xs text-muted-foreground"><GraduationCap className="h-4 w-4 text-primary" /> Progress is saved on this device. Finished episodes light up on the course card.</p>
+        <p className="mt-6 flex items-center gap-2 text-xs text-muted-foreground"><GraduationCap className="h-4 w-4 text-primary" /> {user ? 'Your progress is saved to your account. Finished episodes light up on the course card.' : <>Listening as a guest. <Link to={`/auth?next=/academy/${slug}`} className="font-semibold text-primary">Sign in</Link> to keep your place across devices.</>}</p>
       </section>
 
       {/* Player */}
@@ -167,11 +179,11 @@ export default function CoursePage() {
               <p className="truncate font-heading text-sm font-semibold">{current.title}</p>
             </div>
             <div className="flex items-center gap-1">
-              <button type="button" onClick={() => setEpisode(Math.max(1, episode - 1))} disabled={episode === 1} aria-label="Previous episode" className="hidden h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:bg-white/[0.06] hover:text-foreground disabled:opacity-30 sm:flex"><SkipPrevious className="h-5 w-5" /></button>
+              <button type="button" onClick={() => setEpisode([...course.episodes].reverse().find(item => item.number < episode)?.number ?? episode)} disabled={episode === course.episodes[0]?.number} aria-label="Previous episode" className="hidden h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:bg-white/[0.06] hover:text-foreground disabled:opacity-30 sm:flex"><SkipPrevious className="h-5 w-5" /></button>
               <button type="button" onClick={() => skip(-15)} aria-label="Back 15 seconds" className="flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:bg-white/[0.06] hover:text-foreground"><Back15 className="h-5 w-5" /></button>
               <button type="button" onClick={toggle} aria-label={playing ? 'Pause' : 'Play'} className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_8px_22px_rgba(255,92,138,0.35)] active:scale-95">{playing ? <PauseCircle className="h-6 w-6" /> : <Play className="h-5 w-5" />}</button>
               <button type="button" onClick={() => skip(15)} aria-label="Forward 15 seconds" className="flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:bg-white/[0.06] hover:text-foreground"><Forward15 className="h-5 w-5" /></button>
-              <button type="button" onClick={() => setEpisode(Math.min(count, episode + 1))} disabled={episode === count} aria-label="Next episode" className="hidden h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:bg-white/[0.06] hover:text-foreground disabled:opacity-30 sm:flex"><SkipNext className="h-5 w-5" /></button>
+              <button type="button" onClick={() => setEpisode(course.episodes.find(item => item.number > episode)?.number ?? episode)} disabled={episode === lastNumber} aria-label="Next episode" className="hidden h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:bg-white/[0.06] hover:text-foreground disabled:opacity-30 sm:flex"><SkipNext className="h-5 w-5" /></button>
               <button type="button" onClick={() => setSpeed(SPEEDS[(SPEEDS.indexOf(speed) + 1) % SPEEDS.length])} aria-label="Playback speed" className="ml-1 hidden h-9 min-w-[3rem] items-center justify-center rounded-full border border-white/[0.1] px-2 text-xs font-semibold sm:flex">{speed}×</button>
             </div>
           </div>
@@ -180,7 +192,7 @@ export default function CoursePage() {
             <input
               type="range"
               min={0}
-              max={duration || episodeSeconds(slug, episode) || 1}
+              max={duration || current.duration_seconds || 1}
               step={0.1}
               value={time}
               onChange={event => { if (audio.current) audio.current.currentTime = Number(event.target.value) }}
@@ -188,7 +200,7 @@ export default function CoursePage() {
               className="episode-seek h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-white/10"
               style={{ backgroundImage: `linear-gradient(90deg, #ff5c8a ${(time / (duration || 1)) * 100}%, transparent 0)` }}
             />
-            <span className="w-9 font-mono text-[10px] text-muted-foreground">{clock(duration || episodeSeconds(slug, episode))}</span>
+            <span className="w-9 font-mono text-[10px] text-muted-foreground">{clock(duration || current.duration_seconds)}</span>
           </div>
         </div>
       )}

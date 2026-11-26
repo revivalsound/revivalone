@@ -14,7 +14,10 @@ const Home = lazy(() => import('./pages/app/Home'))
 const Community = lazy(() => import('./pages/app/Community'))
 const Events = lazy(() => import('./pages/app/Events'))
 const Academy = lazy(() => import('./pages/app/Academy'))
-const Word = lazy(() => import('./pages/app/Word'))
+const BibleReader = lazy(() => import('./pages/app/BibleReader'))
+const BibleHome = lazy(() => import('./pages/app/BibleReader').then(module => ({ default: module.BibleHome })))
+const DailyGuide = lazy(() => import('./pages/app/DailyGuide'))
+const CreateCourse = lazy(() => import('./pages/app/CreateCourse'))
 const Profile = lazy(() => import('./pages/app/Profile'))
 const PostPage = lazy(() => import('./pages/app/PostPage'))
 const PublicProfile = lazy(() => import('./pages/app/PublicProfile'))
@@ -93,11 +96,16 @@ export default function App() {
               <Route path="/community/cells/:id" element={<CellChat />} />
               <Route path="/community/prayer" element={<PrayerWalls />} />
               <Route path="/prayer/:code" element={<PrayerRoom />} />
+              <Route path="/create/course" element={<RequireAuth><CreateCourse /></RequireAuth>} />
               <Route path="/create/:kind" element={<RequireAuth><CreatePage /></RequireAuth>} />
               <Route path="/events" element={<Events />} />
               <Route path="/academy" element={<Academy />} />
               <Route path="/academy/:slug" element={<CoursePage />} />
-              <Route path="/word/:slug" element={<Word />} />
+              <Route path="/bible" element={<BibleHome />} />
+              <Route path="/bible/:translation/:book/:chapter" element={<BibleReader />} />
+              <Route path="/guide" element={<DailyGuide />} />
+              <Route path="/guide/:day" element={<DailyGuide />} />
+              <Route path="/word/*" element={<Navigate to="/guide" replace />} />
               <Route path="/post/:id" element={<PostPage />} />
               <Route path="/u/:id" element={<PublicProfile />} />
               <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />

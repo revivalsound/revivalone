@@ -130,10 +130,3 @@ grant usage on schema public to anon, authenticated;
 grant select on public.profiles, public.initiatives, public.community_memberships, public.academy_courses to anon, authenticated;
 grant insert, update, delete on public.initiatives, public.event_registrations, public.community_memberships, public.course_enrollments to authenticated;
 grant update on public.profiles to authenticated;
-
-insert into public.academy_courses (title, slug, category, description, lesson_count, published)
-values
-  ('Built in the Secret Place','built-in-the-secret-place','Spiritual Formation','Build a durable life of prayer, scripture, and abiding.',8,true),
-  ('Leading with Fire','leading-with-fire','Leadership','Lead people with conviction, humility, and spiritual clarity.',10,true),
-  ('Kingdom Enterprise','kingdom-enterprise','Business','Turn a God-given burden into an enterprise that serves people.',12,true)
-on conflict (slug) do nothing;

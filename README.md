@@ -21,7 +21,6 @@ Optional environment (`.env.local`):
 | --- | --- |
 | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | Browser Supabase client (falls back to the existing project) |
 | `SUPABASE_URL`, `SUPABASE_ANON_KEY` | `api/` functions (same fallback) |
-| `YVP_APP_KEY` | YouVersion Platform key for licensed Bible text in Today's Word |
 | `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` | LiveKit project for live prayer walls (`api/prayer-token.ts`) |
 
 ## Database
@@ -32,18 +31,27 @@ Run these in the Supabase SQL Editor, in order (each is safe to re-run):
 2. `supabase/profile-upgrade.sql`: profile fields and the `avatars` bucket
 3. `supabase/posts.sql`: the Home feed
 4. `supabase/community.sql`: cell group chat (Realtime), prayer walls, the `media` bucket for event, bootcamp and cell covers
+5. `supabase/bible.sql`: Bible highlights and notes, daily-guide progress and journals, member-made Rev Academy courses (and it removes the old demo courses)
 
-## Rev Academy audio
+## The Bible
 
-Courses are audio, episode by episode. Each episode plays `public/audio/academy/<course-slug>/<n>.mp3`.
-The files there now are placeholder narration made with the Windows speech voice:
+Bible text, audio narration, study notes, commentaries, cross references and the verse of the day come from the
+[Free Use Bible API](https://bible.helloao.org) ([HelloAOLab/bible-api](https://github.com/HelloAOLab/bible-api)): free, no key,
+CORS-enabled. The default translation is the Berean Standard Bible (public domain).
 
-```bash
-node --experimental-strip-types scripts/build-academy-audio.mjs                   # regenerate all
-node --experimental-strip-types scripts/build-academy-audio.mjs --durations-only  # after swapping in real recordings
-```
+- **Reader** (`/bible`): ten free English translations, book and chapter picker, the words of Jesus in pink, footnotes,
+  chapter narration (BSB), highlights and verse notes saved to the member's account, Tyndale study notes, Matthew Henry and
+  Jamieson-Fausset-Brown commentary, and OpenBible.info cross references.
+- **Daily guide** (`/guide`): the whole Bible from January to December (Old Testament, New Testament, and Psalms with Proverbs),
+  the dataset's verse of the day, a Tyndale note before you read, reflection prompts, a private journal, a streak and a
+  year calendar.
 
-Listening progress is saved on the device; finished episodes light up pink on the course card.
+`scripts/build-bible-data.mjs` regenerates the book list the guide is built from.
+
+## Real data only
+
+The app ships no sample people, posts, events, cells or courses. Everything shown comes from members, apart from the Bible
+and the daily guide built from it.
 
 ## Icons
 

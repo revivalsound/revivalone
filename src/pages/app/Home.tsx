@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
-import { ArrowRight, ChevronRight, HandHeart, Heart, MapPin, PenNew, Sunrise, Video } from '../../components/ui/icons'
+import { ArrowRight, PenNew } from '../../components/ui/icons'
 import { Notice } from '../../components/ui/kit'
 import PostCard, { KIND_META, PostCardSkeleton } from '../../components/posts/PostCard'
 import PostComposer from '../../components/posts/PostComposer'
 import { useAuth } from '../../lib/AuthContext'
-import { EVENTS, PRAYERS, TODAYS_WORD } from '../../lib/content'
+import { ComingUpCard, PrayerWallsCard, TodaysReadingsCard, VerseOfTheDayCard } from '../../components/bible/TodayCards'
 import { fetchFeed, FeedNotReady, PAGE_SIZE, POST_KINDS, type Post, type PostKind } from '../../lib/posts'
 
 type Filter = PostKind | 'all'
@@ -81,7 +81,6 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const prayer = PRAYERS[2]
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
@@ -147,49 +146,10 @@ export default function Home() {
         </div>
 
         <aside className="space-y-4 lg:sticky lg:top-20 lg:h-fit">
-          <Link to={`/word/${TODAYS_WORD.slug}`} className="bolt-card bolt-card--hover bolt-card--inset group relative flex min-h-[220px] overflow-hidden rounded-[24px] border border-white/10">
-            <img src="/assets/revival-dawn.webp" alt="" className="absolute inset-0 h-full w-full object-cover object-[75%_50%] transition-transform duration-700 group-hover:scale-[1.04]" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/55 to-black/10" />
-            <div className="relative mt-auto p-6">
-              <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary"><Sunrise className="h-4 w-4" /> Today’s Word · {TODAYS_WORD.reference}</p>
-              <h2 className="mt-2 font-heading text-2xl font-semibold leading-tight">Strength for <span className="text-primary">the waiting.</span></h2>
-              <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-white/85">Read the chapter <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
-            </div>
-          </Link>
-
-          <div className="rounded-[24px] border border-white/[0.07] bg-surface-raised p-5">
-            <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground"><HandHeart className="h-4 w-4 text-primary" /> Pray with someone</p>
-            <p className="mt-3 font-heading text-[15px] font-semibold">{prayer.title}</p>
-            <p className="mt-1 text-xs leading-5 text-muted-foreground">{prayer.text}</p>
-            <div className="mt-4 flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-xs text-primary"><Heart className="h-3.5 w-3.5" /> {prayer.praying} praying</span>
-              <Link to="/community/prayer" className="inline-flex items-center gap-1 text-xs font-semibold text-foreground/85 hover:text-primary">Prayer wall <ChevronRight className="h-3.5 w-3.5" /></Link>
-            </div>
-          </div>
-
-          <div className="rounded-[24px] border border-white/[0.07] bg-surface p-5">
-            <div className="flex items-center justify-between">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Coming up</p>
-              <Link to="/events" className="text-xs font-semibold text-primary hover:text-primary/80">All events</Link>
-            </div>
-            <ul className="mt-3 space-y-3">
-              {EVENTS.slice(0, 3).map(event => {
-                const Place = event.online ? Video : MapPin
-                return (
-                  <li key={event.title} className="flex items-center gap-3">
-                    <span className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl bg-primary/10 font-heading text-primary">
-                      <span className="text-[9px] font-semibold uppercase">{event.date.split(' ')[0]}</span>
-                      <span className="text-sm font-semibold leading-none">{event.date.split(' ')[1]}</span>
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block truncate text-[13px] font-semibold">{event.title}</span>
-                      <span className="flex items-center gap-1 truncate text-[11px] text-muted-foreground"><Place className="h-3 w-3" /> {event.place}</span>
-                    </span>
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
+          <VerseOfTheDayCard />
+          <TodaysReadingsCard />
+          <PrayerWallsCard />
+          <ComingUpCard />
         </aside>
       </div>
 

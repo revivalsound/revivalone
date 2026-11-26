@@ -7,28 +7,11 @@ import { MediaCover } from '../../components/community/cards'
 import { useAuth } from '../../lib/AuthContext'
 import { supabase } from '../../lib/supabase'
 import {
-  fetchInitiative, fetchMembers, fetchMessages, formatTime, isMember, isUuid, joinCell, leaveCell, sendMessage, subscribeToCell,
+  fetchInitiative, fetchMembers, fetchMessages, formatTime, isMember, joinCell, leaveCell, sendMessage, subscribeToCell,
   type CellDetails, type ChatAuthor, type ChatMessage, type Initiative,
 } from '../../lib/community'
 
 type Member = ChatAuthor & { role: string }
-
-const GUEST = { id: 'sample-guest' }
-
-const SAMPLE_PEOPLE: ChatAuthor[] = [
-  { id: 'sample-ada', full_name: 'Ada Okafor', avatar_url: null },
-  { id: 'sample-daniel', full_name: 'Daniel Mensah', avatar_url: null },
-]
-
-function sampleMessages(cellId: string): ChatMessage[] {
-  const at = (minutes: number) => new Date(Date.now() - minutes * 60_000).toISOString()
-  return [
-    { id: 's1', cell_id: cellId, author_id: 'sample-ada', author: SAMPLE_PEOPLE[0], body: 'Good morning family! Reminder that we meet this Thursday. Bring a friend 🙌', created_at: at(1500) },
-    { id: 's2', cell_id: cellId, author_id: 'sample-daniel', author: SAMPLE_PEOPLE[1], body: 'Amen! I’ll bring the snacks this week.', created_at: at(1490) },
-    { id: 's3', cell_id: cellId, author_id: 'sample-daniel', author: SAMPLE_PEOPLE[1], body: 'Also, please keep my mum in prayer. She has a check-up on Friday.', created_at: at(1488) },
-    { id: 's4', cell_id: cellId, author_id: 'sample-ada', author: SAMPLE_PEOPLE[0], body: 'Praying with you, Daniel. We will lift her up together on Thursday.', created_at: at(40) },
-  ]
-}
 
 function dayLabel(iso: string) {
   const date = new Date(iso)
@@ -43,13 +26,7 @@ const clock = (iso: string) => new Intl.DateTimeFormat('en', { hour: 'numeric', 
 
 export default function CellChat() {
   const { id = '' } = useParams()
-  const auth = useAuth()
-  const sample = !isUuid(id)
-  // Sample cells (local development only) open as a guest so the chat can be previewed.
-  const user = auth.user ?? (sample ? GUEST : null)
-  const session = auth.session ?? (sample ? true : null)
-  const displayName = auth.user ? auth.displayName : 'Guest'
-  const avatarUrl = auth.user ? auth.avatarUrl : null
+  const { user, session, displayName, avatarUrl } = useAuth()
   const [cell, setCell] = useState<Initiative<'cell'> | null>(null)
   const [state, setState] = useState<'loading' | 'ready' | 'missing' | 'error'>('loading')
   const [role, setRole] = useState<string | null>(null)
@@ -80,12 +57,6 @@ export default function CellChat() {
   useEffect(() => {
     if (state !== 'ready' || !user) return
     let live = true
-    if (sample) {
-      setRole('member')
-      setMembers([...SAMPLE_PEOPLE, { id: user.id, full_name: displayName, avatar_url: avatarUrl }].map(person => ({ ...person, role: 'member' })))
-      setMessages(sampleMessages(id))
-      return
-    }
     isMember(id, user.id).then(found => live && setRole(found)).catch(caught => live && setError(caught.message))
     fetchMembers(id).then(list => {
       if (!live) return
@@ -93,10 +64,10 @@ export default function CellChat() {
       list.forEach(member => authors.current.set(member.id, member))
     }).catch(() => undefined)
     return () => { live = false }
-  }, [state, user, id, sample, displayName, avatarUrl])
+  }, [state, user, id])
 
   useEffect(() => {
-    if (sample || !role || !user) return
+    if (!role || !user) return
     let live = true
     fetchMessages(id).then(list => {
       if (!live) return
@@ -121,7 +92,7 @@ export default function CellChat() {
       })
     })
     return () => { live = false; void supabase.removeChannel(channel) }
-  }, [id, role, sample, user])
+  }, [id, role, user])
 
   // Stay pinned to the newest message.
   useEffect(() => {
@@ -133,7 +104,7 @@ export default function CellChat() {
     if (!user) return
     setBusy(true); setError('')
     try {
-      if (!sample) await joinCell(id, user.id)
+      await joinCell(id, user.id)
       setRole('member')
       setMembers(current => current.some(member => member.id === user.id) ? current : [...current, { id: user.id, full_name: displayName, avatar_url: avatarUrl, role: 'member' }])
     } catch (caught) {
@@ -147,7 +118,7 @@ export default function CellChat() {
     if (!user || role === 'leader') return
     setBusy(true)
     try {
-      if (!sample) await leaveCell(id, user.id)
+      await leaveCell(id, user.id)
       setRole(null); setMessages([])
       setMembers(current => current.filter(member => member.id !== user.id))
     } catch (caught) {
@@ -164,7 +135,6 @@ export default function CellChat() {
     setDraft('')
     const optimistic: ChatMessage = { id: `pending-${Date.now()}`, cell_id: id, author_id: user.id, body, created_at: new Date().toISOString(), author: { id: user.id, full_name: displayName, avatar_url: avatarUrl }, pending: true }
     setMessages(current => [...current, optimistic])
-    if (sample) { setMessages(current => current.map(message => message.id === optimistic.id ? { ...message, pending: false } : message)); return }
     try {
       const saved = await sendMessage(id, body)
       setMessages(current => {

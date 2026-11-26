@@ -15,6 +15,7 @@ export default {
       fontFamily: {
         sans: ["Montserrat", "system-ui", "sans-serif"],
         heading: ["Space Grotesk", "Montserrat", "sans-serif"],
+        scripture: ["Literata", "Georgia", "serif"],
       },
       backgroundImage: {
         'brand-gradient': 'linear-gradient(135deg, #ff5c8a 0%, #e11d5c 100%)',

@@ -13,10 +13,12 @@ const PROMPTS: Record<PostKind, { title: string; body: string }> = {
   opportunity: { title: 'Name the opportunity', body: 'Who is it for, what does it involve, where is it and how do people respond?' },
 }
 
-export default function PostComposer({ onClose, onPosted }: { onClose: () => void; onPosted: (post: Post) => void }) {
+export type ComposerDraft = { kind?: PostKind; title?: string; body?: string; scripture?: string; tags?: string }
+
+export default function PostComposer({ onClose, onPosted, initial }: { onClose: () => void; onPosted: (post: Post) => void; initial?: ComposerDraft }) {
   const { session } = useAuth()
   const dialog = useRef<HTMLDialogElement>(null)
-  const [kind, setKind] = useState<PostKind>('word')
+  const [kind, setKind] = useState<PostKind>(initial?.kind ?? 'word')
   const [opportunityType, setOpportunityType] = useState<OpportunityType>('job')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -108,11 +110,11 @@ export default function PostComposer({ onClose, onPosted }: { onClose: () => voi
             )}
 
             <div className="mt-5 space-y-4">
-              <label className="block text-xs font-medium text-foreground/90">Title<input required name="title" minLength={3} maxLength={140} placeholder={kind === 'question' ? 'Ask in one line' : 'Give it a title'} className={`${inputClass} mt-2 px-4`} /></label>
-              <label className="block text-xs font-medium text-foreground/90">{kind === 'question' ? 'Details' : 'Your post'}<textarea required name="body" minLength={10} maxLength={10000} rows={7} placeholder={prompt.body} className={`${inputClass} mt-2 h-auto px-4 py-3 leading-6`} /></label>
+              <label className="block text-xs font-medium text-foreground/90">Title<input required name="title" defaultValue={initial?.title} minLength={3} maxLength={140} placeholder={kind === 'question' ? 'Ask in one line' : 'Give it a title'} className={`${inputClass} mt-2 px-4`} /></label>
+              <label className="block text-xs font-medium text-foreground/90">{kind === 'question' ? 'Details' : 'Your post'}<textarea required name="body" defaultValue={initial?.body} minLength={10} maxLength={10000} rows={7} placeholder={prompt.body} className={`${inputClass} mt-2 h-auto px-4 py-3 leading-6`} /></label>
               <div className="grid gap-4 sm:grid-cols-2">
-                <label className="block text-xs font-medium text-foreground/90">Scripture <span className="text-muted-foreground">(optional)</span><input name="scripture" maxLength={80} placeholder="Isaiah 40:31" className={`${inputClass} mt-2 px-4`} /></label>
-                <label className="block text-xs font-medium text-foreground/90">Topics <span className="text-muted-foreground">(up to 5)</span><input name="tags" maxLength={120} placeholder="prayer, leadership" className={`${inputClass} mt-2 px-4`} /></label>
+                <label className="block text-xs font-medium text-foreground/90">Scripture <span className="text-muted-foreground">(optional)</span><input name="scripture" defaultValue={initial?.scripture} maxLength={80} placeholder="Isaiah 40:31" className={`${inputClass} mt-2 px-4`} /></label>
+                <label className="block text-xs font-medium text-foreground/90">Topics <span className="text-muted-foreground">(up to 5)</span><input name="tags" defaultValue={initial?.tags} maxLength={120} placeholder="prayer, leadership" className={`${inputClass} mt-2 px-4`} /></label>
               </div>
               {kind === 'opportunity' && (
                 <label className="block text-xs font-medium text-foreground/90">Link to apply or learn more <span className="text-muted-foreground">(optional)</span><input name="link_url" type="url" maxLength={500} placeholder="https://" className={`${inputClass} mt-2 px-4`} /></label>

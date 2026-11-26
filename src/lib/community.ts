@@ -1,6 +1,5 @@
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { supabase } from './supabase'
-import { CELLS, EVENTS } from './content'
 
 /* ── Initiatives: events, gospel bootcamps and revival cells ── */
 
@@ -24,8 +23,6 @@ export type Initiative<K extends InitiativeKind = InitiativeKind> = {
   media_type: '' | 'image' | 'video'
   details: K extends 'event' ? Partial<EventDetails> : K extends 'bootcamp' ? Partial<BootcampDetails> : Partial<CellDetails>
   created_at: string
-  /** Set on example listings that aren't stored in Supabase. */
-  example?: boolean
   member_count?: number
 }
 
@@ -46,83 +43,19 @@ export const isUuid = (id: string) => UUID.test(id)
 
 const INITIATIVE = 'id, owner_id, kind, title, description, city, starts_at, status, media_url, media_type, details, created_at'
 
-/* Example listings, shown alongside real ones so the screens aren't empty on day one. */
-
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-function exampleDate(label: string) {
-  const [month, day] = label.split(' ')
-  const now = new Date()
-  const date = new Date(now.getFullYear(), MONTHS.indexOf(month), Number(day))
-  if (date.getTime() < now.getTime() - 86_400_000) date.setFullYear(date.getFullYear() + 1)
-  const pad = (value: number) => String(value).padStart(2, '0')
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
-}
-
-export const EXAMPLE_EVENTS: Initiative<'event' | 'bootcamp'>[] = EVENTS.map((event, index) => ({
-  id: `example-event-${index}`,
-  owner_id: '',
-  kind: event.category === 'Gospel bootcamp' ? 'bootcamp' : 'event',
-  title: event.title,
-  description: `${event.category} with the Revival One community.`,
-  city: event.place.split(' · ').pop() ?? event.place,
-  starts_at: exampleDate(event.date),
-  status: 'published',
-  media_url: '',
-  media_type: '',
-  details: { category: event.category, format: event.online ? 'online' : 'in_person', venue: event.place.split(' · ')[0], start_time: event.time.replace(' WAT', '') } as Partial<EventDetails>,
-  created_at: '2026-01-01T00:00:00Z',
-  example: true,
-}))
-
-const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-
-// Only used in local development, before community.sql has been run, so the chat can be previewed.
-export const SAMPLE_CELLS: Initiative<'cell'>[] = CELLS.map((cell, index) => {
-  const [day, time] = cell.schedule.split(' · ')
-  return {
-    id: `sample-cell-${index}`,
-    owner_id: '',
-    kind: 'cell',
-    title: cell.name,
-    description: `A ${cell.focus.toLowerCase()} cell meeting in ${cell.city}. Come as you are.`,
-    city: cell.city,
-    starts_at: '2026-01-01',
-    status: 'published',
-    media_url: '',
-    media_type: '',
-    details: { focus: cell.focus, area: cell.name.replace(/ (Cell|Fellowship|Revival Cell)$/, ''), format: 'in_person', meeting_day: DAYS.find(name => day.startsWith(name.slice(0, 3))) ?? day, start_time: time },
-    created_at: '2026-01-01T00:00:00Z',
-    example: true,
-    member_count: cell.members,
-  }
-})
-
-async function devFallback<T>(load: () => Promise<T>, fallback: () => T): Promise<T> {
-  try {
-    return await load()
-  } catch (error) {
-    if (import.meta.env.DEV && error instanceof CommunityNotReady) return fallback()
-    throw error
-  }
-}
-
-export function fetchCells() {
-  return devFallback(async () => {
+export async function fetchCells() {
     const { data, error } = await supabase.from('initiatives').select(`${INITIATIVE}, community_memberships(count)`).eq('kind', 'cell').eq('status', 'published').order('created_at', { ascending: false })
     if (error) fail(error)
     return (data ?? []).map(({ community_memberships, ...cell }: any) => ({ ...cell, member_count: community_memberships?.[0]?.count ?? 0 })) as Initiative<'cell'>[]
-  }, () => SAMPLE_CELLS)
 }
 
-export function fetchInitiative(id: string) {
-  if (!isUuid(id)) return Promise.resolve(import.meta.env.DEV ? SAMPLE_CELLS.find(cell => cell.id === id) ?? null : null)
-  return devFallback(async () => {
+export async function fetchInitiative(id: string) {
+  if (!isUuid(id)) return null
     const { data, error } = await supabase.from('initiatives').select(`${INITIATIVE}, community_memberships(count)`).eq('id', id).maybeSingle()
     if (error) fail(error)
     if (!data) return null
     const { community_memberships, ...rest } = data as any
     return { ...rest, member_count: community_memberships?.[0]?.count ?? 0 } as Initiative
-  }, () => null)
 }
 
 /** Upcoming published events and bootcamps, soonest first. */

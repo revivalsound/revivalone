@@ -87,7 +87,7 @@ export function EventCard({ initiative, going, onToggleGoing }: { initiative: In
           <p className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5 text-primary/80" /> {formatDay(initiative.starts_at)}{details.start_time ? ` · ${formatTime(details.start_time)}` : ''}{isBootcamp && details.weeks ? ` · ${details.weeks} week${details.weeks > 1 ? 's' : ''}` : ''}</p>
         </div>
         <div className="mt-auto flex items-center justify-between gap-3 pt-5">
-          <span className="text-[11px] text-muted-foreground">{initiative.example ? 'Example listing' : details.capacity ? `${details.capacity} places` : 'Open to all'}</span>
+          <span className="text-[11px] text-muted-foreground">{details.capacity ? `${details.capacity} places` : 'Open to all'}</span>
           <button type="button" onClick={onToggleGoing} aria-pressed={going} className={`inline-flex h-10 items-center gap-1.5 rounded-full px-5 text-xs font-semibold transition-all active:scale-[0.97] ${going ? 'bg-primary text-primary-foreground' : 'border border-white/[0.1] bg-surface-raised hover:bg-white/[0.07]'}`}>
             {going ? <><Check className="h-3.5 w-3.5" strokeWidth={2.4} /> Going</> : 'I’ll be there'}
           </button>

@@ -1,67 +1,122 @@
 import { useCallback, useEffect, useState } from 'react'
-import { EPISODE_SECONDS } from './academy-audio.generated'
-import { COURSES, type Course } from './content'
+import { supabase } from './supabase'
 
-/** Listening progress per course, kept on this device. */
-export type CourseProgress = { done: number[]; current: number; position: number }
+/* Rev Academy: audio courses made by members, delivered episode by episode. */
 
-const KEY = 'revival.academy'
-const EVENT = 'revival:academy'
-
-function readAll(): Record<string, CourseProgress> {
-  try { return JSON.parse(window.localStorage.getItem(KEY) || '{}') } catch { return {} }
+export type Episode = { id: string; number: number; title: string; summary: string; audio_url: string; duration_seconds: number }
+export type Course = {
+  id: string; slug: string; title: string; category: string; description: string; teacher: string; cover_url: string
+  owner_id: string | null; published: boolean; created_at: string; episodes: Episode[]
 }
 
-function writeAll(value: Record<string, CourseProgress>) {
-  try { window.localStorage.setItem(KEY, JSON.stringify(value)) } catch { /* storage unavailable */ }
+export const COURSE_CATEGORIES = ['Spiritual formation', 'Bible', 'Prayer', 'Leadership', 'Evangelism', 'Kingdom business', 'Worship', 'Family']
+
+/** Thrown when supabase/bible.sql hasn't been run yet. */
+export class AcademyNotReady extends Error {
+  constructor() { super('Rev Academy isn’t switched on yet. Run supabase/bible.sql in Supabase to turn it on.') }
+}
+
+function fail(error: { code?: string; message: string }): never {
+  if (['PGRST205', '42P01', '42703', 'PGRST204', 'PGRST200'].includes(error.code ?? '')) throw new AcademyNotReady()
+  throw new Error(error.message)
+}
+
+const COURSE = 'id, slug, title, category, description, teacher, cover_url, owner_id, published, created_at, episodes:academy_episodes(id, number, title, summary, audio_url, duration_seconds)'
+
+const sortEpisodes = (course: Course) => ({ ...course, episodes: [...(course.episodes ?? [])].sort((a, b) => a.number - b.number) })
+
+export async function fetchCourses() {
+  const { data, error } = await supabase.from('academy_courses').select(COURSE).eq('published', true).order('created_at', { ascending: false })
+  if (error) fail(error)
+  return ((data ?? []) as unknown as Course[]).map(sortEpisodes).filter(course => course.episodes.length > 0)
+}
+
+export async function fetchCourse(slug: string) {
+  const { data, error } = await supabase.from('academy_courses').select(COURSE).eq('slug', slug).maybeSingle()
+  if (error) fail(error)
+  return data ? sortEpisodes(data as unknown as Course) : null
+}
+
+export async function createCourse(input: { owner_id: string; title: string; category: string; description: string; teacher: string; cover_url: string }, episodes: Omit<Episode, 'id'>[]) {
+  const slug = `${input.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60)}-${Math.random().toString(36).slice(2, 7)}`
+  const { data, error } = await supabase.from('academy_courses')
+    .insert({ ...input, slug, lesson_count: episodes.length, published: false })
+    .select('id, slug').single()
+  if (error) fail(error)
+  const { error: episodeError } = await supabase.from('academy_episodes').insert(episodes.map(episode => ({ ...episode, course_id: data.id })))
+  if (episodeError) {
+    await supabase.from('academy_courses').delete().eq('id', data.id)
+    fail(episodeError)
+  }
+  // Publish only once every episode is in place.
+  const { error: publishError } = await supabase.from('academy_courses').update({ published: true }).eq('id', data.id)
+  if (publishError) fail(publishError)
+  return data.slug as string
+}
+
+/** Reads an audio file's length in the browser before it uploads. */
+export function audioDuration(file: File) {
+  return new Promise<number>(resolve => {
+    const url = URL.createObjectURL(file)
+    const element = new Audio()
+    element.preload = 'metadata'
+    element.onloadedmetadata = () => { resolve(Number.isFinite(element.duration) ? Math.round(element.duration) : 0); URL.revokeObjectURL(url) }
+    element.onerror = () => { resolve(0); URL.revokeObjectURL(url) }
+    element.src = url
+  })
+}
+
+/* ── Listening progress, saved to your account ── */
+
+export type CourseProgress = { done: number[]; current: number; position: number }
+const EMPTY: CourseProgress = { done: [], current: 1, position: 0 }
+const EVENT = 'revival:academy'
+const memory = new Map<string, CourseProgress>()
+
+export async function fetchProgress(userId: string) {
+  const { data, error } = await supabase.from('academy_progress').select('course_id, done, current, position').eq('user_id', userId)
+  if (error) fail(error)
+  for (const row of data ?? []) memory.set(row.course_id, { done: row.done ?? [], current: row.current ?? 1, position: row.position ?? 0 })
   window.dispatchEvent(new Event(EVENT))
 }
 
-const EMPTY: CourseProgress = { done: [], current: 1, position: 0 }
+let pending: number | undefined
 
-export function readProgress(slug: string): CourseProgress {
-  return { ...EMPTY, ...readAll()[slug] }
+export function saveProgress(userId: string | undefined, courseId: string, update: (current: CourseProgress) => CourseProgress, { immediate = false } = {}) {
+  const next = update(memory.get(courseId) ?? EMPTY)
+  memory.set(courseId, next)
+  window.dispatchEvent(new Event(EVENT))
+  if (!userId) return
+  const write = () => supabase.from('academy_progress').upsert({ user_id: userId, course_id: courseId, ...next, updated_at: new Date().toISOString() }).then(() => undefined)
+  // Position updates while listening are batched; finished episodes save straight away.
+  window.clearTimeout(pending)
+  if (immediate) void write()
+  else pending = window.setTimeout(() => void write(), 4000)
 }
 
-export function saveProgress(slug: string, update: (current: CourseProgress) => CourseProgress) {
-  const all = readAll()
-  all[slug] = update({ ...EMPTY, ...all[slug] })
-  writeAll(all)
-}
-
-/** Live progress for one course, updated across tabs and components. */
-export function useCourseProgress(slug: string) {
-  const [progress, setProgress] = useState(() => readProgress(slug))
+/** Live progress for one course, shared by every component that shows it. */
+export function useCourseProgress(courseId: string | undefined, userId: string | undefined) {
+  const read = useCallback(() => (courseId ? memory.get(courseId) ?? EMPTY : EMPTY), [courseId])
+  const [progress, setProgress] = useState(read)
   useEffect(() => {
-    const sync = () => setProgress(readProgress(slug))
+    const sync = () => setProgress(read())
     sync()
     window.addEventListener(EVENT, sync)
-    window.addEventListener('storage', sync)
-    return () => { window.removeEventListener(EVENT, sync); window.removeEventListener('storage', sync) }
-  }, [slug])
-
-  const markDone = useCallback((episode: number) => saveProgress(slug, current => ({
-    ...current,
-    done: current.done.includes(episode) ? current.done : [...current.done, episode].sort((a, b) => a - b),
-    position: 0,
-  })), [slug])
-
+    return () => window.removeEventListener(EVENT, sync)
+  }, [read])
+  const markDone = useCallback((episode: number) => {
+    if (!courseId) return
+    saveProgress(userId, courseId, current => ({ ...current, position: 0, done: current.done.includes(episode) ? current.done : [...current.done, episode].sort((a, b) => a - b) }), { immediate: true })
+  }, [courseId, userId])
   return { progress, markDone }
 }
 
-export function courseBySlug(slug: string): Course | undefined {
-  return COURSES.find(course => course.slug === slug)
-}
-
-export const audioFor = (slug: string, episode: number) => `/audio/academy/${slug}/${episode}.mp3`
-export const episodeSeconds = (slug: string, episode: number) => EPISODE_SECONDS[slug]?.[episode - 1] ?? 0
-export const courseSeconds = (slug: string) => (EPISODE_SECONDS[slug] ?? []).reduce((sum, value) => sum + value, 0)
-
 /** The first episode not yet finished, or the last one if all are done. */
-export function nextEpisode(course: Course, progress: CourseProgress) {
-  for (let episode = 1; episode <= course.episodes.length; episode += 1) if (!progress.done.includes(episode)) return episode
-  return course.episodes.length
+export function nextEpisode(course: Pick<Course, 'episodes'>, progress: CourseProgress) {
+  return course.episodes.find(episode => !progress.done.includes(episode.number))?.number ?? course.episodes.at(-1)?.number ?? 1
 }
+
+export const courseSeconds = (course: Pick<Course, 'episodes'>) => course.episodes.reduce((sum, episode) => sum + (episode.duration_seconds || 0), 0)
 
 export function clock(total: number) {
   const value = Math.max(0, Math.floor(total))
@@ -69,6 +124,7 @@ export function clock(total: number) {
 }
 
 export function runtime(total: number) {
+  if (!total) return 'Audio'
   if (total < 60) return `${total} sec`
   const minutes = Math.round(total / 60)
   return minutes < 60 ? `${minutes} min` : `${Math.floor(minutes / 60)} hr ${minutes % 60} min`

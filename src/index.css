@@ -446,6 +446,10 @@
 .episode-seek::-webkit-slider-thumb { -webkit-appearance: none; height: 14px; width: 14px; border-radius: 9999px; background: #fff; box-shadow: 0 0 0 4px rgba(255, 92, 138, 0.35); }
 .episode-seek::-moz-range-thumb { height: 14px; width: 14px; border: 0; border-radius: 9999px; background: #fff; box-shadow: 0 0 0 4px rgba(255, 92, 138, 0.35); }
 
+/* Bible reader: a verse opened from a link glows for a moment. */
+.verse-flash { animation: verse-flash 2.2s ease-out; }
+@keyframes verse-flash { 0%, 30% { background-color: rgba(255, 92, 138, 0.3); box-shadow: 0 0 0 3px rgba(255, 92, 138, 0.3); } 100% { background-color: transparent; box-shadow: none; } }
+
 /* Solar line-duotone icons: never shrink in flex rows; 2.2+ stroke is heavier. */
 .solar-icon { flex-shrink: 0; }
 .solar-icon--bold [stroke-width="1.5"] { stroke-width: 2; }
@@ -461,7 +465,7 @@ dialog.revival-dialog::backdrop { background: rgb(0 0 0 / 0.7); -webkit-backdrop
 @media (prefers-reduced-motion: reduce) {
   .revival-splash, .revival-splash *, .flame-chrome,
   .hero-field-canvas, .landing-enter, .page-enter, .hero-strike,
-  .animate-marquee, .partners-marquee__track, .dialog-in, .equalizer-bar { animation: none !important; }
+  .animate-marquee, .partners-marquee__track, .dialog-in, .equalizer-bar, .verse-flash { animation: none !important; }
   .bloom-texture, .bloom-texture::before, .bloom-texture::after { transition: none; }
   .bolt-card--on::before, .bolt-card--on::after,
   .bolt-card--hover:is(:hover, :focus-within)::before, .bolt-card--hover:is(:hover, :focus-within)::after,

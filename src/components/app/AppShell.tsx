@@ -21,7 +21,6 @@ import AmbientField from '../AmbientField'
 import BrandMark from '../brand/BrandMark'
 import PostComposer from '../posts/PostComposer'
 import { useAuth } from '../../lib/AuthContext'
-import { TODAYS_WORD } from '../../lib/content'
 
 /* ── Create flow, shared by every screen ── */
 
@@ -30,6 +29,7 @@ const CREATION_TYPES = [
   { kind: 'event', title: 'Event', copy: 'A worship night, outreach or conference.', icon: CalendarDays },
   { kind: 'bootcamp', title: 'Gospel bootcamp', copy: 'An intensive track for evangelism, prayer or leadership.', icon: Fire },
   { kind: 'cell', title: 'Revival cell', copy: 'A local group that meets, grows and serves together.', icon: Users },
+  { kind: 'course', title: 'Rev Academy course', copy: 'Teach an audio course, episode by episode.', icon: GraduationCap },
 ] as const
 
 export type CreationKind = typeof CREATION_TYPES[number]['kind']
@@ -69,15 +69,19 @@ type NavItem = { to: string; label: string; icon: ElementType }
 
 const NAV: NavItem[] = [
   { to: '/home', label: 'Home', icon: Home },
+  { to: '/bible', label: 'Bible', icon: Bible },
   { to: '/community', label: 'Community', icon: Users },
   { to: '/events', label: 'Events', icon: CalendarDays },
   { to: '/academy', label: 'Academy', icon: GraduationCap },
 ]
 
 const SECONDARY: NavItem[] = [
-  { to: `/word/${TODAYS_WORD.slug}`, label: 'Today’s Word', icon: Bible },
+  { to: '/guide', label: 'Daily guide', icon: Sunrise },
   { to: '/community/prayer', label: 'Prayer wall', icon: HandHeart },
 ]
+
+// Phones: four tabs around the create button.
+const MOBILE: NavItem[] = [NAV[0], NAV[1], NAV[2], NAV[4]]
 
 function SideLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
   const { pathname } = useLocation()
@@ -110,7 +114,7 @@ function Avatar({ size = 'h-8 w-8' }: { size?: string }) {
   )
 }
 
-const SECTION_TITLES: Record<string, string> = { '/home': 'Home', '/community/cells': 'Revival cells', '/community/prayer': 'Prayer wall', '/events': 'Events', '/academy': 'Academy', '/profile': 'Profile' }
+const SECTION_TITLES: Record<string, string> = { '/home': 'Home', '/guide': 'Daily guide', '/community/cells': 'Revival cells', '/community/prayer': 'Prayer wall', '/events': 'Events', '/academy': 'Academy', '/profile': 'Profile' }
 
 export default function AppShell() {
   const { pathname } = useLocation()
@@ -125,7 +129,7 @@ export default function AppShell() {
   useEffect(() => { try { window.localStorage.setItem('revival.rail', collapsed ? '1' : '0') } catch { /* storage unavailable */ } }, [collapsed])
 
   const section = SECTION_TITLES[pathname]
-    ?? (pathname.startsWith('/word') ? 'Today’s Word' : pathname.startsWith('/post') ? 'Post' : pathname.startsWith('/u/') ? 'Member'
+    ?? (pathname.startsWith('/bible') ? 'Bible' : pathname.startsWith('/guide') ? 'Daily guide' : pathname.startsWith('/post') ? 'Post' : pathname.startsWith('/u/') ? 'Member'
       : pathname.startsWith('/community/cells/') ? 'Cell chat' : pathname.startsWith('/prayer/') ? 'Prayer wall' : pathname.startsWith('/create/') ? 'Create'
       : pathname.startsWith('/academy/') ? 'Course' : 'Revival One')
   const openCreate = (kind?: CreationKind) => {
@@ -183,7 +187,7 @@ export default function AppShell() {
               <span className="hidden truncate font-semibold lg:inline">{section}</span>
             </div>
             <div className="flex items-center gap-2">
-              <Link to={`/word/${TODAYS_WORD.slug}`} className="hidden h-8 items-center gap-1.5 rounded-full border border-white/[0.09] bg-white/[0.03] px-3 text-[12px] font-medium text-foreground/85 transition-colors hover:bg-white/[0.07] sm:inline-flex"><Sunrise className="h-3.5 w-3.5 text-primary" /> Today’s Word</Link>
+              <Link to="/guide" className="inline-flex h-8 items-center gap-1.5 rounded-full border border-white/[0.09] bg-white/[0.03] px-3 text-[12px] font-medium text-foreground/85 transition-colors hover:bg-white/[0.07]"><Sunrise className="h-3.5 w-3.5 text-primary" /> <span className="hidden sm:inline">Today’s guide</span></Link>
               {user
                 ? <Link to="/profile" aria-label="Open your profile"><Avatar /></Link>
                 : <button type="button" onClick={() => navigate('/auth')} className="inline-flex h-8 items-center rounded-full bg-primary px-3.5 font-heading text-[10px] font-semibold uppercase tracking-[0.14em] text-primary-foreground">Sign in</button>}
@@ -198,11 +202,11 @@ export default function AppShell() {
         {/* Phone navigation with the create button in the middle */}
         <nav aria-label="App" className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-white/[0.07] bg-[#0a0607]/90 px-2 pt-2 backdrop-blur-xl lg:hidden">
           <div className="mx-auto grid max-w-md grid-cols-5 items-end">
-            {NAV.slice(0, 2).map(item => <MobileLink key={item.to} item={item} />)}
+            {MOBILE.slice(0, 2).map(item => <MobileLink key={item.to} item={item} />)}
             <div className="flex justify-center">
               <button type="button" onClick={() => openCreate()} aria-label="Create" className="-mt-6 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_12px_30px_rgba(255,92,138,0.4)] ring-4 ring-background transition-transform active:scale-95"><Plus className="h-6 w-6" strokeWidth={2.4} /></button>
             </div>
-            {NAV.slice(2).map(item => <MobileLink key={item.to} item={item} />)}
+            {MOBILE.slice(2).map(item => <MobileLink key={item.to} item={item} />)}
           </div>
         </nav>
 
