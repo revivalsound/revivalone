@@ -3,7 +3,7 @@
 // cached shell when offline); built assets and icons are cache-first; the
 // Bible API is stale-while-revalidate so chapters you've read open offline.
 // API calls and Supabase (accounts, posts, chat) always go to the network.
-const VERSION = 'revival-v1'
+const VERSION = 'revival-v2'
 const SHELL = ['/', '/home', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png', '/assets/revival-flame-mark.png']
 
 self.addEventListener('install', event => {
@@ -52,4 +52,15 @@ self.addEventListener('fetch', event => {
       return response
     })))
   }
+})
+
+// Tapping a device notification opens (or focuses) the app at its link.
+self.addEventListener('notificationclick', event => {
+  event.notification.close()
+  const link = event.notification.data?.link || '/notifications'
+  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windows => {
+    const open = windows.find(client => new URL(client.url).origin === self.location.origin)
+    if (open) { open.focus(); return open.navigate(link) }
+    return self.clients.openWindow(link)
+  }))
 })

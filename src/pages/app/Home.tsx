@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowRight, PenNew } from '../../components/ui/icons'
+import { ArrowRight, PenNew, UserCheck } from '../../components/ui/icons'
 import { Notice } from '../../components/ui/kit'
 import PostCard, { KIND_META, PostCardSkeleton } from '../../components/posts/PostCard'
 import { useAuth } from '../../lib/AuthContext'
 import { ComingUpCard, PrayerWallsCard, TodaysReadingsCard, VerseOfTheDayCard } from '../../components/bible/TodayCards'
+import { fetchFollowingIds } from '../../lib/social'
 import { fetchFeed, FeedNotReady, PAGE_SIZE, POST_KINDS, type Post, type PostKind } from '../../lib/posts'
 
-type Filter = PostKind | 'all'
+type Filter = PostKind | 'all' | 'following'
 
 function greeting() {
   const hour = new Date().getHours()
@@ -50,7 +51,14 @@ export default function Home() {
     setLoading(true)
     setError('')
     try {
-      const batch = await fetchFeed(kind, nextPage)
+      let batch: Post[] = []
+      if (kind === 'following') {
+        // Posts from people you follow.
+        const ids = user ? await fetchFollowingIds(user.id).catch(() => []) : []
+        batch = ids.length ? await fetchFeed('all', nextPage, ids) : []
+      } else {
+        batch = await fetchFeed(kind, nextPage)
+      }
       setPosts(current => nextPage === 0 ? batch : [...current, ...batch.filter(post => !current.some(existing => existing.id === post.id))])
       setHasMore(batch.length === PAGE_SIZE)
       setPage(nextPage)
@@ -62,7 +70,7 @@ export default function Home() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [user])
 
   useEffect(() => { void load(filter, 0) }, [filter, load])
 
@@ -98,9 +106,9 @@ export default function Home() {
 
           <div className="sticky top-14 z-10 -mx-4 mt-6 overflow-x-auto bg-background px-4 py-3 [scrollbar-width:none] sm:mx-0 sm:rounded-full sm:px-0" role="tablist" aria-label="Filter posts">
             <div className="flex w-max gap-1.5">
-              {(['all', ...POST_KINDS] as Filter[]).map(option => {
+              {(['all', ...(user ? ['following'] : []), ...POST_KINDS] as Filter[]).map(option => {
                 const active = option === filter
-                const meta = option === 'all' ? null : KIND_META[option]
+                const meta = option === 'all' || option === 'following' ? null : KIND_META[option]
                 return (
                   <button
                     key={option}
@@ -111,7 +119,8 @@ export default function Home() {
                     className={`inline-flex h-9 items-center gap-1.5 rounded-full border px-4 text-[13px] font-medium transition-colors ${active ? 'border-primary/40 bg-primary/[0.12] text-foreground' : 'border-white/[0.08] bg-surface text-muted-foreground hover:text-foreground'}`}
                   >
                     {meta && <meta.icon className="h-4 w-4" style={{ color: meta.accent }} />}
-                    {meta ? meta.plural : 'All posts'}
+                    {option === 'following' && <UserCheck className="h-4 w-4 text-primary" />}
+                    {meta ? meta.plural : option === 'following' ? 'Following' : 'All posts'}
                   </button>
                 )
               })}
@@ -130,7 +139,7 @@ export default function Home() {
             {!loading && !error && posts.length === 0 && (
               <div className="rounded-[26px] border border-dashed border-white/[0.1] bg-surface/60 px-6 py-14 text-center">
                 <span className="brand-ring brand-ring--on mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-surface"><img src="/assets/revival-flame-mark.png" alt="" className="h-7 w-7 object-contain" /></span>
-                <h2 className="mt-5 font-heading text-xl font-semibold">{filter === 'all' ? 'Be the first to post' : `No ${KIND_META[filter].plural.toLowerCase()} yet`}</h2>
+                <h2 className="mt-5 font-heading text-xl font-semibold">{filter === 'all' ? 'Be the first to post' : filter === 'following' ? 'Follow people to fill this feed' : `No ${KIND_META[filter].plural.toLowerCase()} yet`}</h2>
                 <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">Share what God is saying, what you are studying, a question, or an opportunity for someone in the Kingdom.</p>
                 <button type="button" onClick={compose} className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-primary px-5 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground">Write a post <ArrowRight className="h-4 w-4" /></button>
               </div>

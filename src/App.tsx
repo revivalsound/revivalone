@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect, useState, type ReactNode } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { AuthProvider, useAuth } from './lib/AuthContext'
 import { ThemeProvider } from './lib/theme'
+import { NotificationsProvider } from './lib/notifications'
 import Landing from './pages/Landing'
 import RevivalSplash from './components/RevivalSplash'
 import InstallPrompt from './components/InstallPrompt'
@@ -21,6 +22,7 @@ const BibleHome = lazy(() => import('./pages/app/BibleReader').then(module => ({
 const DailyGuide = lazy(() => import('./pages/app/DailyGuide'))
 const CreateCourse = lazy(() => import('./pages/app/CreateCourse'))
 const CreatePost = lazy(() => import('./pages/app/CreatePost'))
+const Notifications = lazy(() => import('./pages/app/Notifications'))
 const Profile = lazy(() => import('./pages/app/Profile'))
 const PostPage = lazy(() => import('./pages/app/PostPage'))
 const PublicProfile = lazy(() => import('./pages/app/PublicProfile'))
@@ -84,6 +86,7 @@ export default function App() {
     <ThemeProvider>
     <AuthProvider>
       <BrowserRouter>
+      <NotificationsProvider>
         <ScrollToTop />
         <Splash />
         <InstallPrompt />
@@ -117,11 +120,13 @@ export default function App() {
               <Route path="/post/:id" element={<PostPage />} />
               <Route path="/u/:id" element={<PublicProfile />} />
               <Route path="/profile" element={<RequireAuth><PublicProfile self /></RequireAuth>} />
+              <Route path="/notifications" element={<RequireAuth><Notifications /></RequireAuth>} />
               <Route path="/profile/edit" element={<RequireAuth><Profile /></RequireAuth>} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
+      </NotificationsProvider>
       </BrowserRouter>
     </AuthProvider>
     </ThemeProvider>

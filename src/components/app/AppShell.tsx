@@ -10,6 +10,7 @@ import {
   Home,
   LogOut,
   Moon,
+  BellBing,
   PanelLeft,
   PenNew,
   Plus,
@@ -24,6 +25,7 @@ import PhotoImg from '../ui/PhotoImg'
 import BrandMark from '../brand/BrandMark'
 import { useAuth } from '../../lib/AuthContext'
 import { useTheme } from '../../lib/theme'
+import { useNotifications } from '../../lib/notifications'
 
 /* ── Create flow, shared by every screen ── */
 
@@ -117,7 +119,7 @@ function Avatar({ size = 'h-8 w-8' }: { size?: string }) {
   )
 }
 
-const SECTION_TITLES: Record<string, string> = { '/home': 'Home', '/guide': 'Daily guide', '/community/cells': 'Revival cells', '/community/prayer': 'Prayer wall', '/events': 'Events', '/academy': 'Academy', '/profile': 'Profile' }
+const SECTION_TITLES: Record<string, string> = { '/home': 'Home', '/notifications': 'Notifications', '/guide': 'Daily guide', '/community/cells': 'Revival cells', '/community/prayer': 'Prayer wall', '/events': 'Events', '/academy': 'Academy', '/profile': 'Profile' }
 
 export default function AppShell() {
   const { pathname } = useLocation()
@@ -189,6 +191,7 @@ export default function AppShell() {
             </div>
             <div className="flex items-center gap-2">
               <ThemeToggle />
+              {user && <BellButton />}
               <Link to="/guide" className="inline-flex h-8 items-center gap-1.5 rounded-full border border-white/[0.09] bg-white/[0.03] px-3 text-[12px] font-medium text-foreground/85 transition-colors hover:bg-white/[0.07]"><Sunrise className="h-3.5 w-3.5 text-primary" /> <span className="hidden sm:inline">Today’s guide</span></Link>
               {user
                 ? <Link to="/profile" aria-label="Open your profile"><Avatar /></Link>
@@ -266,5 +269,22 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
       <Sun className={`absolute h-4 w-4 text-primary transition-all duration-300 ${light ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-50 opacity-0'}`} />
       <Moon className={`absolute h-4 w-4 text-primary transition-all duration-300 ${light ? 'rotate-90 scale-50 opacity-0' : 'rotate-0 scale-100 opacity-100'}`} />
     </button>
+  )
+}
+
+/** The bell in the top bar: a live unread badge, and a little ring when something new arrives. */
+function BellButton() {
+  const { unread } = useNotifications()
+  const [ring, setRing] = useState(false)
+  const previous = useRef(unread)
+  useEffect(() => {
+    if (unread > previous.current) { setRing(true); const timer = window.setTimeout(() => setRing(false), 950); previous.current = unread; return () => window.clearTimeout(timer) }
+    previous.current = unread
+  }, [unread])
+  return (
+    <Link to="/notifications" aria-label={unread ? `Notifications, ${unread} unread` : 'Notifications'} className="relative flex h-8 w-8 items-center justify-center rounded-full border border-white/[0.09] bg-white/[0.03] text-foreground/85 transition-colors hover:bg-white/[0.07]">
+      <BellBing className={`h-4 w-4 text-primary ${ring ? 'bell-ring' : ''}`} />
+      {unread > 0 && <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-primary px-1 font-heading text-[10px] font-bold text-primary-foreground ring-2 ring-shell">{unread > 99 ? '99+' : unread}</span>}
+    </Link>
   )
 }

@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, Bible, Check, Clock, Copy, ExternalLink, Loader,
 import { Deck, Notice } from '../../components/ui/kit'
 import PostCard, { AuthorAvatar, KIND_META, KindChip, PostCardSkeleton } from '../../components/posts/PostCard'
 import { useAuth } from '../../lib/AuthContext'
+import FollowButton from '../../components/social/FollowButton'
 import { sanitizePostHtml } from '../../lib/richText'
 import { deletePost, fetchAuthorPosts, fetchPost, fetchSimilar, readingMinutes, type Post, type PostMedia } from '../../lib/posts'
 
@@ -146,6 +147,7 @@ export default function PostPage() {
             </span>
             <span className="hidden items-center gap-1 text-[13px] font-semibold text-primary sm:inline-flex">View profile <ArrowRight className="h-4 w-4" /></span>
           </Link>
+          {!mine && <div className="mt-3 flex justify-end"><FollowButton userId={post.author_id} /></div>}
         </div>
       </article>
 

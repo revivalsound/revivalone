@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, CalendarDays, Chat, Check, Copy, Globe, MapPin, Pen, Play, Settings, Users } from '../../components/ui/icons'
 import PostCard, { AuthorAvatar, KIND_META, PostCardSkeleton } from '../../components/posts/PostCard'
+import FollowButton from '../../components/social/FollowButton'
+import PeopleSheet from '../../components/social/PeopleSheet'
+import { followCounts } from '../../lib/social'
 import { useAuth } from '../../lib/AuthContext'
 import { fetchAuthorPosts, POST_KINDS, type Post, type PostKind } from '../../lib/posts'
 import { fetchMemberCells, fetchMemberProfile, fetchProfileStats, type MemberCell, type MemberProfile, type ProfileStats } from '../../lib/profiles'
@@ -24,6 +27,8 @@ export default function ProfilePage({ self = false }: { self?: boolean }) {
   const [posts, setPosts] = useState<Post[] | null>(null)
   const [cells, setCells] = useState<MemberCell[] | null>(null)
   const [stats, setStats] = useState<ProfileStats | null>(null)
+  const [counts, setCounts] = useState<{ followers: number | null; following: number | null } | null>(null)
+  const [people, setPeople] = useState<'followers' | 'following' | null>(null)
   const [tab, setTab] = useState<Tab>('posts')
   const [filter, setFilter] = useState<PostKind | 'all'>('all')
   const [copied, setCopied] = useState(false)
@@ -38,6 +43,8 @@ export default function ProfilePage({ self = false }: { self?: boolean }) {
     fetchAuthorPosts(id, { limit: 60 }).then(list => live && setPosts(list)).catch(() => live && setPosts([]))
     fetchMemberCells(id).then(list => live && setCells(list))
     fetchProfileStats(id).then(value => live && setStats(value))
+    setCounts(null); setPeople(null)
+    followCounts(id).then(value => live && setCounts(value)).catch(() => undefined)
     return () => { live = false }
   }, [id])
 
@@ -109,7 +116,7 @@ export default function ProfilePage({ self = false }: { self?: boolean }) {
           <div className="flex items-center gap-2 pb-1">
             {mine ? (
               <Link to="/profile/edit" className="inline-flex h-11 items-center gap-2 rounded-full bg-primary px-5 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground shadow-[0_12px_30px_rgba(255,92,138,0.28)] transition-transform hover:-translate-y-0.5"><Pen className="h-4 w-4" /> Edit profile</Link>
-            ) : null}
+            ) : <FollowButton userId={profile.id} onChange={following => setCounts(current => current && current.followers !== null ? { ...current, followers: current.followers + (following ? 1 : -1) } : current)} />}
             <button type="button" onClick={share} aria-label="Share profile" className="inline-flex h-11 items-center gap-2 rounded-full border border-white/[0.12] bg-surface px-4 text-[13px] font-semibold transition-colors hover:bg-surface-raised">
               {copied ? <><Check className="h-4 w-4 text-primary" /> Copied</> : <><Copy className="h-4 w-4 text-primary" /> <span className="hidden sm:inline">Share</span></>}
             </button>
@@ -135,14 +142,26 @@ export default function ProfilePage({ self = false }: { self?: boolean }) {
         )}
 
         {/* Stats */}
-        <dl className="mt-6 grid grid-cols-3 divide-x divide-white/[0.08] rounded-[22px] border border-white/[0.07] bg-surface py-4 sm:max-w-md">
-          {([['Posts', stats?.posts], ['Cells', stats?.cells], ['Prayer walls', stats?.walls]] as const).map(([label, value]) => (
-            <div key={label} className="text-center">
-              <dt className="sr-only">{label}</dt>
-              <dd className="font-heading text-2xl font-semibold">{value ?? '–'}</dd>
-              <p className="text-[11px] text-muted-foreground">{label}</p>
-            </div>
-          ))}
+        <dl className="mt-6 grid grid-cols-4 divide-x divide-white/[0.08] rounded-[22px] border border-white/[0.07] bg-surface py-4 sm:max-w-xl">
+          {([
+            ['Posts', stats?.posts, null],
+            ['Followers', counts?.followers, 'followers'],
+            ['Following', counts?.following, 'following'],
+            ['Cells', stats?.cells, null],
+          ] as const).map(([label, value, list]) => {
+            const inner = (
+              <>
+                <dd className="font-heading text-2xl font-semibold">{value ?? '–'}</dd>
+                <p className="text-[11px] text-muted-foreground">{label}</p>
+              </>
+            )
+            return (
+              <div key={label} className="text-center">
+                <dt className="sr-only">{label}</dt>
+                {list ? <button type="button" onClick={() => setPeople(list)} className="w-full rounded-xl transition-colors hover:text-primary">{inner}</button> : inner}
+              </div>
+            )
+          })}
         </dl>
       </div>
 
@@ -235,6 +254,7 @@ export default function ProfilePage({ self = false }: { self?: boolean }) {
           </dl>
         )}
       </section>
+      {people && <PeopleSheet userId={profile.id} which={people} name={firstName} onClose={() => setPeople(null)} />}
     </div>
   )
 }

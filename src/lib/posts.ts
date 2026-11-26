@@ -65,10 +65,11 @@ function fail(error: { code?: string; message: string }): never {
 
 export const PAGE_SIZE = 12
 
-export async function fetchFeed(kind: PostKind | 'all', page = 0) {
+export async function fetchFeed(kind: PostKind | 'all', page = 0, authors?: string[]) {
   await ensureColumns()
   let query = supabase.from('posts').select(SELECT).order('created_at', { ascending: false }).range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
   if (kind !== 'all') query = query.eq('kind', kind)
+  if (authors) query = query.in('author_id', authors)
   const { data, error } = await query
   if (error) fail(error)
   return (data ?? []) as unknown as Post[]
