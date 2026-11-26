@@ -46,3 +46,6 @@ next-env.d.ts
 # vite
 /node_modules/.tmp/
 *.tsbuildinfo
+
+# Source photos (only the optimised copies in public/assets/people are used)
+/Landing Pages Images/

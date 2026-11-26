@@ -483,8 +483,17 @@ export default function Landing() {
                 <p className="text-sm text-muted-foreground">Prayer nights, cells, bootcamps</p>
                 <p className="mt-3 font-heading text-5xl font-semibold tracking-[-0.03em]">02</p>
                 <div className="mt-auto flex -space-x-3 pt-10">
-                  {['AO', 'TK', 'IB', 'CE', 'FM'].map((initials, index) => (
-                    <span key={initials} className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-surface-raised font-heading text-xs font-semibold" style={{ background: ['#ff5c8a', '#ffb36b', '#d7b8ff', '#e0346a', '#7b1b45'][index], color: index === 4 ? '#fff' : '#1d0a10' }}>{initials}</span>
+                  {[1, 2, 3, 4, 5, 6].map((number, index) => (
+                    <img
+                      key={number}
+                      src={`/assets/people/member-${number}.jpg`}
+                      alt=""
+                      width={44}
+                      height={44}
+                      loading="lazy"
+                      className="h-11 w-11 rounded-full border-2 border-surface-raised object-cover shadow-[0_6px_16px_rgba(0,0,0,0.35)] transition-transform duration-300 hover:z-10 hover:-translate-y-1 hover:scale-110"
+                      style={{ zIndex: 6 - index }}
+                    />
                   ))}
                 </div>
                 <h3 className="mt-5 font-heading text-lg font-semibold">{problems[1][0]}</h3>
