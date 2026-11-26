@@ -5,6 +5,8 @@ import { Color, FontFamily, FontSize, TextStyle } from '@tiptap/extension-text-s
 import Highlight from '@tiptap/extension-highlight'
 import TextAlign from '@tiptap/extension-text-align'
 import { Placeholder } from '@tiptap/extension-placeholder'
+import { mentionExtension } from './mentionExtension'
+import { useAuth } from '../../lib/AuthContext'
 import { ChevronDown, Link as LinkIcon } from '../ui/icons'
 import Select from '../ui/Select'
 
@@ -44,6 +46,9 @@ type Props = { initialHtml?: string; placeholder?: string; onChange: (value: { h
 
 /** The post editor: headings, fonts, sizes, bold, italic, underline, colour, highlight, lists, quotes, alignment and links. */
 export default function RichEditor({ initialHtml = '', placeholder = 'Write your post…', onChange }: Props) {
+  const { user } = useAuth()
+  const userId = useRef(user?.id)
+  userId.current = user?.id
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ heading: { levels: [1, 2, 3] }, link: { openOnClick: false, autolink: true, protocols: ['https', 'mailto'] }, code: false, codeBlock: false }),
@@ -54,6 +59,7 @@ export default function RichEditor({ initialHtml = '', placeholder = 'Write your
       Highlight.configure({ multicolor: true }),
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       Placeholder.configure({ placeholder }),
+      mentionExtension(() => userId.current),
     ],
     content: initialHtml,
     editorProps: { attributes: { class: 'rich-text min-h-[280px] px-5 py-4 outline-none sm:px-6', 'aria-label': 'Post text' } },

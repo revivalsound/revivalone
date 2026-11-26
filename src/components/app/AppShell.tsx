@@ -158,6 +158,7 @@ export default function AppShell() {
             {!collapsed && <p className="mb-1 mt-5 px-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/60">Daily</p>}
             {collapsed && <span className="my-3 h-px w-8 bg-white/[0.06]" />}
             {SECONDARY.map(item => <SideLink key={item.to} item={item} collapsed={collapsed} />)}
+            {user && <NotificationsLink collapsed={collapsed} />}
           </nav>
 
           <div className={`flex flex-col gap-2 border-t border-white/[0.06] pt-3 ${collapsed ? 'items-center' : ''}`}>
@@ -285,6 +286,20 @@ function BellButton() {
     <Link to="/notifications" aria-label={unread ? `Notifications, ${unread} unread` : 'Notifications'} className="relative flex h-8 w-8 items-center justify-center rounded-full border border-white/[0.09] bg-white/[0.03] text-foreground/85 transition-colors hover:bg-white/[0.07]">
       <BellBing className={`h-4 w-4 text-primary ${ring ? 'bell-ring' : ''}`} />
       {unread > 0 && <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-primary px-1 font-heading text-[10px] font-bold text-primary-foreground ring-2 ring-shell">{unread > 99 ? '99+' : unread}</span>}
+    </Link>
+  )
+}
+
+/** Sidebar entry for notifications, with the unread count. */
+function NotificationsLink({ collapsed }: { collapsed: boolean }) {
+  const { unread } = useNotifications()
+  const { pathname } = useLocation()
+  const active = pathname === '/notifications'
+  return (
+    <Link to="/notifications" title={collapsed ? 'Notifications' : undefined} aria-current={active ? 'page' : undefined} className={`group relative flex items-center gap-2.5 rounded-[10px] transition-all duration-200 ${collapsed ? 'h-10 w-10 justify-center' : 'px-2.5 py-2'} ${active ? 'bg-primary/[0.08] text-primary' : 'text-muted-foreground hover:bg-white/[0.05] hover:text-foreground'}`}>
+      <span className={`relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${active ? 'bg-plum ring-2 ring-primary' : ''}`}><BellBing className="h-[17px] w-[17px]" /></span>
+      {!collapsed && <span className="flex-1 truncate text-[13px] font-medium tracking-wide">Notifications</span>}
+      {unread > 0 && <span className={`flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 font-heading text-[10px] font-bold text-primary-foreground ${collapsed ? 'absolute -right-0.5 -top-0.5' : ''}`}>{unread > 99 ? '99+' : unread}</span>}
     </Link>
   )
 }

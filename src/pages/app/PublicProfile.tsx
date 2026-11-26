@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, CalendarDays, Chat, Check, Copy, Globe, MapPin, Pen, Play, Settings, Users } from '../../components/ui/icons'
+import { ArrowLeft, ArrowRight, BellBing, CalendarDays, Chat, Check, Copy, Globe, MapPin, Pen, Play, Settings, Users } from '../../components/ui/icons'
 import PostCard, { AuthorAvatar, KIND_META, PostCardSkeleton } from '../../components/posts/PostCard'
 import FollowButton from '../../components/social/FollowButton'
 import PeopleSheet from '../../components/social/PeopleSheet'
@@ -100,6 +100,9 @@ export default function ProfilePage({ self = false }: { self?: boolean }) {
           ? <img src={profile.cover_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
           : <><div className="absolute inset-0 hero-field-fallback--vivid" /><div className="absolute inset-0 hero-field-scrim--vivid" /><img src="/assets/revival-flame-mark.png" alt="" className="absolute -bottom-10 right-6 h-52 w-52 object-contain opacity-20 mix-blend-screen" /></>}
         <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
+        {mine && (
+          <Link to="/notifications" aria-label="Notifications" className="absolute right-16 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md transition-colors hover:bg-black/60"><BellBing className="h-4 w-4" /></Link>
+        )}
         {mine && (
           <Link to="/profile/edit" aria-label="Profile settings" className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md transition-colors hover:bg-black/60"><Settings className="h-4 w-4" /></Link>
         )}

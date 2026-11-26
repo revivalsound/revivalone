@@ -1,6 +1,7 @@
 import type { CSSProperties, ElementType } from 'react'
 import { Link } from 'react-router-dom'
 import PhotoImg from '../ui/PhotoImg'
+import { excerptHtml } from '../../lib/richText'
 import { ArrowRight, Bible, Briefcase, Clock, Play, GraphUp, HandHeart, HandMoney, HandStars, Notebook, Question, Sparkles } from '../ui/icons'
 import { initialsOf, readingMinutes, timeAgo, type Author, type OpportunityType, type Post, type PostKind, type PostMedia } from '../../lib/posts'
 
@@ -73,7 +74,9 @@ export default function PostCard({ post, compact = false }: { post: Post; compac
         <h3 className={`mt-4 font-heading font-semibold leading-[1.15] tracking-[-0.015em] text-foreground ${compact ? 'text-lg' : 'text-[1.45rem] sm:text-[1.6rem]'}`}>
           <Link to={`/post/${post.id}`} className="outline-none after:absolute after:inset-0 after:z-[1] after:rounded-[26px] focus-visible:after:ring-2 focus-visible:after:ring-primary">{post.title}</Link>
         </h3>
-        {excerpt && <p className={`mt-2.5 text-sm leading-6 text-muted-foreground ${compact ? 'line-clamp-2' : 'line-clamp-3'}`}>{excerpt}</p>}
+        {post.body_html?.includes('data-mention')
+          ? <p className={`mt-2.5 text-sm leading-6 text-muted-foreground ${compact ? 'line-clamp-2' : 'line-clamp-3'}`} dangerouslySetInnerHTML={{ __html: excerptHtml(post.body_html) }} />
+          : excerpt && <p className={`mt-2.5 text-sm leading-6 text-muted-foreground ${compact ? 'line-clamp-2' : 'line-clamp-3'}`}>{excerpt}</p>}
         {post.media && post.media.length > 0 && <MediaPreview media={post.media} compact={compact} />}
 
         <footer className={`flex flex-wrap items-center gap-2 ${compact ? 'mt-4' : 'mt-6'}`}>

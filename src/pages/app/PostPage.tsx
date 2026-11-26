@@ -106,7 +106,18 @@ export default function PostPage() {
           )}
           {post.media && post.media.length > 0 && <Gallery media={post.media} />}
           {post.body_html
-            ? <div className="rich-text mt-8" dangerouslySetInnerHTML={{ __html: sanitizePostHtml(post.body_html) }} />
+            ? (
+              <div
+                className="rich-text mt-8"
+                dangerouslySetInnerHTML={{ __html: sanitizePostHtml(post.body_html) }}
+                // Tagged people and Bible references open inside the app.
+                onClick={event => {
+                  const link = (event.target as HTMLElement).closest('a.mention') as HTMLAnchorElement | null
+                  const href = link?.getAttribute('href')
+                  if (link && href?.startsWith('/')) { event.preventDefault(); navigate(href) }
+                }}
+              />
+            )
             : (
               <div className="post-body mt-8 text-[17px] leading-8 text-foreground/90">
                 {paragraphs.map((paragraph, index) => <p key={index} className="whitespace-pre-line">{paragraph}</p>)}

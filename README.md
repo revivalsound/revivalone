@@ -37,8 +37,9 @@ Run these in the Supabase SQL Editor, in order (each is safe to re-run):
 5. `supabase/posts-rich.sql`: formatted text and up to six photos or videos per post
 6. `supabase/profile-v2.sql`: cover photos and a website link on profiles
 7. `supabase/follows.sql`: follows and notifications (new posts, prayer walls and cells from people you follow, and new cells in your city)
-8. `supabase/push.sql`: push notifications to closed apps (device sign-ups, and a trigger that hands each notification to `/api/push`)
-9. `supabase/bible.sql`: Bible highlights and notes, daily-guide progress and journals, member-made Rev Academy courses (and it removes the old demo courses)
+8. `supabase/mentions.sql`: @ tags in posts and the "tagged you" notification
+9. `supabase/push.sql`: push notifications to closed apps (device sign-ups, and a trigger that hands each notification to `/api/push`)
+10. `supabase/bible.sql`: Bible highlights and notes, daily-guide progress and journals, member-made Rev Academy courses (and it removes the old demo courses)
 
 ## The Bible
 

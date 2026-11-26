@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ElementType } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { BellBing, BellOff, Check, Fire, HandHeart, Loader, MapPin, PenNew, UserPlus, Users } from '../../components/ui/icons'
+import { AtSign, BellBing, BellOff, Check, Fire, HandHeart, Loader, MapPin, PenNew, UserPlus, Users } from '../../components/ui/icons'
 import { Notice } from '../../components/ui/kit'
 import { AuthorAvatar } from '../../components/posts/PostCard'
 import { useAuth } from '../../lib/AuthContext'
@@ -15,6 +15,7 @@ const TYPE: Record<NotificationType, { icon: ElementType; tint: string }> = {
   prayer_wall: { icon: HandHeart, tint: '#ffb36b' },
   cell: { icon: Users, tint: '#ffd479' },
   cell_nearby: { icon: MapPin, tint: '#8fd3ff' },
+  mention: { icon: AtSign, tint: '#ff8fb0' },
 }
 
 type Filter = 'all' | 'unread'
@@ -28,7 +29,7 @@ export default function Notifications() {
   const [filter, setFilter] = useState<Filter>('all')
 
   useEffect(() => {
-    if (!user) return
+    if (!user) { setItems([]); return }
     let live = true
     const load = () => fetchNotifications(user.id).then(list => live && setItems(list)).catch(caught => { if (live) { setItems([]); setError(caught instanceof SocialNotReady || caught instanceof Error ? caught.message : 'We couldn’t load notifications.') } })
     void load()

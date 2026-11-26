@@ -9,6 +9,7 @@ import { uploadMedia, MAX_IMAGE_BYTES, MAX_VIDEO_BYTES } from '../../lib/communi
 import { shrinkImage } from '../../lib/images'
 import { createPost, MAX_POST_MEDIA, OPPORTUNITY_TYPES, parseTags, POST_KINDS, type OpportunityType, type PostKind } from '../../lib/posts'
 import { sanitizePostHtml, textToHtml } from '../../lib/richText'
+import { mentionedUsers } from '../../lib/mentions'
 
 /** What another screen can prefill when it opens the editor (a shared verse, a journal entry). */
 export type PostDraft = { kind?: PostKind; title?: string; body?: string; scripture?: string; tags?: string }
@@ -87,6 +88,7 @@ export default function CreatePost() {
         title: title.trim(),
         body: content.text,
         body_html: sanitizePostHtml(content.html),
+        mentions: mentionedUsers(content.html),
         media: uploaded,
         scripture: scripture.trim(),
         link_url: kind === 'opportunity' ? link.trim() : '',
@@ -167,6 +169,7 @@ export default function CreatePost() {
           </div>
 
           <RichEditor initialHtml={initialHtml} placeholder={PROMPTS[kind]} onChange={setContent} />
+          <p className="-mt-2 flex items-center gap-1.5 px-1 text-xs text-muted-foreground"><span className="mention">@</span> Type @ to add a Bible reference, like <b className="font-semibold text-foreground/80">@John 3:16</b>, or to tag someone you follow.</p>
         </div>
 
         <aside className="h-fit space-y-4 lg:sticky lg:top-20">

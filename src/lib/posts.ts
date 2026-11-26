@@ -33,7 +33,7 @@ export type PublicProfile = {
   church: string; ministry_focus: string; bio: string; created_at: string
 }
 
-export type NewPost = Pick<Post, 'kind' | 'title' | 'body' | 'scripture' | 'link_url' | 'tags'> & { opportunity_type: OpportunityType | null; body_html?: string; media?: PostMedia[] }
+export type NewPost = Pick<Post, 'kind' | 'title' | 'body' | 'scripture' | 'link_url' | 'tags'> & { opportunity_type: OpportunityType | null; body_html?: string; media?: PostMedia[]; mentions?: string[] }
 
 const BASE = 'id, author_id, kind, opportunity_type, title, body, scripture, link_url, tags, created_at, author:profiles(id, full_name, avatar_url, city, church)'
 let SELECT = `${BASE}, body_html, media`
@@ -43,12 +43,18 @@ let SELECT = `${BASE}, body_html, media`
  * run, fall back to the plain columns so the feed keeps working.
  */
 export let richPosts = true
+/** Tagged people are stored once supabase/mentions.sql has run. */
+export let mentionsReady = false
 let columnsCheck: Promise<void> | null = null
 // Every request waits on the same check, so none can run ahead of it.
 function ensureColumns() {
   columnsCheck ??= (async () => {
-    const { error } = await supabase.from('posts').select('body_html, media').limit(1)
-    if (error?.code === '42703') { richPosts = false; SELECT = BASE }
+    const [rich, tagged] = await Promise.all([
+      supabase.from('posts').select('body_html, media').limit(1),
+      supabase.from('posts').select('mentions').limit(1),
+    ])
+    if (rich.error?.code === '42703') { richPosts = false; SELECT = BASE }
+    mentionsReady = tagged.error?.code !== '42703'
   })()
   return columnsCheck
 }
@@ -118,7 +124,9 @@ export async function fetchSimilar(post: Post, limit = 3) {
 export async function createPost(input: NewPost) {
   await ensureColumns()
   if (!richPosts && input.media?.length) throw new Error('Photos and videos on posts aren’t switched on yet. Run supabase/posts-rich.sql in Supabase.')
-  const row = richPosts ? input : (({ body_html: _html, media: _media, ...rest }) => rest)(input)
+  const { mentions, ...fields } = input
+  const base = richPosts ? fields : (({ body_html: _html, media: _media, ...rest }) => rest)(fields)
+  const row = mentionsReady && mentions?.length ? { ...base, mentions } : base
   const { data, error } = await supabase.from('posts').insert(row).select(SELECT).single()
   if (error) fail(error)
   return data as unknown as Post

@@ -122,6 +122,7 @@ const MAP = {
   VideoFrame: 'video-frame-play-horizontal',
   CloudUpload: 'cloud-upload',
   Moon: 'moon',
+  AtSign: 'mention-circle',
   BellBing: 'bell-bing',
   BellOff: 'bell-off',
   UserCheck: 'user-check-rounded',

@@ -60,7 +60,7 @@ export async function fetchFollowingIds(me: string) {
 
 /* ── Notifications ── */
 
-export type NotificationType = 'follow' | 'post' | 'prayer_wall' | 'cell' | 'cell_nearby'
+export type NotificationType = 'follow' | 'post' | 'prayer_wall' | 'cell' | 'cell_nearby' | 'mention'
 export type AppNotification = {
   id: string; type: NotificationType; title: string; body: string; link: string; read_at: string | null; created_at: string
   actor: { id: string; full_name: string; avatar_url: string | null } | null
