@@ -1,19 +1,16 @@
-import { createContext, useContext, useEffect, useRef, useState, type ElementType, type FormEvent, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useRef, useState, type ElementType, type ReactNode } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
-  ArrowRight,
   Bible,
   CalendarDays,
-  Check,
-  ChevronLeft,
   ChevronRight,
   Fire,
   GraduationCap,
   HandHeart,
   Home,
-  Loader,
   LogOut,
   PanelLeft,
+  PenNew,
   Plus,
   Sunrise,
   User,
@@ -22,14 +19,14 @@ import {
 } from '../ui/icons'
 import AmbientField from '../AmbientField'
 import BrandMark from '../brand/BrandMark'
-import { Notice, inputClass } from '../ui/kit'
+import PostComposer from '../posts/PostComposer'
 import { useAuth } from '../../lib/AuthContext'
-import { api } from '../../lib/supabase'
 import { TODAYS_WORD } from '../../lib/content'
 
 /* ── Create flow, shared by every screen ── */
 
 const CREATION_TYPES = [
+  { kind: 'post', title: 'Revival post', copy: 'A word, study, question or Kingdom opportunity for the feed.', icon: PenNew },
   { kind: 'event', title: 'Event', copy: 'A worship night, outreach or conference.', icon: CalendarDays },
   { kind: 'bootcamp', title: 'Gospel bootcamp', copy: 'An intensive track for evangelism, prayer or leadership.', icon: Fire },
   { kind: 'cell', title: 'Revival cell', copy: 'A local group that meets, grows and serves together.', icon: Users },
@@ -39,93 +36,28 @@ export type CreationKind = typeof CREATION_TYPES[number]['kind']
 const CreateContext = createContext<(kind?: CreationKind) => void>(() => undefined)
 export const useCreate = () => useContext(CreateContext)
 
-function CreateDialog({ initialKind, onClose }: { initialKind?: CreationKind; onClose: () => void }) {
-  const { session } = useAuth()
+/** The + menu: pick what to create. Each type has its own page; posts use the composer. */
+function CreateDialog({ onPick, onClose }: { onPick: (kind: CreationKind) => void; onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null)
-  const [kind, setKind] = useState<CreationKind | undefined>(initialKind)
-  const [saving, setSaving] = useState(false)
-  const [created, setCreated] = useState(false)
-  const [error, setError] = useState('')
-  const selected = CREATION_TYPES.find(type => type.kind === kind)
-
   useEffect(() => { dialog.current?.showModal() }, [])
 
-  const close = () => { if (!saving) dialog.current?.close() }
-
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    if (!session || !kind || saving) return
-    const form = new FormData(event.currentTarget)
-    setSaving(true)
-    setError('')
-    try {
-      await api('initiatives', {
-        method: 'POST',
-        token: session.access_token,
-        body: JSON.stringify({ kind, title: form.get('title'), city: form.get('city'), startsAt: form.get('startsAt'), description: form.get('description') }),
-      })
-      setCreated(true)
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'We couldn’t save your draft. Try again.')
-    } finally {
-      setSaving(false)
-    }
-  }
-
   return (
-    <dialog ref={dialog} className="revival-dialog" aria-labelledby="create-title" onClose={onClose} onCancel={event => { if (saving) event.preventDefault() }}>
+    <dialog ref={dialog} className="revival-dialog" aria-labelledby="create-title" onClose={onClose}>
       <div className="dialog-in fixed inset-x-0 bottom-0 m-auto w-full max-w-lg rounded-t-[28px] border glass glass-strong p-6 shadow-[0_24px_80px_rgba(0,0,0,0.55)] sm:inset-0 sm:h-fit sm:rounded-[28px] sm:p-7">
-        <button type="button" onClick={close} disabled={saving} aria-label="Close" className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.08] text-muted-foreground transition-colors hover:bg-white/[0.05] hover:text-foreground">
+        <button type="button" onClick={() => dialog.current?.close()} aria-label="Close" className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.08] text-muted-foreground transition-colors hover:bg-white/[0.05] hover:text-foreground">
           <X className="h-4 w-4" />
         </button>
-
-        {created ? (
-          <div className="py-6 text-center">
-            <span className="brand-ring brand-ring--on mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary"><Check className="h-7 w-7" strokeWidth={2.4} /></span>
-            <h2 id="create-title" className="mt-5 font-heading text-2xl font-semibold">Draft saved</h2>
-            <p className="mt-2 text-sm text-muted-foreground">Your {selected?.title.toLowerCase()} was saved to your account.</p>
-            <button type="button" onClick={close} className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground hover:bg-primary/90">Done</button>
-          </div>
-        ) : !session ? (
-          <div className="py-4 text-center">
-            <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-primary/25 bg-primary/10 text-primary"><Plus className="h-6 w-6" /></span>
-            <h2 id="create-title" className="mt-5 font-heading text-2xl font-semibold">Sign in to start something</h2>
-            <p className="mx-auto mt-2 max-w-xs text-sm text-muted-foreground">Events, bootcamps and cells are saved to your Revival One account.</p>
-            <Link to="/auth" onClick={close} className="mt-6 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-primary text-sm font-semibold text-primary-foreground hover:bg-primary/90">Sign in <ArrowRight className="h-4 w-4" /></Link>
-          </div>
-        ) : selected ? (
-          <form onSubmit={submit} className="space-y-4">
-            <button type="button" disabled={saving} onClick={() => { setKind(undefined); setError('') }} className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"><ChevronLeft className="h-3.5 w-3.5" /> Choose another type</button>
-            <div className="flex items-center gap-3">
-              <span className="flex h-11 w-11 items-center justify-center rounded-full border border-primary/25 bg-primary/10 text-primary"><selected.icon className="h-5 w-5" /></span>
-              <h2 id="create-title" className="font-heading text-2xl font-semibold">Create a {selected.title.toLowerCase()}</h2>
-            </div>
-            <label className="block text-xs font-medium text-foreground/90">Name<input required name="title" minLength={3} maxLength={120} placeholder={selected.title} className={`${inputClass} mt-2 px-4`} /></label>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="block text-xs font-medium text-foreground/90">City<input required name="city" minLength={2} maxLength={100} placeholder="Lagos, Nigeria" className={`${inputClass} mt-2 px-4`} /></label>
-              <label className="block text-xs font-medium text-foreground/90">Start date<input required name="startsAt" type="date" className={`${inputClass} mt-2 px-4 [color-scheme:dark]`} /></label>
-            </div>
-            <label className="block text-xs font-medium text-foreground/90">Description<textarea required name="description" minLength={10} maxLength={1000} rows={4} placeholder="What will happen, and who is it for?" className={`${inputClass} mt-2 h-auto px-4 py-3`} /></label>
-            {error && <Notice tone="error">{error}</Notice>}
-            <button type="submit" disabled={saving} className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primary text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 disabled:opacity-60">
-              {saving ? <><Loader className="h-4 w-4 animate-spin" /> Saving…</> : 'Save draft'}
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary">Create</p>
+        <h2 id="create-title" className="mt-2 font-heading text-2xl font-semibold">What are you starting?</h2>
+        <div className="mt-6 space-y-2.5">
+          {CREATION_TYPES.map(({ kind, title, copy, icon: Icon }) => (
+            <button type="button" key={kind} onClick={() => { dialog.current?.close(); onPick(kind) }} className="bolt-card bolt-card--hover group flex w-full items-center gap-4 rounded-[20px] border border-white/[0.07] bg-surface p-4 text-left transition-colors hover:bg-surface-raised">
+              <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${kind === 'post' ? 'bg-primary text-primary-foreground' : 'border border-primary/25 bg-primary/10 text-primary'}`}><Icon className="h-5 w-5" /></span>
+              <span className="min-w-0 flex-1"><b className="block font-heading text-[15px] font-semibold">{title}</b><small className="text-xs text-muted-foreground">{copy}</small></span>
+              <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
             </button>
-          </form>
-        ) : (
-          <>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary">Create</p>
-            <h2 id="create-title" className="mt-2 font-heading text-2xl font-semibold">What are you starting?</h2>
-            <div className="mt-6 space-y-2.5">
-              {CREATION_TYPES.map(({ kind: type, title, copy, icon: Icon }) => (
-                <button type="button" key={type} onClick={() => setKind(type)} className="bolt-card bolt-card--hover group flex w-full items-center gap-4 rounded-[20px] border border-white/[0.07] bg-surface p-4 text-left transition-colors hover:bg-surface-raised">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-primary/25 bg-primary/10 text-primary"><Icon className="h-5 w-5" /></span>
-                  <span className="min-w-0 flex-1"><b className="block font-heading text-[15px] font-semibold">{title}</b><small className="text-xs text-muted-foreground">{copy}</small></span>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-                </button>
-              ))}
-            </div>
-          </>
-        )}
+          ))}
+        </div>
       </div>
     </dialog>
   )
@@ -144,12 +76,16 @@ const NAV: NavItem[] = [
 
 const SECONDARY: NavItem[] = [
   { to: `/word/${TODAYS_WORD.slug}`, label: 'Today’s Word', icon: Bible },
-  { to: '/community#prayer-wall', label: 'Prayer wall', icon: HandHeart },
+  { to: '/community/prayer', label: 'Prayer wall', icon: HandHeart },
 ]
 
 function SideLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
   const { pathname } = useLocation()
-  const active = pathname === item.to.split('#')[0] && !item.to.includes('#')
+  // Sections own their sub-pages (a course under Academy, a cell chat under Community),
+  // except the prayer wall, which has its own sidebar entry.
+  const active = pathname === item.to
+    || (item.to !== '/home' && pathname.startsWith(`${item.to}/`) && !(item.to === '/community' && pathname.startsWith('/community/prayer')))
+    || (item.to === '/community/prayer' && pathname.startsWith('/prayer/'))
   return (
     <Link
       to={item.to}
@@ -174,7 +110,7 @@ function Avatar({ size = 'h-8 w-8' }: { size?: string }) {
   )
 }
 
-const SECTION_TITLES: Record<string, string> = { '/home': 'Home', '/community': 'Community', '/events': 'Events', '/academy': 'Academy', '/profile': 'Profile' }
+const SECTION_TITLES: Record<string, string> = { '/home': 'Home', '/community/cells': 'Revival cells', '/community/prayer': 'Prayer wall', '/events': 'Events', '/academy': 'Academy', '/profile': 'Profile' }
 
 export default function AppShell() {
   const { pathname } = useLocation()
@@ -183,13 +119,20 @@ export default function AppShell() {
   const [collapsed, setCollapsed] = useState(() => {
     try { return window.localStorage.getItem('revival.rail') === '1' } catch { return false }
   })
-  const [creating, setCreating] = useState<{ kind?: CreationKind } | null>(null)
+  const [picking, setPicking] = useState(false)
+  const [composing, setComposing] = useState(false)
 
   useEffect(() => { try { window.localStorage.setItem('revival.rail', collapsed ? '1' : '0') } catch { /* storage unavailable */ } }, [collapsed])
 
   const section = SECTION_TITLES[pathname]
-    ?? (pathname.startsWith('/word') ? 'Today’s Word' : pathname.startsWith('/post') ? 'Post' : pathname.startsWith('/u/') ? 'Member' : 'Revival One')
-  const openCreate = (kind?: CreationKind) => setCreating({ kind })
+    ?? (pathname.startsWith('/word') ? 'Today’s Word' : pathname.startsWith('/post') ? 'Post' : pathname.startsWith('/u/') ? 'Member'
+      : pathname.startsWith('/community/cells/') ? 'Cell chat' : pathname.startsWith('/prayer/') ? 'Prayer wall' : pathname.startsWith('/create/') ? 'Create'
+      : pathname.startsWith('/academy/') ? 'Course' : 'Revival One')
+  const openCreate = (kind?: CreationKind) => {
+    if (!kind) setPicking(true)
+    else if (kind === 'post') setComposing(true)
+    else navigate(`/create/${kind}`)
+  }
 
   return (
     <CreateContext.Provider value={openCreate}>
@@ -263,7 +206,8 @@ export default function AppShell() {
           </div>
         </nav>
 
-        {creating && <CreateDialog initialKind={creating.kind} onClose={() => setCreating(null)} />}
+        {picking && <CreateDialog onPick={kind => openCreate(kind)} onClose={() => setPicking(false)} />}
+        {composing && <PostComposer onClose={() => setComposing(false)} onPosted={post => navigate(`/post/${post.id}`)} />}
       </div>
     </CreateContext.Provider>
   )

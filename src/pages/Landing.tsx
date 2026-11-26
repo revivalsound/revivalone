@@ -589,14 +589,14 @@ export default function Landing() {
           <div className="relative overflow-hidden">
             <div className="flex w-max gap-4 animate-marquee hover:[animation-play-state:paused]">
               {[...COURSES, ...COURSES].map((course, index) => (
-                <Link to="/academy" key={`${course.title}-${index}`} className="group flex aspect-[4/5] w-[220px] flex-col rounded-[22px] border border-white/[0.08] bg-surface p-5 shadow-[0_18px_45px_rgba(0,0,0,0.3)] transition-colors hover:border-primary/30 sm:w-[260px]">
+                <Link to={`/academy/${course.slug}`} key={`${course.title}-${index}`} className="group flex aspect-[4/5] w-[220px] flex-col rounded-[22px] border border-white/[0.08] bg-surface p-5 shadow-[0_18px_45px_rgba(0,0,0,0.3)] transition-colors hover:border-primary/30 sm:w-[260px]">
                   <span className="flex h-11 w-11 items-center justify-center rounded-full border border-primary/25 bg-primary/10 text-primary"><GraduationCap className="h-5 w-5" /></span>
                   <p className="mt-6 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">{course.category}</p>
                   <h3 className="mt-2 font-heading text-xl font-semibold leading-tight">{course.title}</h3>
                   <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted-foreground">{course.summary}</p>
                   <div className="mt-auto flex items-center justify-between border-t border-white/[0.07] pt-4 text-xs text-muted-foreground">
                     <span>{course.teacher}</span>
-                    <span className="font-semibold text-foreground">{course.lessons} lessons</span>
+                    <span className="font-semibold text-foreground">{course.lessons} episodes</span>
                   </div>
                 </Link>
               ))}

@@ -18,6 +18,11 @@ const Word = lazy(() => import('./pages/app/Word'))
 const Profile = lazy(() => import('./pages/app/Profile'))
 const PostPage = lazy(() => import('./pages/app/PostPage'))
 const PublicProfile = lazy(() => import('./pages/app/PublicProfile'))
+const CellChat = lazy(() => import('./pages/app/CellChat'))
+const PrayerWalls = lazy(() => import('./pages/app/PrayerWalls'))
+const PrayerRoom = lazy(() => import('./pages/app/PrayerRoom'))
+const CreatePage = lazy(() => import('./pages/app/CreatePage'))
+const CoursePage = lazy(() => import('./pages/app/CoursePage'))
 
 const SPLASH_SEEN_KEY = 'revival.splashSeen'
 
@@ -83,9 +88,15 @@ export default function App() {
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route element={<AppShell />}>
               <Route path="/home" element={<Home />} />
-              <Route path="/community" element={<Community />} />
+              <Route path="/community" element={<Navigate to="/community/cells" replace />} />
+              <Route path="/community/cells" element={<Community />} />
+              <Route path="/community/cells/:id" element={<CellChat />} />
+              <Route path="/community/prayer" element={<PrayerWalls />} />
+              <Route path="/prayer/:code" element={<PrayerRoom />} />
+              <Route path="/create/:kind" element={<RequireAuth><CreatePage /></RequireAuth>} />
               <Route path="/events" element={<Events />} />
               <Route path="/academy" element={<Academy />} />
+              <Route path="/academy/:slug" element={<CoursePage />} />
               <Route path="/word/:slug" element={<Word />} />
               <Route path="/post/:id" element={<PostPage />} />
               <Route path="/u/:id" element={<PublicProfile />} />

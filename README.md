@@ -22,6 +22,28 @@ Optional environment (`.env.local`):
 | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | Browser Supabase client (falls back to the existing project) |
 | `SUPABASE_URL`, `SUPABASE_ANON_KEY` | `api/` functions (same fallback) |
 | `YVP_APP_KEY` | YouVersion Platform key for licensed Bible text in Today's Word |
+| `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` | LiveKit project for live prayer walls (`api/prayer-token.ts`) |
+
+## Database
+
+Run these in the Supabase SQL Editor, in order (each is safe to re-run):
+
+1. `supabase/schema.sql`: profiles, initiatives, memberships, courses
+2. `supabase/profile-upgrade.sql`: profile fields and the `avatars` bucket
+3. `supabase/posts.sql`: the Home feed
+4. `supabase/community.sql`: cell group chat (Realtime), prayer walls, the `media` bucket for event, bootcamp and cell covers
+
+## Rev Academy audio
+
+Courses are audio, episode by episode. Each episode plays `public/audio/academy/<course-slug>/<n>.mp3`.
+The files there now are placeholder narration made with the Windows speech voice:
+
+```bash
+node --experimental-strip-types scripts/build-academy-audio.mjs                   # regenerate all
+node --experimental-strip-types scripts/build-academy-audio.mjs --durations-only  # after swapping in real recordings
+```
+
+Listening progress is saved on the device; finished episodes light up pink on the course card.
 
 ## Icons
 

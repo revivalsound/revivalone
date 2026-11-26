@@ -1,26 +1,39 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { CalendarDays, Check, Clock, MapPin, Video, Zap } from '../../components/ui/icons'
+import { Deck } from '../../components/ui/kit'
 import { CreateButton, PageHeader } from '../../components/app/AppShell'
-import { EVENTS } from '../../lib/content'
+import { EventCard, MediaCover } from '../../components/community/cards'
+import { EXAMPLE_EVENTS, fetchUpcoming, formatDay, formatTime, type EventDetails, type Initiative } from '../../lib/community'
 
 const FILTERS = [
-  { key: 'all', label: 'All formats' },
-  { key: 'in-person', label: 'In person' },
+  { key: 'all', label: 'Everything' },
+  { key: 'event', label: 'Events' },
+  { key: 'bootcamp', label: 'Bootcamps' },
   { key: 'online', label: 'Online' },
 ] as const
 
 const GOING_KEY = 'revival.going'
 
 export default function Events() {
+  const { state } = useLocation() as { state?: { created?: string } }
   const [filter, setFilter] = useState<typeof FILTERS[number]['key']>('all')
+  const [real, setReal] = useState<Initiative<'event' | 'bootcamp'>[]>([])
   const [going, setGoing] = useState<string[]>(() => {
     try { return JSON.parse(window.localStorage.getItem(GOING_KEY) || '[]') } catch { return [] }
   })
-  const events = EVENTS.filter(event => filter === 'all' || event.online === (filter === 'online'))
-  const featured = EVENTS[1]
 
-  const toggleGoing = (title: string) => setGoing(current => {
-    const next = current.includes(title) ? current.filter(item => item !== title) : [...current, title]
+  useEffect(() => { fetchUpcoming().then(setReal).catch(() => setReal([])) }, [])
+
+  // Real listings first, then the examples, all in date order within each group.
+  const all = [...real, ...EXAMPLE_EVENTS.slice().sort((a, b) => a.starts_at.localeCompare(b.starts_at))]
+  const shown = all.filter(item => filter === 'all'
+    || (filter === 'online' ? item.details.format === 'online' : item.kind === filter))
+  const featured = all.find(item => item.id === state?.created) ?? real.find(item => item.media_url) ?? real[0] ?? EXAMPLE_EVENTS.find(item => item.title === 'The Upper Room') ?? all[0]
+  const featuredDetails = featured.details as Partial<EventDetails>
+
+  const toggleGoing = (id: string) => setGoing(current => {
+    const next = current.includes(id) ? current.filter(item => item !== id) : [...current, id]
     try { window.localStorage.setItem(GOING_KEY, JSON.stringify(next)) } catch { /* storage unavailable */ }
     return next
   })
@@ -34,65 +47,44 @@ export default function Events() {
         action={<CreateButton kind="event">Create an event</CreateButton>}
       />
 
-      <section className="relative mt-8 overflow-hidden rounded-[28px] border border-white/10">
-        <div className="absolute inset-0 hero-field-fallback--vivid" />
-        <div className="absolute inset-0 hero-field-scrim--vivid" />
-        <div className="hero-strike" />
-        <div className="relative grid gap-6 p-7 sm:p-9 md:grid-cols-[1fr_auto] md:items-end">
-          <div>
-            <p className="inline-flex items-center gap-1.5 rounded-full bg-black/30 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/90 backdrop-blur-md"><Zap className="h-3.5 w-3.5 text-primary" /> Featured · {featured.category}</p>
-            <h2 className="mt-5 font-heading text-4xl font-semibold leading-[1.05] tracking-[-0.02em] text-white sm:text-5xl">{featured.title}</h2>
-            <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-white/80">
-              <span className="flex items-center gap-1.5"><CalendarDays className="h-4 w-4" /> {featured.date}</span>
-              <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" /> {featured.time}</span>
-              <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {featured.place}</span>
-            </p>
+      <section className="bolt-card bolt-card--inset bolt-card--hover group relative mt-8 overflow-hidden rounded-[30px] border border-white/10">
+        <MediaCover initiative={featured} className="min-h-[360px] sm:min-h-[420px]">
+          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-transparent" />
+          <div className="hero-strike" />
+          <div className="absolute inset-x-0 bottom-0 z-[2] grid gap-6 p-7 sm:p-10 md:grid-cols-[1fr_auto] md:items-end">
+            <div>
+              <p className="inline-flex items-center gap-1.5 rounded-full bg-black/35 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/90 backdrop-blur-md"><Zap className="h-3.5 w-3.5 text-primary" /> Featured · {featured.kind === 'bootcamp' ? 'Gospel bootcamp' : featuredDetails.category ?? 'Event'}</p>
+              <h2 className="mt-5 max-w-2xl font-heading text-4xl font-semibold leading-[1.04] tracking-[-0.02em] text-white sm:text-[3.4rem]">{featured.title}</h2>
+              <p className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-white/85">
+                <span className="flex items-center gap-1.5"><CalendarDays className="h-4 w-4 text-primary" /> {formatDay(featured.starts_at, { weekday: 'long', month: 'long', day: 'numeric' })}</span>
+                {featuredDetails.start_time && <span className="flex items-center gap-1.5"><Clock className="h-4 w-4 text-primary" /> {formatTime(featuredDetails.start_time)}</span>}
+                <span className="flex items-center gap-1.5">{featuredDetails.format === 'online' ? <Video className="h-4 w-4 text-primary" /> : <MapPin className="h-4 w-4 text-primary" />} {featuredDetails.format === 'online' ? 'Online' : [featuredDetails.venue, featured.city].filter(Boolean).join(' · ')}</span>
+              </p>
+            </div>
+            <button type="button" onClick={() => toggleGoing(featured.id)} aria-pressed={going.includes(featured.id)} className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-6 font-heading text-[12px] font-semibold uppercase tracking-[0.14em] text-primary-foreground shadow-[0_14px_34px_rgba(255,92,138,0.35)] transition-all hover:-translate-y-0.5 active:scale-[0.98]">
+              {going.includes(featured.id) ? <><Check className="h-4 w-4" strokeWidth={2.4} /> You’re going</> : 'I’ll be there'}
+            </button>
           </div>
-          <button type="button" onClick={() => toggleGoing(featured.title)} aria-pressed={going.includes(featured.title)} className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#070405] px-6 font-heading text-[12px] font-semibold uppercase tracking-[0.14em] text-white transition-all hover:-translate-y-0.5 active:scale-[0.98]">
-            {going.includes(featured.title) ? <><Check className="h-4 w-4 text-primary" strokeWidth={2.4} /> You’re going</> : 'I’ll be there'}
-          </button>
-        </div>
+        </MediaCover>
       </section>
 
-      <section id="event-directory" className="mt-12" aria-labelledby="directory-heading">
+      <section className="mt-12" aria-labelledby="directory-heading">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 id="directory-heading" className="font-heading text-2xl font-semibold">Event directory</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Example listings. Dates and venues are illustrative.</p>
+            <h2 id="directory-heading" className="font-heading text-2xl font-semibold">Coming up</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{real.length ? 'Gatherings from the community, plus a few example listings.' : 'Example listings for now. Create one and it appears here.'}</p>
           </div>
-          <div className="flex gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] p-1" role="group" aria-label="Filter by event format">
+          <div className="flex gap-1 overflow-x-auto rounded-full border border-white/[0.08] bg-white/[0.03] p-1" role="group" aria-label="Filter listings">
             {FILTERS.map(({ key, label }) => (
-              <button key={key} type="button" aria-pressed={filter === key} onClick={() => setFilter(key)} className={`h-8 rounded-full px-3.5 text-xs font-semibold transition-colors ${filter === key ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>{label}</button>
+              <button key={key} type="button" aria-pressed={filter === key} onClick={() => setFilter(key)} className={`h-9 shrink-0 rounded-full px-4 text-xs font-semibold transition-colors ${filter === key ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>{label}</button>
             ))}
           </div>
         </div>
 
-        <div className="mt-5 space-y-3">
-          {events.map(event => {
-            const Place = event.online ? Video : MapPin
-            const on = going.includes(event.title)
-            const [month, day] = event.date.split(' ')
-            return (
-              <article key={event.title} className={`bolt-card flex flex-col gap-4 rounded-[24px] border p-5 transition-colors sm:flex-row sm:items-center sm:p-6 ${on ? 'bolt-card--on border-transparent bg-surface-raised' : 'border-white/[0.07] bg-surface hover:border-white/[0.14]'}`}>
-                <span className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-2xl bg-primary/10 font-heading text-primary">
-                  <span className="text-[11px] font-semibold uppercase">{month}</span>
-                  <span className="text-2xl font-semibold leading-none">{day}</span>
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{event.category}</p>
-                  <h3 className="mt-1 font-heading text-lg font-semibold">{event.title}</h3>
-                  <p className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1.5"><Place className="h-3.5 w-3.5" /> {event.place}</span>
-                    <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> {event.time}</span>
-                  </p>
-                </div>
-                <button type="button" onClick={() => toggleGoing(event.title)} aria-pressed={on} className={`inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-full px-5 text-xs font-semibold transition-all active:scale-[0.97] ${on ? 'bg-primary text-primary-foreground' : 'border border-white/[0.1] bg-surface-raised hover:bg-white/[0.07]'}`}>
-                  {on ? <><Check className="h-3.5 w-3.5" strokeWidth={2.4} /> Going</> : 'I’ll be there'}
-                </button>
-              </article>
-            )
-          })}
-        </div>
+        <Deck key={filter} className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {shown.map(item => <EventCard key={item.id} initiative={item} going={going.includes(item.id)} onToggleGoing={() => toggleGoing(item.id)} />)}
+        </Deck>
+        {shown.length === 0 && <p className="mt-6 rounded-[24px] border border-dashed border-white/[0.1] px-5 py-10 text-center text-sm text-muted-foreground">Nothing here yet.</p>}
       </section>
     </div>
   )

@@ -104,6 +104,23 @@ const MAP = {
   Trash: 'trash-bin-trash',
   HandMoney: 'hand-money',
   GraphUp: 'graph-up',
+  EndCall: 'end-call-rounded',
+  Headphones: 'headphones-round-sound',
+  Pause: 'pause',
+  PlayCircle: 'play-circle',
+  PauseCircle: 'pause-circle',
+  Back15: 'rewind-15-seconds-back',
+  Forward15: 'rewind-15-seconds-forward',
+  SkipNext: 'skip-next',
+  SkipPrevious: 'skip-previous',
+  Hourglass: 'hourglass',
+  UserPlus: 'user-plus-rounded',
+  Volume: 'volume-loud',
+  Playlist: 'playlist',
+  LockKeyhole: 'lock-keyhole',
+  GalleryAdd: 'gallery-add',
+  VideoFrame: 'video-frame-play-horizontal',
+  CloudUpload: 'cloud-upload',
 }
 
 function inner(svg) {

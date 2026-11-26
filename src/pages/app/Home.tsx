@@ -163,7 +163,7 @@ export default function Home() {
             <p className="mt-1 text-xs leading-5 text-muted-foreground">{prayer.text}</p>
             <div className="mt-4 flex items-center justify-between">
               <span className="flex items-center gap-1.5 text-xs text-primary"><Heart className="h-3.5 w-3.5" /> {prayer.praying} praying</span>
-              <Link to="/community#prayer-wall" className="inline-flex items-center gap-1 text-xs font-semibold text-foreground/85 hover:text-primary">Prayer wall <ChevronRight className="h-3.5 w-3.5" /></Link>
+              <Link to="/community/prayer" className="inline-flex items-center gap-1 text-xs font-semibold text-foreground/85 hover:text-primary">Prayer wall <ChevronRight className="h-3.5 w-3.5" /></Link>
             </div>
           </div>
 
