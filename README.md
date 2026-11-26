@@ -32,7 +32,8 @@ Run these in the Supabase SQL Editor, in order (each is safe to re-run):
 3. `supabase/posts.sql`: the Home feed
 4. `supabase/community.sql`: cell group chat (Realtime), prayer walls, the `media` bucket for event, bootcamp and cell covers
 5. `supabase/posts-rich.sql`: formatted text and up to six photos or videos per post
-6. `supabase/bible.sql`: Bible highlights and notes, daily-guide progress and journals, member-made Rev Academy courses (and it removes the old demo courses)
+6. `supabase/profile-v2.sql`: cover photos and a website link on profiles
+7. `supabase/bible.sql`: Bible highlights and notes, daily-guide progress and journals, member-made Rev Academy courses (and it removes the old demo courses)
 
 ## The Bible
 

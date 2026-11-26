@@ -20,6 +20,7 @@ import {
   X,
 } from '../ui/icons'
 import AmbientField from '../AmbientField'
+import PhotoImg from '../ui/PhotoImg'
 import BrandMark from '../brand/BrandMark'
 import { useAuth } from '../../lib/AuthContext'
 import { useTheme } from '../../lib/theme'
@@ -111,7 +112,7 @@ function Avatar({ size = 'h-8 w-8' }: { size?: string }) {
   const { avatarUrl, initials } = useAuth()
   return (
     <span className={`flex ${size} shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#ff5c8a] to-[#e11d5c] font-heading text-[11px] font-bold text-primary-foreground`}>
-      {avatarUrl ? <img src={avatarUrl} alt="" className="h-full w-full object-cover" /> : initials}
+      {avatarUrl ? <PhotoImg src={avatarUrl} fallback={initials} /> : initials}
     </span>
   )
 }
@@ -130,7 +131,7 @@ export default function AppShell() {
   useEffect(() => { try { window.localStorage.setItem('revival.rail', collapsed ? '1' : '0') } catch { /* storage unavailable */ } }, [collapsed])
 
   const section = SECTION_TITLES[pathname]
-    ?? (pathname.startsWith('/bible') ? 'Bible' : pathname.startsWith('/guide') ? 'Daily guide' : pathname.startsWith('/post') ? 'Post' : pathname.startsWith('/u/') ? 'Member'
+    ?? (pathname === '/profile/edit' ? 'Edit profile' : pathname.startsWith('/bible') ? 'Bible' : pathname.startsWith('/guide') ? 'Daily guide' : pathname.startsWith('/post') ? 'Post' : pathname.startsWith('/u/') ? 'Member'
       : pathname.startsWith('/community/cells/') ? 'Cell chat' : pathname.startsWith('/prayer/') ? 'Prayer wall' : pathname.startsWith('/create/') ? 'Create'
       : pathname.startsWith('/academy/') ? 'Course' : 'Revival One')
   const openCreate = (kind?: CreationKind) => {

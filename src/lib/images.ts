@@ -22,10 +22,14 @@ export async function shrinkImage(file: File, { maxSize = 800, quality = 0.86, s
   canvas.height = Math.round(sh * scale)
   const context = canvas.getContext('2d')
   if (!context) return file
+  // JPEG has no transparency; give see-through PNGs a white background rather than black.
+  context.fillStyle = '#ffffff'
+  context.fillRect(0, 0, canvas.width, canvas.height)
   context.drawImage(bitmap, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height)
   bitmap.close()
-  const type = canvas.toDataURL('image/webp').startsWith('data:image/webp') ? 'image/webp' : 'image/jpeg'
+  // JPEG: smaller than PNG and read by every phone browser (some older ones mishandle WebP).
+  const type = 'image/jpeg'
   const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, type, quality))
   if (!blob) return file
-  return new File([blob], file.name.replace(/\.[^.]+$/, '') + (type === 'image/webp' ? '.webp' : '.jpg'), { type })
+  return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type })
 }

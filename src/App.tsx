@@ -112,7 +112,8 @@ export default function App() {
               <Route path="/word/*" element={<Navigate to="/guide" replace />} />
               <Route path="/post/:id" element={<PostPage />} />
               <Route path="/u/:id" element={<PublicProfile />} />
-              <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
+              <Route path="/profile" element={<RequireAuth><PublicProfile self /></RequireAuth>} />
+              <Route path="/profile/edit" element={<RequireAuth><Profile /></RequireAuth>} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

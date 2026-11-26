@@ -1,5 +1,6 @@
 import type { CSSProperties, ElementType } from 'react'
 import { Link } from 'react-router-dom'
+import PhotoImg from '../ui/PhotoImg'
 import { ArrowRight, Bible, Briefcase, Clock, Play, GraphUp, HandHeart, HandMoney, HandStars, Notebook, Question, Sparkles } from '../ui/icons'
 import { initialsOf, readingMinutes, timeAgo, type Author, type OpportunityType, type Post, type PostKind, type PostMedia } from '../../lib/posts'
 
@@ -24,7 +25,7 @@ export const OPPORTUNITY_META: Record<OpportunityType, { label: string; icon: El
 export function AuthorAvatar({ author, size = 'h-10 w-10', text = 'text-xs' }: { author: Pick<Author, 'full_name' | 'avatar_url'> | null; size?: string; text?: string }) {
   return (
     <span className={`flex ${size} shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#ff5c8a] to-[#e11d5c] font-heading ${text} font-bold text-primary-foreground ring-2 ring-white/[0.08]`}>
-      {author?.avatar_url ? <img src={author.avatar_url} alt="" className="h-full w-full object-cover" loading="lazy" /> : initialsOf(author?.full_name ?? '')}
+      {author?.avatar_url ? <PhotoImg src={author.avatar_url} fallback={initialsOf(author.full_name ?? '')} lazy /> : initialsOf(author?.full_name ?? '')}
     </span>
   )
 }
