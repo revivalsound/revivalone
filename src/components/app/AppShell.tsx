@@ -145,7 +145,7 @@ export default function AppShell() {
         <AmbientField intensity={0.8} className="fixed" />
 
         {/* Sidebar: full list or icon rail (Spyda's workspace sidebar) */}
-        <aside className={`sticky top-0 z-30 hidden h-[100dvh] shrink-0 flex-col border-r border-white/[0.06] bg-shell/95 py-4 transition-[width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:flex ${collapsed ? 'w-[68px] items-center px-2' : 'w-[248px] px-3'}`}>
+        <aside className={`sticky top-0 z-30 hidden h-[100dvh] shrink-0 flex-col border-r border-white/[0.06] bg-shell py-4 transition-[width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:flex ${collapsed ? 'w-[68px] items-center px-2' : 'w-[248px] px-3'}`}>
           <Link to="/" className={`mb-5 flex items-center gap-2.5 rounded-lg px-1.5 py-1.5 transition-colors hover:bg-white/[0.04] ${collapsed ? 'justify-center' : ''}`} aria-label="Revival One home">
             <BrandMark size={30} animated />
             {!collapsed && <span className="flex flex-col"><span className="font-heading text-[14px] font-semibold leading-none">Revival One</span><span className="mt-1 text-[11px] leading-none text-muted-foreground">One movement</span></span>}
@@ -179,7 +179,7 @@ export default function AppShell() {
         </aside>
 
         <div className="relative z-10 flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between border-b border-white/[0.06] bg-shell/80 px-4 backdrop-blur-xl sm:px-6">
+          <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between border-b border-white/[0.06] bg-shell px-4 sm:px-6">
             <div className="flex min-w-0 items-center gap-2.5 text-[13px]">
               <button type="button" onClick={() => setCollapsed(value => !value)} aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} className="hidden h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-white/[0.06] hover:text-foreground lg:flex"><PanelLeft className="h-4 w-4" /></button>
               <Link to="/" className="flex items-center gap-2 lg:hidden" aria-label="Revival One home"><BrandMark size={26} animated /><span className="font-heading text-[15px] font-semibold">Revival One</span></Link>
@@ -202,7 +202,7 @@ export default function AppShell() {
         </div>
 
         {/* Phone navigation with the create button in the middle */}
-        <nav aria-label="App" className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-white/[0.07] bg-shell/90 px-2 pt-2 backdrop-blur-xl lg:hidden">
+        <nav aria-label="App" className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-white/[0.07] bg-shell px-2 pt-2 lg:hidden">
           <div className="mx-auto grid max-w-md grid-cols-5 items-end">
             {MOBILE.slice(0, 2).map(item => <MobileLink key={item.to} item={item} />)}
             <div className="flex justify-center">

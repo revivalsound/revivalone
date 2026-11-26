@@ -96,7 +96,7 @@ export default function Home() {
             <span className="hidden h-9 items-center rounded-full bg-primary px-4 font-heading text-[10px] font-semibold uppercase tracking-[0.14em] text-primary-foreground sm:inline-flex">Post</span>
           </button>
 
-          <div className="sticky top-14 z-10 -mx-4 mt-6 overflow-x-auto bg-background/80 px-4 py-3 backdrop-blur-xl [scrollbar-width:none] sm:mx-0 sm:rounded-full sm:px-0" role="tablist" aria-label="Filter posts">
+          <div className="sticky top-14 z-10 -mx-4 mt-6 overflow-x-auto bg-background px-4 py-3 [scrollbar-width:none] sm:mx-0 sm:rounded-full sm:px-0" role="tablist" aria-label="Filter posts">
             <div className="flex w-max gap-1.5">
               {(['all', ...POST_KINDS] as Filter[]).map(option => {
                 const active = option === filter

@@ -563,3 +563,32 @@ dialog.revival-dialog::backdrop { background: rgb(0 0 0 / 0.7); -webkit-backdrop
 .sheet-in { animation: sheet-in 340ms cubic-bezier(0.16, 1, 0.3, 1) both; }
 @keyframes sheet-in { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .sheet-in { animation: none; } }
+
+/* Custom dropdown: opens from its button with a soft spring; options settle in. */
+.select-menu { transform-origin: top center; animation: select-in 260ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.select-menu--up { transform-origin: bottom center; animation-name: select-in-up; }
+@keyframes select-in { from { opacity: 0; transform: translateY(-6px) scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes select-in-up { from { opacity: 0; transform: translateY(6px) scale(0.96); } to { opacity: 1; transform: none; } }
+.select-option { animation: select-option-in 240ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+@keyframes select-option-in { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .select-menu, .select-option { animation: none; } }
+
+/* Install card: rises with a spring, the icon pops, the perks settle in one by one. */
+.install-backdrop { animation: install-fade 260ms ease-out both; }
+.install-backdrop--out { animation: install-fade-out 300ms ease-in both; }
+.install-card { animation: install-rise 620ms cubic-bezier(0.18, 1.25, 0.4, 1) both; }
+.install-card--out { animation: install-sink 300ms cubic-bezier(0.4, 0, 1, 1) both; }
+.install-icon { animation: install-pop 700ms cubic-bezier(0.2, 1.6, 0.4, 1) 160ms both; }
+.install-perk { animation: install-perk 420ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.install-cta { animation: install-perk 420ms cubic-bezier(0.16, 1, 0.3, 1) 480ms both, install-pulse 2.4s ease-in-out 1.2s infinite; }
+.install-toast { animation: install-rise 520ms cubic-bezier(0.18, 1.25, 0.4, 1) both; }
+@keyframes install-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes install-fade-out { to { opacity: 0; } }
+@keyframes install-rise { from { opacity: 0; transform: translateY(70px) scale(0.94); } to { opacity: 1; transform: none; } }
+@keyframes install-sink { to { opacity: 0; transform: translateY(60px) scale(0.96); } }
+@keyframes install-pop { from { opacity: 0; transform: scale(0.4) rotate(-12deg); } to { opacity: 1; transform: none; } }
+@keyframes install-perk { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes install-pulse { 0%, 100% { box-shadow: 0 14px 34px rgba(255, 92, 138, 0.4); } 50% { box-shadow: 0 14px 44px rgba(255, 92, 138, 0.7), 0 0 0 6px rgba(255, 92, 138, 0.12); } }
+@media (prefers-reduced-motion: reduce) {
+  .install-backdrop, .install-backdrop--out, .install-card, .install-card--out, .install-icon, .install-perk, .install-cta, .install-toast { animation: none; }
+}

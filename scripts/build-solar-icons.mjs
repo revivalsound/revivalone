@@ -122,6 +122,10 @@ const MAP = {
   VideoFrame: 'video-frame-play-horizontal',
   CloudUpload: 'cloud-upload',
   Moon: 'moon',
+  Download: 'download-minimalistic',
+  AddSquare: 'add-square',
+  Smartphone: 'smartphone',
+  WifiOff: 'cloud-cross',
 }
 
 function inner(svg) {

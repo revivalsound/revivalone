@@ -6,6 +6,7 @@ import {
 import { Notice } from '../../components/ui/kit'
 import ChapterText from '../../components/bible/ChapterText'
 import Sheet from '../../components/ui/Sheet'
+import Select from '../../components/ui/Select'
 import { useTheme } from '../../lib/theme'
 import BookPicker from '../../components/bible/BookPicker'
 import StudyPanel from '../../components/bible/StudyPanel'
@@ -221,7 +222,8 @@ export default function BibleReader() {
       )}
 
       {/* Reader toolbar */}
-      <div className="sticky top-14 z-20 -mx-4 flex items-center gap-2 border-b border-white/[0.06] bg-background/85 px-4 py-2.5 backdrop-blur-xl sm:mx-0 sm:rounded-full sm:border sm:px-2">
+      <div className="sticky top-14 z-20 -mx-4 bg-background px-4 py-2 shadow-[0_1px_0_rgb(var(--ink)/0.06)] sm:-mx-6 sm:px-6">
+      <div className="flex items-center gap-2 sm:rounded-full sm:border sm:border-white/[0.08] sm:bg-surface sm:p-1.5">
         <button type="button" onClick={() => setPicking(true)} className="inline-flex h-10 min-w-0 items-center gap-2 rounded-full bg-white/[0.05] pl-3 pr-3.5 font-heading text-[14px] font-semibold transition-colors hover:bg-white/[0.09]">
           <Bible className="h-4 w-4 shrink-0 text-primary" /> <span className="truncate">{book.name} {chapterNumber}</span> <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
         </button>
@@ -237,6 +239,7 @@ export default function BibleReader() {
           <button type="button" onClick={() => setStudyOpen(true)} aria-label="Study notes" className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.05] hover:bg-white/[0.09] lg:hidden"><Notebook className="h-4 w-4 text-primary" /></button>
           <button type="button" onClick={() => setSettings(true)} aria-label="Reading settings" aria-haspopup="dialog" className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/[0.05] hover:bg-white/[0.09]"><Settings className="h-4 w-4" /></button>
         </div>
+      </div>
       </div>
       {translationsOpen && (
         <Sheet title="Bible version" subtitle="Free translations from the Free Use Bible API" onClose={closeTranslations}>
@@ -277,15 +280,13 @@ export default function BibleReader() {
             <Toggle label="Verse numbers" on={prefs.verseNumbers} onChange={value => updatePrefs({ verseNumbers: value })} />
             {data && Object.keys(data.thisChapterAudioLinks ?? {}).length > 1 && (
               <label className="block text-[11px] font-semibold text-muted-foreground">Narrator
-                <select value={prefs.narrator} onChange={event => updatePrefs({ narrator: event.target.value })} className="mt-2 h-10 w-full rounded-full border border-white/[0.09] bg-white/[0.03] px-3 text-xs font-semibold text-foreground outline-none [color-scheme:dark]">
-                  {Object.keys(data.thisChapterAudioLinks ?? {}).map(id => <option key={id} value={id}>{NARRATORS[id] ?? id}</option>)}
-                </select>
+                <Select label="Narrator" value={prefs.narrator} onChange={value => updatePrefs({ narrator: value })} className="mt-2 w-full" options={Object.keys(data.thisChapterAudioLinks ?? {}).map(id => ({ value: id, label: NARRATORS[id] ?? id, description: 'Berean Standard Bible audio' }))} />
               </label>
             )}
           </div>
         </Sheet>
       )}
-      {playing && <div className="sticky top-[7.6rem] z-10 h-0.5 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-primary transition-[width] duration-300" style={{ width: `${progress * 100}%` }} /></div>}
+      {playing && <div className="sticky top-[7.75rem] z-10 h-0.5 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-primary transition-[width] duration-300" style={{ width: `${progress * 100}%` }} /></div>}
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
         <article className="mx-auto w-full max-w-[44rem]">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Link as LinkIcon, Loader, Notebook, Pen } from '../ui/icons'
+import Select from '../ui/Select'
 import { COMMENTARIES, fetchCommentary, fetchCrossReferences, fetchPassageText, formatReference, readerPath, type CommentaryId, type CommentaryNote, type CrossReference } from '../../lib/bible'
 import type { Highlight } from '../../lib/reading'
 
@@ -45,9 +46,7 @@ export default function StudyPanel({ translation, book, chapter, focusVerse, hig
       <div className="mt-4 min-h-0 flex-1 overflow-y-auto pr-1">
         {tab === 'notes' && (
           <>
-            <select value={commentary} onChange={event => setCommentary(event.target.value as CommentaryId)} aria-label="Commentary" className="h-10 w-full rounded-full border border-white/[0.09] bg-white/[0.03] px-4 text-xs font-semibold outline-none [color-scheme:dark]">
-              {COMMENTARIES.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}
-            </select>
+            <Select label="Commentary" value={commentary} onChange={setCommentary} className="w-full" options={COMMENTARIES.map(item => ({ value: item.id, label: item.name, description: item.id === 'tyndale' ? 'Verse-by-verse notes' : 'Classic commentary' }))} />
             {focusVerse && <p className="mt-3 text-[11px] text-muted-foreground">Showing notes on verse {focusVerse}.</p>}
             {notes === null ? <Spinner /> : (
               <div className="mt-4 space-y-4">

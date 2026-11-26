@@ -147,7 +147,7 @@ export default function ProfilePage({ self = false }: { self?: boolean }) {
       </div>
 
       {/* Tabs */}
-      <div className="sticky top-14 z-10 -mx-4 mt-8 border-b border-white/[0.07] bg-background/85 px-4 backdrop-blur-xl sm:mx-0 sm:px-0" role="tablist" aria-label="Profile sections">
+      <div className="sticky top-14 z-10 -mx-4 mt-8 border-b border-white/[0.07] bg-background px-4 sm:-mx-6 sm:px-6" role="tablist" aria-label="Profile sections">
         <div className="flex gap-1 overflow-x-auto sm:px-6">
           {tabs.map(item => (
             <button key={item.id} type="button" role="tab" aria-selected={tab === item.id} onClick={() => setTab(item.id)} className={`relative h-12 shrink-0 px-4 text-[14px] font-semibold transition-colors ${tab === item.id ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>

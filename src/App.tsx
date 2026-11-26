@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './lib/AuthContext'
 import { ThemeProvider } from './lib/theme'
 import Landing from './pages/Landing'
 import RevivalSplash from './components/RevivalSplash'
+import InstallPrompt from './components/InstallPrompt'
 
 // Only the landing page is on the critical path; the app and auth screens
 // download when visited (same split as Spyda).
@@ -85,6 +86,7 @@ export default function App() {
       <BrowserRouter>
         <ScrollToTop />
         <Splash />
+        <InstallPrompt />
         <Suspense fallback={<ScreenLoader />}>
           <Routes>
             <Route path="/" element={<Landing />} />

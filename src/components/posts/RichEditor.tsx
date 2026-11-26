@@ -6,6 +6,7 @@ import Highlight from '@tiptap/extension-highlight'
 import TextAlign from '@tiptap/extension-text-align'
 import { Placeholder } from '@tiptap/extension-placeholder'
 import { ChevronDown, Link as LinkIcon } from '../ui/icons'
+import Select from '../ui/Select'
 
 export const TEXT_COLORS = [
   { name: 'Default', value: '' },
@@ -108,28 +109,23 @@ function Toolbar({ editor }: { editor: Editor }) {
   }
 
   return (
-    <div className="sticky top-14 z-10 flex flex-wrap items-center gap-1 rounded-t-[21px] border-b border-white/[0.07] bg-surface-raised/95 p-2 backdrop-blur-xl" role="toolbar" aria-label="Formatting">
-      <select
-        aria-label="Text style"
+    <div className="sticky top-14 z-10 flex flex-wrap items-center gap-1 rounded-t-[21px] border-b border-white/[0.07] bg-surface-raised p-2" role="toolbar" aria-label="Formatting">
+      <Select
+        size="sm"
+        keepFocus
+        label="Text style"
         value={state.block}
-        onChange={event => {
-          const value = event.target.value
-          if (value === 'p') chain().setParagraph().run()
-          else chain().toggleHeading({ level: Number(value.slice(1)) as 1 | 2 | 3 }).run()
-        }}
-        className="h-9 rounded-xl border border-white/[0.08] bg-white/[0.04] px-2 text-xs font-semibold outline-none [color-scheme:dark]"
-      >
-        <option value="p">Paragraph</option>
-        <option value="h1">Heading 1</option>
-        <option value="h2">Heading 2</option>
-        <option value="h3">Heading 3</option>
-      </select>
-      <select aria-label="Font" value={state.font} onChange={event => (event.target.value ? chain().setFontFamily(event.target.value).run() : chain().unsetFontFamily().run())} className="h-9 rounded-xl border border-white/[0.08] bg-white/[0.04] px-2 text-xs font-semibold outline-none [color-scheme:dark]">
-        {FONTS.map(font => <option key={font.name} value={font.value}>{font.name}</option>)}
-      </select>
-      <select aria-label="Text size" value={state.size} onChange={event => (event.target.value ? chain().setFontSize(event.target.value).run() : chain().unsetFontSize().run())} className="h-9 rounded-xl border border-white/[0.08] bg-white/[0.04] px-2 text-xs font-semibold outline-none [color-scheme:dark]">
-        {SIZES.map(size => <option key={size.name} value={size.value}>{size.name}</option>)}
-      </select>
+        onChange={value => (value === 'p' ? chain().setParagraph().run() : chain().toggleHeading({ level: Number(value.slice(1)) as 1 | 2 | 3 }).run())}
+        menuWidth={200}
+        options={[
+          { value: 'p', label: 'Paragraph', description: 'Body text' },
+          { value: 'h1', label: 'Heading 1', description: 'Large title', preview: { fontFamily: '"Space Grotesk", sans-serif', fontSize: 17 } },
+          { value: 'h2', label: 'Heading 2', description: 'Section title', preview: { fontFamily: '"Space Grotesk", sans-serif', fontSize: 15 } },
+          { value: 'h3', label: 'Heading 3', description: 'Small heading', preview: { fontFamily: '"Space Grotesk", sans-serif', color: 'rgb(var(--primary-soft))' } },
+        ]}
+      />
+      <Select size="sm" keepFocus label="Font" value={state.font} onChange={value => (value ? chain().setFontFamily(value).run() : chain().unsetFontFamily().run())} options={FONTS.map(font => ({ value: font.value, label: font.name, preview: font.value ? { fontFamily: font.value } : undefined }))} />
+      <Select size="sm" keepFocus label="Text size" value={state.size} onChange={value => (value ? chain().setFontSize(value).run() : chain().unsetFontSize().run())} options={SIZES.map(size => ({ value: size.value, label: size.name, description: size.value || '17px' }))} />
       <Divider />
       <Tool label="Bold (Ctrl+B)" active={state.bold} onClick={() => chain().toggleBold().run()}><b className="font-heading text-sm">B</b></Tool>
       <Tool label="Italic (Ctrl+I)" active={state.italic} onClick={() => chain().toggleItalic().run()}><i className="font-scripture text-sm">I</i></Tool>

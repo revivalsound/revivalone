@@ -100,7 +100,7 @@ export default function ProfileSettings() {
   return (
     <form onSubmit={save} className="mx-auto max-w-3xl px-4 pb-16 pt-4 sm:px-6 sm:pt-6">
       {/* Header */}
-      <div className="sticky top-14 z-20 -mx-4 flex items-center gap-3 border-b border-white/[0.06] bg-background/85 px-4 py-3 backdrop-blur-xl sm:mx-0 sm:rounded-full sm:border sm:px-2">
+      <div className="sticky top-14 z-20 -mx-4 flex items-center gap-3 border-b border-white/[0.06] bg-background px-4 py-3 sm:-mx-6 sm:px-6">
         <Link to="/profile" aria-label="Back to your profile" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/[0.05] hover:bg-white/[0.09]"><ArrowLeft className="h-4 w-4" /></Link>
         <h1 className="flex-1 font-heading text-lg font-semibold">Edit profile</h1>
         <button type="submit" disabled={saving} className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-5 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground disabled:opacity-60">

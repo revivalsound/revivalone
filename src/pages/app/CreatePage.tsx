@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, CalendarDays, Eye, Fire, Loader, Users } from '../../components/ui/icons'
 import { Notice, inputClass } from '../../components/ui/kit'
 import MediaPicker from '../../components/community/MediaPicker'
+import Select from '../../components/ui/Select'
 import { CellCard, EventCard } from '../../components/community/cards'
 import { useAuth } from '../../lib/AuthContext'
 import { createInitiative, fetchInitiative, updateInitiative, uploadMedia, type Format, type Initiative, type InitiativeKind } from '../../lib/community'
@@ -181,9 +182,7 @@ export function CreateForm({ kind, existing }: { kind: InitiativeKind; existing?
                 <div className="grid gap-4 sm:grid-cols-3">
                   <Field label="Starts"><input required type="date" value={values.date} onChange={event => set('date', event.target.value)} className={`${inputClass} px-4 [color-scheme:dark]`} /></Field>
                   <Field label="Length">
-                    <select value={values.weeks} onChange={event => set('weeks', event.target.value)} className={`${inputClass} px-4 [color-scheme:dark]`}>
-                      {[1, 2, 3, 4, 6, 8, 10, 12].map(weeks => <option key={weeks} value={weeks}>{weeks} week{weeks > 1 ? 's' : ''}</option>)}
-                    </select>
+                    <Select label="Length" value={values.weeks} onChange={value => set('weeks', value)} className="w-full !rounded-2xl" options={[1, 2, 3, 4, 6, 8, 10, 12].map(weeks => ({ value: String(weeks), label: `${weeks} week${weeks > 1 ? 's' : ''}` }))} />
                   </Field>
                   <Field label="Session time"><input required type="time" value={values.start_time} onChange={event => set('start_time', event.target.value)} className={`${inputClass} px-4 [color-scheme:dark]`} /></Field>
                 </div>
