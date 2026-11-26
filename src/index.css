@@ -1,0 +1,436 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Spyda's design system, in Revival One's colours.
+   Spyda mint (#9dfab0)  -> flame pink (#ff5c8a)
+   Spyda sky  (#8bd3ff)  -> ember amber (#ffb36b)
+   Everything else — surfaces, radii, pills, motion — is the same system. */
+@layer base {
+  :root,
+  .dark {
+    --background: 345 30% 2%;
+    --foreground: 20 60% 97%;
+
+    --card: 345 18% 5%;
+    --card-foreground: 20 60% 97%;
+
+    --popover: 345 18% 5%;
+    --popover-foreground: 20 60% 97%;
+
+    --primary: 344 100% 68%;
+    --primary-foreground: 344 80% 8%;
+
+    --secondary: 345 12% 10%;
+    --secondary-foreground: 20 60% 97%;
+
+    --muted: 345 12% 10%;
+    --muted-foreground: 345 8% 64%;
+
+    --accent: 345 12% 12%;
+    --accent-foreground: 20 60% 97%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 20 60% 97%;
+
+    --border: 345 12% 13%;
+    --input: 345 12% 13%;
+    --ring: 344 100% 68%;
+
+    --radius: 0.625rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  *::-webkit-scrollbar { display: none; }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Montserrat', sans-serif;
+  }
+  html { scroll-behavior: smooth; scroll-padding-top: 88px; }
+  ::selection { color: #2a0612; background: #ffc2d3; }
+  :focus-visible { outline: 2px solid #ff8fb0; outline-offset: 3px; }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply text-transparent bg-clip-text;
+    background-image: linear-gradient(135deg, #ff8fb0 0%, #ffb36b 55%, #fff4ec 100%);
+  }
+
+  /* Glass surfaces, as in Spyda: solid by default, sheen for depth. */
+  .glass,
+  .glass-strong {
+    border-color: rgb(255 255 255 / 0.1);
+    background-image:
+      linear-gradient(180deg, rgb(255 255 255 / 0.075) 0%, rgb(255 255 255 / 0) 38%),
+      linear-gradient(160deg, rgb(255 255 255 / 0.045) 0%, rgb(255 255 255 / 0) 60%);
+  }
+  .glass { background-color: #0f0b0c; }
+  .glass-strong { background-color: #161012; }
+
+  @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass-blur {
+      background-color: rgb(15 11 12 / 0.84);
+      -webkit-backdrop-filter: blur(26px) saturate(135%) brightness(1.02);
+      backdrop-filter: blur(26px) saturate(135%) brightness(1.02);
+    }
+    .glass-strong.glass-blur { background-color: rgb(22 16 18 / 0.88); }
+  }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee { animation: marquee 34s linear infinite; }
+
+/* ── Pricing-style texture cards: bloom into a grain gradient on hover ── */
+.bloom-texture {
+  isolation: isolate;
+  overflow: hidden;
+  transition: color 320ms ease, border-color 320ms ease, transform 320ms ease, box-shadow 320ms ease;
+}
+.bloom-texture::before,
+.bloom-texture::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 380ms ease, transform 650ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.bloom-texture > * { z-index: 1; }
+.bloom-texture > :not(.absolute) { position: relative; }
+.bloom-texture::before { transform: scale(1.12) rotate(-2deg); background: var(--bloom); }
+.bloom-texture::after {
+  background-image: radial-gradient(circle, rgba(255,255,255,0.7) 0 0.45px, transparent 0.75px);
+  background-size: 3px 3px;
+  mix-blend-mode: overlay;
+}
+.bloom-texture--rose {
+  --bloom:
+    radial-gradient(circle at 78% 82%, #ffb36b 0, #e0346a 28%, transparent 50%),
+    radial-gradient(circle at 22% 30%, #8a1b4a 0, #4a0b28 48%, #1a0610 100%);
+}
+.bloom-texture--ember {
+  --bloom:
+    radial-gradient(circle at 94% 92%, #ffd27a 0, #ff6b3d 35%, transparent 58%),
+    radial-gradient(circle at 18% 25%, #ff5c8a 0, #b0204f 55%, #3d0a1d 100%);
+}
+.bloom-texture--dusk {
+  --bloom:
+    radial-gradient(circle at 14% 16%, #d7b8ff 0, #7b4bc7 22%, transparent 43%),
+    radial-gradient(circle at 88% 72%, #ff5c8a 0, #a3123f 44%, #2a0718 100%);
+}
+.bloom-texture--dawn {
+  --bloom:
+    radial-gradient(circle at 84% 88%, #ffd08a 0, #ff7a45 27%, transparent 50%),
+    radial-gradient(circle at 18% 78%, #ff3d6e 0, #7f1d3e 40%, transparent 61%),
+    radial-gradient(circle at 72% 12%, #5a2a6b 0, #2a0f33 58%, #0d0510 100%);
+}
+.bloom-texture:hover,
+.bloom-texture:focus-within {
+  color: #fff;
+  border-color: rgba(255,255,255,0.34);
+  transform: translateY(-4px);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+}
+.bloom-texture:hover::before,
+.bloom-texture:hover::after,
+.bloom-texture:focus-within::before,
+.bloom-texture:focus-within::after { opacity: 1; transform: scale(1) rotate(0deg); }
+.bloom-texture:hover :is(p, li, span, svg, h3),
+.bloom-texture:focus-within :is(p, li, span, svg, h3) { color: rgba(255,255,255,0.9) !important; }
+
+/* ── Splash: the flame in liquid chrome inside a glass orb (Spyda's splash) ── */
+.revival-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #060304;
+  color: hsl(var(--foreground));
+  animation: splash-in 420ms ease-out both;
+  transition: opacity 260ms ease, filter 260ms ease;
+}
+.revival-splash--leaving { opacity: 0; filter: blur(6px); }
+.revival-splash__aurora {
+  position: absolute;
+  width: 70vmax;
+  height: 70vmax;
+  border-radius: 999px;
+  filter: blur(80px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.revival-splash__aurora--rose {
+  left: -18vmax;
+  top: -22vmax;
+  background: radial-gradient(circle, rgba(176, 32, 79, 0.85), transparent 62%);
+  animation: aurora-a 7s ease-in-out infinite alternate;
+}
+.revival-splash__aurora--ember {
+  right: -22vmax;
+  bottom: -26vmax;
+  background: radial-gradient(circle, rgba(170, 70, 20, 0.85), transparent 62%);
+  animation: aurora-b 8s ease-in-out infinite alternate;
+}
+.revival-splash__grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.08;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0 0.5px, transparent 0.8px);
+  background-size: 3px 3px;
+  mask-image: radial-gradient(circle at center, black, transparent 70%);
+  pointer-events: none;
+}
+.revival-splash__stage { position: relative; display: flex; flex-direction: column; align-items: center; gap: 28px; padding: 24px; }
+.revival-splash__orb { position: relative; width: clamp(132px, 34vw, 168px); aspect-ratio: 1; animation: orb-in 900ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.revival-splash__halo {
+  position: absolute;
+  inset: -14px;
+  border-radius: 999px;
+  background: conic-gradient(from 0deg, #ff5c8a, #ffb36b, #7b1b45, #e0346a, #d7b8ff, #ff5c8a);
+  filter: blur(22px);
+  opacity: 0.7;
+  animation: spin 9s linear infinite, halo-breathe 2.8s ease-in-out infinite;
+}
+.revival-splash__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  padding: 1.5px;
+  background: conic-gradient(from 140deg, #ff5c8a, #7b1b45, #ffb36b, #e0346a, #ff5c8a);
+  animation: spin 14s linear infinite reverse;
+}
+.revival-splash__glass {
+  position: absolute;
+  inset: 1.5px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.24), transparent 34%),
+    radial-gradient(circle at 70% 80%, rgba(255, 179, 107, 0.28), transparent 46%),
+    radial-gradient(circle at 50% 50%, #2a0c17, #060304 72%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), inset 0 -18px 40px rgba(0, 0, 0, 0.55);
+}
+.revival-splash__mark { position: absolute; inset: 22%; animation: mark-float 3.6s ease-in-out infinite; }
+
+/* Liquid chrome without WebGL: metal bands sliding through the flame's shape. */
+.flame-chrome {
+  position: absolute;
+  inset: 0;
+  -webkit-mask: url('/assets/revival-flame-mark.png') center / contain no-repeat;
+  mask: url('/assets/revival-flame-mark.png') center / contain no-repeat;
+  background:
+    linear-gradient(115deg,
+      #3a0a1c 0%, #e0346a 10%, #fff0f4 16%, #ff8fb0 22%, #7b1b45 32%,
+      #2a0712 40%, #ffb36b 50%, #fff6ec 55%, #c2416b 64%, #3a0a1c 72%,
+      #e0346a 82%, #fff0f4 88%, #ff8fb0 94%, #3a0a1c 100%);
+  background-size: 260% 260%;
+  animation: chrome-flow 3.2s linear infinite;
+}
+.revival-splash__word {
+  position: relative;
+  margin: 0;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(2.2rem, 11vw, 3.4rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: transparent;
+  background:
+    linear-gradient(100deg, transparent 38%, rgba(255, 255, 255, 0.95) 50%, transparent 62%) 0 0 / 240% 100% no-repeat,
+    linear-gradient(135deg, #fff4ec, #ff8fb0 52%, #ffb36b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: word-in 700ms ease 180ms both, word-sheen 2.4s ease-in-out 600ms infinite;
+}
+.revival-splash__message { margin-top: -14px; font-size: 0.8rem; letter-spacing: 0.02em; color: rgba(255, 244, 236, 0.62); animation: word-in 700ms ease 320ms both; }
+.revival-splash__track { position: relative; width: min(52vw, 180px); height: 2px; overflow: hidden; border-radius: 999px; background: rgba(255, 255, 255, 0.07); animation: word-in 700ms ease 420ms both; }
+.revival-splash__track i {
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, #ff5c8a, #ffb36b, transparent);
+  box-shadow: 0 0 12px rgba(255, 92, 138, 0.6);
+  animation: track 1.3s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@keyframes splash-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes halo-breathe { 0%, 100% { opacity: 0.5; } 50% { opacity: 0.85; } }
+@keyframes orb-in { from { opacity: 0; transform: scale(0.86); filter: blur(10px); } to { opacity: 1; transform: scale(1); filter: blur(0); } }
+@keyframes mark-float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-4px) rotate(-1.5deg); } }
+@keyframes chrome-flow { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
+@keyframes word-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes word-sheen { 0% { background-position: 130% 0, 0 0; } 60%, 100% { background-position: -130% 0, 0 0; } }
+@keyframes track { from { transform: translateX(-110%); } to { transform: translateX(260%); } }
+@keyframes aurora-a { to { transform: translate(8vmax, 6vmax) scale(1.08); } }
+@keyframes aurora-b { to { transform: translate(-6vmax, -8vmax) scale(1.1); } }
+
+/* ── Hero field (mesh-gradient shader + painted fallback + legibility scrim) ── */
+.hero-field-canvas { animation: hero-field-in 1.4s ease-out both; }
+@keyframes hero-field-in { from { opacity: 0; } to { opacity: 1; } }
+
+.hero-field-fallback {
+  background:
+    radial-gradient(70% 82% at 18% 4%, rgba(110, 20, 52, 0.9), transparent 74%),
+    radial-gradient(64% 74% at 86% 0%, rgba(80, 30, 12, 0.9), transparent 76%),
+    radial-gradient(96% 96% at 50% 42%, rgba(70, 14, 36, 0.6), transparent 84%),
+    #14040b;
+}
+.hero-field-scrim {
+  background:
+    linear-gradient(180deg, rgb(7 4 5 / 0.7) 0%, rgb(7 4 5 / 0.22) 12%, rgb(7 4 5 / 0.04) 30%, rgb(7 4 5 / 0.22) 62%, rgb(7 4 5 / 0.78) 88%, hsl(var(--background)) 100%),
+    radial-gradient(120% 78% at 50% 24%, transparent 42%, rgb(7 4 5 / 0.7) 100%);
+}
+
+/* The landing hero panel's bright field: rose, ember and plum. */
+.hero-field-fallback--vivid {
+  background:
+    radial-gradient(70% 80% at 20% 10%, #b0204f, transparent 72%),
+    radial-gradient(60% 70% at 85% 5%, #a2441a, transparent 74%),
+    radial-gradient(90% 90% at 50% 60%, #c8325f, transparent 80%),
+    #7a1438;
+}
+.hero-field-scrim--vivid {
+  background:
+    linear-gradient(180deg, rgb(26 4 12 / 0.46) 0%, rgb(26 4 12 / 0.1) 22%, transparent 45%),
+    radial-gradient(70% 38% at 50% 100%, rgb(255 228 214 / 0.2), transparent 70%),
+    radial-gradient(40% 30% at 12% 92%, rgb(255 228 214 / 0.12), transparent 70%),
+    radial-gradient(40% 30% at 88% 90%, rgb(255 228 214 / 0.12), transparent 70%);
+}
+
+/* One entrance for the hero, on load only. */
+.landing-enter { animation: landing-enter 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.landing-enter--late { animation-delay: 0.18s; }
+@keyframes landing-enter { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+/* Screen-level entrance inside the app. */
+.page-enter { animation: landing-enter 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
+.partners-marquee {
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  mask-image: linear-gradient(90deg, transparent, black 12%, black 88%, transparent);
+}
+.partners-marquee__track {
+  display: inline-flex;
+  min-width: max-content;
+  align-items: center;
+  gap: clamp(2.5rem, 7vw, 5rem);
+  padding-right: clamp(2.5rem, 7vw, 5rem);
+  animation: partners-scroll 26s linear infinite;
+}
+.partners-marquee:hover .partners-marquee__track { animation-play-state: paused; }
+@keyframes partners-scroll { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+
+/* ── Lightning: the brand's light running round a card's border ──
+   Spyda's "faq-bolt": a conic gradient spins behind a mask that keeps only the
+   2px ring, with a blurred copy for the glow. The first lap is quick, like a
+   strike, then it settles into a steady run.
+   .bolt-card--on  — strike + steady run (FAQ open, selected cards)
+   .bolt-card--hover — strikes when hovered/focused
+   .brand-ring--on — fast loop for avatars / loading states */
+@property --bolt {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+.bolt-card, .brand-ring { position: relative; }
+.bolt-card::before,
+.bolt-card::after,
+.brand-ring::before,
+.brand-ring::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background: conic-gradient(from var(--bolt), transparent 0deg, transparent 190deg, rgba(255, 92, 138, 0.35) 250deg, #ff5c8a 310deg, #ffffff 334deg, #ffb36b 350deg, transparent 360deg);
+  transition: opacity 300ms ease;
+}
+.bolt-card::before,
+.brand-ring::before {
+  padding: 2px;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+.bolt-card::after,
+.brand-ring::after { z-index: -1; filter: blur(14px); }
+.brand-ring::after { filter: blur(6px); }
+/* Photo cards clip their overflow at the padding box, so the ring moves just
+   inside the edge and paints over the image. */
+.bolt-card--inset::before { inset: 0; z-index: 3; }
+
+.brand-ring--on::before { opacity: 1; animation: bolt 1.6s linear infinite; }
+.brand-ring--on::after { opacity: 0.7; animation: bolt 1.6s linear infinite; }
+
+.bolt-card--on::before,
+.bolt-card--hover:is(:hover, :focus-within)::before { opacity: 1; }
+.bolt-card--on::after,
+.bolt-card--hover:is(:hover, :focus-within)::after { opacity: 0.45; }
+.bolt-card--on::before,
+.bolt-card--on::after,
+.bolt-card--hover:is(:hover, :focus-within)::before,
+.bolt-card--hover:is(:hover, :focus-within)::after {
+  animation: bolt-strike 0.9s cubic-bezier(0.2, 0.7, 0.2, 1), bolt 2.6s linear 0.9s infinite;
+}
+@keyframes bolt { to { --bolt: 360deg; } }
+@keyframes bolt-strike { from { --bolt: -360deg; } to { --bolt: 0deg; } }
+
+/* A one-off flash for the hero: a bolt of light that cracks across the panel. */
+.hero-strike {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(60% 50% at var(--strike-x, 70%) 0%, rgba(255, 236, 242, 0.55), transparent 70%);
+  opacity: 0;
+  mix-blend-mode: screen;
+  animation: hero-strike 9s ease-out 1.4s infinite;
+}
+@keyframes hero-strike {
+  0%, 100% { opacity: 0; }
+  1% { opacity: 0.9; }
+  2% { opacity: 0.15; }
+  3.2% { opacity: 0.7; }
+  7% { opacity: 0; }
+}
+
+/* Solar line-duotone icons: never shrink in flex rows; 2.2+ stroke is heavier. */
+.solar-icon { flex-shrink: 0; }
+.solar-icon--bold [stroke-width="1.5"] { stroke-width: 2; }
+
+/* Bottom nav on phones sits above the home indicator. */
+.safe-bottom { padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); }
+
+dialog.revival-dialog { padding: 0; border: 0; background: transparent; color: inherit; max-width: 100vw; max-height: 100dvh; }
+dialog.revival-dialog::backdrop { background: rgb(0 0 0 / 0.7); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.dialog-in { animation: dialog-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+@keyframes dialog-in { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .revival-splash, .revival-splash *, .flame-chrome,
+  .hero-field-canvas, .landing-enter, .page-enter, .hero-strike,
+  .animate-marquee, .partners-marquee__track, .dialog-in { animation: none !important; }
+  .bloom-texture, .bloom-texture::before, .bloom-texture::after { transition: none; }
+  .bolt-card--on::before, .bolt-card--on::after,
+  .bolt-card--hover:is(:hover, :focus-within)::before, .bolt-card--hover:is(:hover, :focus-within)::after,
+  .brand-ring--on::before, .brand-ring--on::after { animation: none; }
+  .bolt-card--on::before, .brand-ring--on::before { background: linear-gradient(135deg, #ff5c8a, #ffb36b); }
+  .bolt-card--on::after, .brand-ring--on::after { opacity: 0; }
+}
