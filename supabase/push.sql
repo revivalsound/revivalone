@@ -2,6 +2,14 @@
 -- Run once in the Supabase SQL Editor after follows.sql. Safe to re-run.
 -- Then run the one-line insert into private.push_settings from your .env.local notes.
 
+-- follows.sql creates the notifications this file sends; stop with a clear message if it hasn't run.
+do $$
+begin
+  if to_regclass('public.notifications') is null then
+    raise exception 'Run supabase/follows.sql first: it creates the notifications table that push.sql sends.';
+  end if;
+end $$;
+
 /* ── Devices that asked for push ── */
 
 create table if not exists public.push_subscriptions (
