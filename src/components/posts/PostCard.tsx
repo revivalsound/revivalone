@@ -1,7 +1,7 @@
 import type { CSSProperties, ElementType } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Bible, Briefcase, Clock, GraphUp, HandHeart, HandMoney, HandStars, Notebook, Question, Sparkles } from '../ui/icons'
-import { initialsOf, readingMinutes, timeAgo, type Author, type OpportunityType, type Post, type PostKind } from '../../lib/posts'
+import { ArrowRight, Bible, Briefcase, Clock, Play, GraphUp, HandHeart, HandMoney, HandStars, Notebook, Question, Sparkles } from '../ui/icons'
+import { initialsOf, readingMinutes, timeAgo, type Author, type OpportunityType, type Post, type PostKind, type PostMedia } from '../../lib/posts'
 
 type Meta = { label: string; plural: string; icon: ElementType; accent: string; copy: string }
 
@@ -72,7 +72,8 @@ export default function PostCard({ post, compact = false }: { post: Post; compac
         <h3 className={`mt-4 font-heading font-semibold leading-[1.15] tracking-[-0.015em] text-foreground ${compact ? 'text-lg' : 'text-[1.45rem] sm:text-[1.6rem]'}`}>
           <Link to={`/post/${post.id}`} className="outline-none after:absolute after:inset-0 after:z-[1] after:rounded-[26px] focus-visible:after:ring-2 focus-visible:after:ring-primary">{post.title}</Link>
         </h3>
-        <p className={`mt-2.5 text-sm leading-6 text-muted-foreground ${compact ? 'line-clamp-2' : 'line-clamp-3'}`}>{excerpt}</p>
+        {excerpt && <p className={`mt-2.5 text-sm leading-6 text-muted-foreground ${compact ? 'line-clamp-2' : 'line-clamp-3'}`}>{excerpt}</p>}
+        {post.media && post.media.length > 0 && <MediaPreview media={post.media} compact={compact} />}
 
         <footer className={`flex flex-wrap items-center gap-2 ${compact ? 'mt-4' : 'mt-6'}`}>
           {post.scripture && (
@@ -96,6 +97,25 @@ export function PostCardSkeleton() {
       <div className="mt-5 h-6 w-3/4 animate-pulse rounded-full bg-white/[0.07]" />
       <div className="mt-3 h-3 w-full animate-pulse rounded-full bg-white/[0.05]" />
       <div className="mt-2 h-3 w-5/6 animate-pulse rounded-full bg-white/[0.05]" />
+    </div>
+  )
+}
+
+/** Up to four photos or videos on a feed card, in a tidy grid. */
+function MediaPreview({ media, compact }: { media: PostMedia[]; compact: boolean }) {
+  const shown = media.slice(0, compact ? 1 : 4)
+  const extra = media.length - shown.length
+  return (
+    <div className={`relative mt-4 grid gap-1.5 overflow-hidden rounded-[18px] ${shown.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+      {shown.map((item, index) => (
+        <div key={item.url} className={`relative overflow-hidden bg-black ${shown.length === 1 ? 'aspect-[16/9]' : shown.length === 3 && index === 0 ? 'row-span-2 aspect-auto' : 'aspect-[4/3]'}`}>
+          {item.type === 'image'
+            ? <img src={item.url} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
+            : <video src={`${item.url}#t=0.1`} muted playsInline preload="metadata" className="h-full w-full object-cover" />}
+          {item.type === 'video' && <span className="absolute left-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-md"><Play className="h-3.5 w-3.5" /></span>}
+          {extra > 0 && index === shown.length - 1 && <span className="absolute inset-0 flex items-center justify-center bg-black/55 font-heading text-xl font-semibold text-white">+{extra}</span>}
+        </div>
+      ))}
     </div>
   )
 }

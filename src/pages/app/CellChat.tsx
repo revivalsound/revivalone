@@ -7,7 +7,7 @@ import { MediaCover } from '../../components/community/cards'
 import { useAuth } from '../../lib/AuthContext'
 import { supabase } from '../../lib/supabase'
 import {
-  fetchInitiative, fetchMembers, fetchMessages, formatTime, isMember, joinCell, leaveCell, sendMessage, subscribeToCell,
+  cellFocuses, fetchInitiative, fetchMembers, fetchMessages, formatTime, isMember, joinCell, leaveCell, sendMessage, subscribeToCell,
   type CellDetails, type ChatAuthor, type ChatMessage, type Initiative,
 } from '../../lib/community'
 
@@ -182,7 +182,7 @@ export default function CellChat() {
       <MediaCover initiative={cell} className="h-32 rounded-[20px]" />
       <div>
         <h2 className="font-heading text-lg font-semibold">{cell.title}</h2>
-        {details.focus && <p className="mt-0.5 text-xs font-medium text-primary">{details.focus}</p>}
+        {cellFocuses(details).length > 0 && <div className="mt-2 flex flex-wrap gap-1">{cellFocuses(details).map(item => <span key={item} className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">{item}</span>)}</div>}
         <p className="mt-3 whitespace-pre-line text-sm leading-6 text-muted-foreground">{cell.description}</p>
       </div>
       <div className="space-y-2 rounded-[18px] border border-white/[0.07] bg-surface p-4 text-xs text-muted-foreground">

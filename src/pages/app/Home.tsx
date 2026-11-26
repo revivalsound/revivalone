@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { ArrowRight, PenNew } from '../../components/ui/icons'
 import { Notice } from '../../components/ui/kit'
 import PostCard, { KIND_META, PostCardSkeleton } from '../../components/posts/PostCard'
-import PostComposer from '../../components/posts/PostComposer'
 import { useAuth } from '../../lib/AuthContext'
 import { ComingUpCard, PrayerWallsCard, TodaysReadingsCard, VerseOfTheDayCard } from '../../components/bible/TodayCards'
 import { fetchFeed, FeedNotReady, PAGE_SIZE, POST_KINDS, type Post, type PostKind } from '../../lib/posts'
@@ -42,7 +41,8 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [notReady, setNotReady] = useState(false)
-  const [composing, setComposing] = useState(false)
+  const navigate = useNavigate()
+  const compose = () => navigate('/create/post')
   const scrolling = useScrolling()
   const sentinel = useRef<HTMLDivElement>(null)
 
@@ -75,11 +75,6 @@ export default function Home() {
     return () => observer.disconnect()
   }, [filter, hasMore, load, loading, page])
 
-  const posted = (post: Post) => {
-    if (filter === 'all' || filter === post.kind) setPosts(current => [post, ...current])
-    else setFilter(post.kind)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
 
 
   return (
@@ -95,7 +90,7 @@ export default function Home() {
           </header>
 
           {/* Composer prompt: the same flow as the floating button */}
-          <button type="button" onClick={() => setComposing(true)} className="bolt-card bolt-card--hover mt-6 flex w-full items-center gap-3 rounded-[22px] border border-white/[0.07] bg-surface p-3 pr-4 text-left transition-colors hover:bg-surface-raised">
+          <button type="button" onClick={compose} className="bolt-card bolt-card--hover mt-6 flex w-full items-center gap-3 rounded-[22px] border border-white/[0.07] bg-surface p-3 pr-4 text-left transition-colors hover:bg-surface-raised">
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"><PenNew className="h-5 w-5" /></span>
             <span className="flex-1 text-sm text-muted-foreground">Share a word, a study, a question or an opportunity…</span>
             <span className="hidden h-9 items-center rounded-full bg-primary px-4 font-heading text-[10px] font-semibold uppercase tracking-[0.14em] text-primary-foreground sm:inline-flex">Post</span>
@@ -137,7 +132,7 @@ export default function Home() {
                 <span className="brand-ring brand-ring--on mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-surface"><img src="/assets/revival-flame-mark.png" alt="" className="h-7 w-7 object-contain" /></span>
                 <h2 className="mt-5 font-heading text-xl font-semibold">{filter === 'all' ? 'Be the first to post' : `No ${KIND_META[filter].plural.toLowerCase()} yet`}</h2>
                 <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">Share what God is saying, what you are studying, a question, or an opportunity for someone in the Kingdom.</p>
-                <button type="button" onClick={() => setComposing(true)} className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-primary px-5 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground">Write a post <ArrowRight className="h-4 w-4" /></button>
+                <button type="button" onClick={compose} className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-primary px-5 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground">Write a post <ArrowRight className="h-4 w-4" /></button>
               </div>
             )}
             <div ref={sentinel} aria-hidden />
@@ -157,16 +152,15 @@ export default function Home() {
           Portalled to <body> so the page's entrance transform can't offset it. */}
       {createPortal(<button
         type="button"
-        onClick={() => setComposing(true)}
-        data-hidden={scrolling || composing}
-        aria-hidden={scrolling || composing}
-        tabIndex={scrolling || composing ? -1 : 0}
+        onClick={compose}
+        data-hidden={scrolling}
+        aria-hidden={scrolling}
+        tabIndex={scrolling ? -1 : 0}
         className="post-fab group fixed bottom-24 right-5 z-30 inline-flex h-14 items-center gap-2 rounded-full bg-primary pl-5 pr-6 font-heading text-[12px] font-semibold uppercase tracking-[0.14em] text-primary-foreground shadow-[0_16px_40px_rgba(255,92,138,0.42)] ring-1 ring-white/20 hover:bg-primary/95 active:scale-[0.97] lg:bottom-8 lg:right-8"
       >
         <PenNew className="h-5 w-5 transition-transform group-hover:-rotate-12" strokeWidth={2.2} /> Post
       </button>, document.body)}
 
-      {composing && <PostComposer onClose={() => setComposing(false)} onPosted={posted} />}
     </div>
   )
 }

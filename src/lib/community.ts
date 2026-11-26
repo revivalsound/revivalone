@@ -8,7 +8,7 @@ export type Format = 'in_person' | 'online' | 'hybrid'
 
 export type EventDetails = { category: string; format: Format; venue: string; online_link: string; start_time: string; end_time: string; capacity: number | null }
 export type BootcampDetails = { track: string; format: Format; venue: string; weeks: number; days: string[]; start_time: string; capacity: number | null; outcomes: string[] }
-export type CellDetails = { focus: string; area: string; format: Format; meeting_day: string; start_time: string; max_members: number | null }
+export type CellDetails = { focus: string; focuses: string[]; area: string; format: Format; meeting_day: string; start_time: string; max_members: number | null }
 
 export type Initiative<K extends InitiativeKind = InitiativeKind> = {
   id: string
@@ -191,6 +191,11 @@ export function wallStatus(wall: Pick<PrayerWall, 'starts_at' | 'ends_at'>, now 
   if (now >= end) return 'ended' as const
   if (now >= start) return 'live' as const
   return start - now <= 10 * 60_000 ? 'opening' as const : 'scheduled' as const
+}
+
+/** A cell's focuses: the list (up to five), or the single focus older cells were created with. */
+export function cellFocuses(details: Partial<CellDetails>) {
+  return details.focuses?.length ? details.focuses : details.focus ? [details.focus] : []
 }
 
 /* ── formatting ── */

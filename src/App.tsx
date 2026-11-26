@@ -18,6 +18,7 @@ const BibleReader = lazy(() => import('./pages/app/BibleReader'))
 const BibleHome = lazy(() => import('./pages/app/BibleReader').then(module => ({ default: module.BibleHome })))
 const DailyGuide = lazy(() => import('./pages/app/DailyGuide'))
 const CreateCourse = lazy(() => import('./pages/app/CreateCourse'))
+const CreatePost = lazy(() => import('./pages/app/CreatePost'))
 const Profile = lazy(() => import('./pages/app/Profile'))
 const PostPage = lazy(() => import('./pages/app/PostPage'))
 const PublicProfile = lazy(() => import('./pages/app/PublicProfile'))
@@ -96,6 +97,7 @@ export default function App() {
               <Route path="/community/cells/:id" element={<CellChat />} />
               <Route path="/community/prayer" element={<PrayerWalls />} />
               <Route path="/prayer/:code" element={<PrayerRoom />} />
+              <Route path="/create/post" element={<RequireAuth><CreatePost /></RequireAuth>} />
               <Route path="/create/course" element={<RequireAuth><CreateCourse /></RequireAuth>} />
               <Route path="/create/:kind" element={<RequireAuth><CreatePage /></RequireAuth>} />
               <Route path="/events" element={<Events />} />

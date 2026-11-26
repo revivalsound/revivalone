@@ -4,7 +4,8 @@ import { ArrowLeft, ArrowRight, Bible, Check, Clock, Copy, ExternalLink, Loader,
 import { Deck, Notice } from '../../components/ui/kit'
 import PostCard, { AuthorAvatar, KIND_META, KindChip, PostCardSkeleton } from '../../components/posts/PostCard'
 import { useAuth } from '../../lib/AuthContext'
-import { deletePost, fetchAuthorPosts, fetchPost, fetchSimilar, readingMinutes, type Post } from '../../lib/posts'
+import { sanitizePostHtml } from '../../lib/richText'
+import { deletePost, fetchAuthorPosts, fetchPost, fetchSimilar, readingMinutes, type Post, type PostMedia } from '../../lib/posts'
 
 export default function PostPage() {
   const { id = '' } = useParams()
@@ -102,9 +103,14 @@ export default function PostPage() {
           {post.scripture && (
             <p className="mt-8 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/[0.07] px-4 py-2 text-sm font-medium text-primary"><Bible className="h-4 w-4" /> {post.scripture}</p>
           )}
-          <div className="post-body mt-8 text-[17px] leading-8 text-foreground/90">
-            {paragraphs.map((paragraph, index) => <p key={index} className="whitespace-pre-line">{paragraph}</p>)}
-          </div>
+          {post.media && post.media.length > 0 && <Gallery media={post.media} />}
+          {post.body_html
+            ? <div className="rich-text mt-8" dangerouslySetInnerHTML={{ __html: sanitizePostHtml(post.body_html) }} />
+            : (
+              <div className="post-body mt-8 text-[17px] leading-8 text-foreground/90">
+                {paragraphs.map((paragraph, index) => <p key={index} className="whitespace-pre-line">{paragraph}</p>)}
+              </div>
+            )}
 
           {post.link_url && (
             <a href={post.link_url} target="_blank" rel="noopener noreferrer nofollow" className="group mt-8 inline-flex h-12 items-center gap-2 rounded-full bg-[#ffd479] px-6 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-[#1a1206] transition-transform hover:-translate-y-0.5">
@@ -169,5 +175,38 @@ function Suggestions({ title, lede, posts, link, empty }: { title: string; lede?
         <p className="mt-5 rounded-[22px] border border-dashed border-white/[0.1] px-5 py-8 text-center text-sm text-muted-foreground">{empty}</p>
       )}
     </section>
+  )
+}
+
+/** A post's photos and videos. Photos open full screen. */
+function Gallery({ media }: { media: PostMedia[] }) {
+  const [open, setOpen] = useState<number | null>(null)
+  useEffect(() => {
+    if (open === null) return
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(null)
+      if (event.key === 'ArrowRight') setOpen(value => (value === null ? value : (value + 1) % media.length))
+      if (event.key === 'ArrowLeft') setOpen(value => (value === null ? value : (value - 1 + media.length) % media.length))
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open, media.length])
+  return (
+    <>
+      <div className={`mt-8 grid gap-2 ${media.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+        {media.map((item, index) => (
+          <div key={item.url} className={`overflow-hidden rounded-[22px] border border-white/[0.07] bg-black ${media.length === 1 ? '' : media.length % 2 === 1 && index === 0 ? 'col-span-2' : ''}`}>
+            {item.type === 'image'
+              ? <button type="button" onClick={() => setOpen(index)} className="block w-full"><img src={item.url} alt={`Photo ${index + 1}`} loading="lazy" className={`w-full object-cover ${media.length === 1 ? 'max-h-[640px]' : 'aspect-[4/3]'}`} /></button>
+              : <video src={item.url} controls playsInline preload="metadata" className={`w-full bg-black ${media.length === 1 ? 'max-h-[640px]' : 'aspect-[4/3] object-cover'}`} />}
+          </div>
+        ))}
+      </div>
+      {open !== null && media[open]?.type === 'image' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm" onClick={() => setOpen(null)} role="dialog" aria-label="Photo">
+          <img src={media[open].url} alt="" className="max-h-full max-w-full rounded-2xl object-contain" />
+        </div>
+      )}
+    </>
   )
 }

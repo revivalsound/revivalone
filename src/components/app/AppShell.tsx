@@ -19,7 +19,6 @@ import {
 } from '../ui/icons'
 import AmbientField from '../AmbientField'
 import BrandMark from '../brand/BrandMark'
-import PostComposer from '../posts/PostComposer'
 import { useAuth } from '../../lib/AuthContext'
 
 /* ── Create flow, shared by every screen ── */
@@ -124,7 +123,6 @@ export default function AppShell() {
     try { return window.localStorage.getItem('revival.rail') === '1' } catch { return false }
   })
   const [picking, setPicking] = useState(false)
-  const [composing, setComposing] = useState(false)
 
   useEffect(() => { try { window.localStorage.setItem('revival.rail', collapsed ? '1' : '0') } catch { /* storage unavailable */ } }, [collapsed])
 
@@ -134,7 +132,6 @@ export default function AppShell() {
       : pathname.startsWith('/academy/') ? 'Course' : 'Revival One')
   const openCreate = (kind?: CreationKind) => {
     if (!kind) setPicking(true)
-    else if (kind === 'post') setComposing(true)
     else navigate(`/create/${kind}`)
   }
 
@@ -211,7 +208,6 @@ export default function AppShell() {
         </nav>
 
         {picking && <CreateDialog onPick={kind => openCreate(kind)} onClose={() => setPicking(false)} />}
-        {composing && <PostComposer onClose={() => setComposing(false)} onPosted={post => navigate(`/post/${post.id}`)} />}
       </div>
     </CreateContext.Provider>
   )

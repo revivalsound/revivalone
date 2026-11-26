@@ -5,7 +5,7 @@ import { Notice } from '../../components/ui/kit'
 import { PageHeader } from '../../components/app/AppShell'
 import CommunityTabs from '../../components/community/CommunityTabs'
 import { CellCard } from '../../components/community/cards'
-import { fetchCells, type Initiative } from '../../lib/community'
+import { cellFocuses, fetchCells, type Initiative } from '../../lib/community'
 
 /** Revival cells: only cell groups live here. Each one opens its group chat. */
 export default function RevivalCells() {
@@ -21,7 +21,7 @@ export default function RevivalCells() {
   const cities = useMemo(() => ['All cities', ...new Set((cells ?? []).map(cell => cell.city).filter(Boolean))], [cells])
   const shown = (cells ?? []).filter(cell =>
     (city === 'All cities' || cell.city === city)
-    && `${cell.title} ${cell.details.focus ?? ''} ${cell.details.area ?? ''}`.toLowerCase().includes(query.trim().toLowerCase()))
+    && `${cell.title} ${cellFocuses(cell.details).join(' ')} ${cell.details.area ?? ''}`.toLowerCase().includes(query.trim().toLowerCase()))
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">

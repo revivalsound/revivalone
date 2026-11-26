@@ -450,6 +450,24 @@
 .verse-flash { animation: verse-flash 2.2s ease-out; }
 @keyframes verse-flash { 0%, 30% { background-color: rgba(255, 92, 138, 0.3); box-shadow: 0 0 0 3px rgba(255, 92, 138, 0.3); } 100% { background-color: transparent; box-shadow: none; } }
 
+/* Formatted posts: shared by the editor and the post page. */
+.rich-text { font-size: 17px; line-height: 1.8; color: rgb(247 238 234 / 0.9); overflow-wrap: anywhere; }
+.rich-text > * + * { margin-top: 0.9em; }
+.rich-text h1 { font-family: "Space Grotesk", Montserrat, sans-serif; font-size: 1.85em; font-weight: 600; line-height: 1.15; letter-spacing: -0.02em; color: #fff; margin-top: 1.3em; }
+.rich-text h2 { font-family: "Space Grotesk", Montserrat, sans-serif; font-size: 1.45em; font-weight: 600; line-height: 1.2; letter-spacing: -0.015em; color: #fff; margin-top: 1.2em; }
+.rich-text h3 { font-family: "Space Grotesk", Montserrat, sans-serif; font-size: 1.15em; font-weight: 600; color: #ff8fb0; margin-top: 1.1em; }
+.rich-text > :first-child { margin-top: 0; }
+.rich-text strong, .rich-text b { font-weight: 700; color: #fff; }
+.rich-text a { color: #ff8fb0; text-decoration: underline; text-underline-offset: 3px; }
+.rich-text mark { border-radius: 4px; padding: 0 0.15em; color: inherit; background-color: rgba(255, 92, 138, 0.3); }
+.rich-text ul { list-style: disc; padding-left: 1.4em; }
+.rich-text ol { list-style: decimal; padding-left: 1.5em; }
+.rich-text li + li { margin-top: 0.3em; }
+.rich-text li::marker { color: #ff5c8a; }
+.rich-text blockquote { border-left: 3px solid #ff5c8a; padding: 0.2em 0 0.2em 1em; font-family: Literata, Georgia, serif; font-size: 1.08em; font-style: italic; color: rgb(247 238 234 / 0.85); }
+.rich-text hr { border: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255, 92, 138, 0.6), transparent); margin: 1.6em 0; }
+.rich-text p.is-editor-empty:first-child::before { content: attr(data-placeholder); float: left; height: 0; pointer-events: none; color: rgb(161 147 154 / 0.6); }
+
 /* Solar line-duotone icons: never shrink in flex rows; 2.2+ stroke is heavier. */
 .solar-icon { flex-shrink: 0; }
 .solar-icon--bold [stroke-width="1.5"] { stroke-width: 2; }

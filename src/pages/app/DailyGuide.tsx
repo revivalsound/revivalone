@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowRight, Bible, BookOpen, Check, ChevronLeft, ChevronRight, Fire, HandHeart, Loader, Notebook, Share, Sunrise } from '../../components/ui/icons'
 import { Notice } from '../../components/ui/kit'
-import PostComposer from '../../components/posts/PostComposer'
 import { useAuth } from '../../lib/AuthContext'
 import {
   dateForGuideDay, DEFAULT_TRANSLATION, fetchCommentary, fetchPassageText, formatReference, GUIDE_DAYS, guideDay, guideDayForDate,
@@ -42,7 +41,6 @@ export default function DailyGuide() {
   const [draft, setDraft] = useState<GuideProgress>(empty(year, day))
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
-  const [sharing, setSharing] = useState(false)
   const [votd, setVotd] = useState<(Reference & { holiday?: string; text?: string }) | null | undefined>(undefined)
   const [intro, setIntro] = useState<{ label: string; text: string } | null | undefined>(undefined)
 
@@ -243,7 +241,7 @@ export default function DailyGuide() {
                 </label>
                 <div className="flex flex-wrap items-center gap-2">
                   <button type="submit" disabled={saving} className="inline-flex h-11 items-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground disabled:opacity-60">{saving ? <><Loader className="h-4 w-4 animate-spin" /> Saving…</> : saved ? <><Check className="h-4 w-4" /> Saved</> : 'Save journal'}</button>
-                  <button type="button" onClick={() => setSharing(true)} disabled={!draft.reflection.trim()} className="inline-flex h-11 items-center gap-2 rounded-full border border-white/[0.1] px-5 text-sm font-semibold disabled:opacity-40"><Share className="h-4 w-4 text-primary" /> Share to the feed</button>
+                  <button type="button" onClick={() => navigate('/create/post', { state: { draft: { kind: 'word', title: `Day ${day}: ${plan.readings.map(readingLabel).join(', ')}`.slice(0, 140), body: draft.reflection, scripture: plan.readings.map(readingLabel)[0], tags: 'daily-guide' } } })} disabled={!draft.reflection.trim()} className="inline-flex h-11 items-center gap-2 rounded-full border border-white/[0.1] px-5 text-sm font-semibold disabled:opacity-40"><Share className="h-4 w-4 text-primary" /> Share to the feed</button>
                   <span className="text-[11px] text-muted-foreground">Your journal is private unless you share it.</span>
                 </div>
               </form>
@@ -254,13 +252,6 @@ export default function DailyGuide() {
         </section>
       </div>
 
-      {sharing && (
-        <PostComposer
-          initial={{ kind: 'word', title: `Day ${day}: ${plan.readings.map(readingLabel).join(', ')}`.slice(0, 140), body: draft.reflection, scripture: plan.readings.map(readingLabel)[0], tags: 'daily-guide' }}
-          onClose={() => setSharing(false)}
-          onPosted={post => navigate(`/post/${post.id}`)}
-        />
-      )}
     </div>
   )
 }

@@ -7,7 +7,6 @@ import { Notice } from '../../components/ui/kit'
 import ChapterText from '../../components/bible/ChapterText'
 import BookPicker from '../../components/bible/BookPicker'
 import StudyPanel from '../../components/bible/StudyPanel'
-import PostComposer from '../../components/posts/PostComposer'
 import { useAuth } from '../../lib/AuthContext'
 import {
   bookById, bookSlug, DEFAULT_TRANSLATION, fetchChapter, findBook, formatReference, translationById, TRANSLATIONS, verseText,
@@ -51,7 +50,6 @@ export default function BibleReader() {
   const [translationsOpen, setTranslationsOpen] = useState(false)
   const [studyOpen, setStudyOpen] = useState(false)
   const [noteOpen, setNoteOpen] = useState(false)
-  const [sharing, setSharing] = useState(false)
   const [copied, setCopied] = useState(false)
   const [saveError, setSaveError] = useState('')
   const [playing, setPlaying] = useState(false)
@@ -347,7 +345,7 @@ export default function BibleReader() {
             </div>
             {selectedList.length === 1 && <ActionButton onClick={() => (user ? setNoteOpen(true) : needAccount())} icon={<Pen className="h-4 w-4" />}>{highlights.get(selectedList[0])?.note ? 'Edit note' : 'Note'}</ActionButton>}
             <ActionButton onClick={copy} icon={copied ? <Check className="h-4 w-4 text-primary" /> : <Copy className="h-4 w-4" />}>{copied ? 'Copied' : 'Copy'}</ActionButton>
-            <ActionButton onClick={() => setSharing(true)} icon={<Share className="h-4 w-4" />}>Post</ActionButton>
+            <ActionButton onClick={() => navigate('/create/post', { state: { draft: { kind: 'word', scripture: selectionLabel, body: `“${selectionText}” (${selectionLabel}, ${current.short})`, tags: 'scripture' } } })} icon={<Share className="h-4 w-4" />}>Post</ActionButton>
             <ActionButton className="lg:hidden" onClick={() => setStudyOpen(true)} icon={<Notebook className="h-4 w-4" />}>Study</ActionButton>
           </div>
         </div>
@@ -374,13 +372,6 @@ export default function BibleReader() {
 
       {picking && <BookPicker current={book} chapter={chapterNumber} onPick={(next, chapter) => navigate(`/bible/${translation}/${bookSlug(next)}/${chapter}`)} onClose={() => setPicking(false)} />}
       {noteOpen && <NoteDialog label={selectionLabel} text={selectionText} initial={highlights.get(selectedList[0])?.note ?? ''} onSave={saveNote} onClose={() => setNoteOpen(false)} />}
-      {sharing && (
-        <PostComposer
-          initial={{ kind: 'word', scripture: selectionLabel, body: `“${selectionText}” (${selectionLabel}, ${current.short})\n\n`, tags: 'scripture' }}
-          onClose={() => setSharing(false)}
-          onPosted={post => navigate(`/post/${post.id}`)}
-        />
-      )}
       {/* Play control for phones, above the bottom navigation */}
       {audioUrl && playing && selectedList.length === 0 && (
         <button type="button" onClick={toggleAudio} className="fixed bottom-24 right-4 z-30 flex h-12 items-center gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-[0_12px_30px_rgba(255,92,138,0.4)] lg:hidden"><PauseCircle className="h-5 w-5" /> Pause</button>

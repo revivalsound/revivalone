@@ -9,14 +9,14 @@ import { createInitiative, uploadMedia, type Format, type Initiative, type Initi
 
 const EVENT_CATEGORIES = ['Worship night', 'Prayer gathering', 'Conference', 'Outreach', 'Tent meeting', 'Bible study', 'Youth night']
 const TRACKS = ['Evangelism', 'Prayer', 'Leadership', 'Discipleship', 'Worship', 'Missions']
-const FOCUSES = ['Prayer & Scripture', 'Young professionals', 'Students & campus', 'Families', 'Outreach', 'Men', 'Women']
+const FOCUSES = ['Prayer & Scripture', 'Worship', 'Discipleship', 'Evangelism', 'Outreach', 'Young professionals', 'Students & campus', 'Families', 'Men', 'Women', 'Youth', 'Marketplace', 'Healing & recovery', 'Missions']
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
 type Values = {
   title: string; description: string; city: string; date: string
   category: string; format: Format; venue: string; online_link: string; start_time: string; end_time: string; capacity: string
   track: string; weeks: string; days: string[]; outcomes: [string, string, string]
-  focus: string; area: string; meeting_day: string; max_members: string
+  focuses: string[]; area: string; meeting_day: string; max_members: string
 }
 
 const PAGES: Record<InitiativeKind, { eyebrow: string; title: ReactNode; lede: string; icon: typeof Fire; submit: string }> = {
@@ -34,7 +34,7 @@ const EMPTY: Values = {
   title: '', description: '', city: '', date: nextWeek(),
   category: EVENT_CATEGORIES[0], format: 'in_person', venue: '', online_link: '', start_time: '18:00', end_time: '20:00', capacity: '',
   track: TRACKS[0], weeks: '4', days: ['Saturday'], outcomes: ['', '', ''],
-  focus: FOCUSES[0], area: '', meeting_day: 'Thursday', max_members: '',
+  focuses: [FOCUSES[0]], area: '', meeting_day: 'Thursday', max_members: '',
 }
 
 export default function CreatePage() {
@@ -67,7 +67,7 @@ function CreateForm({ kind }: { kind: InitiativeKind }) {
   function details(): Initiative['details'] {
     if (kind === 'event') return { category: values.category, format: values.format, venue: online ? '' : values.venue.trim(), online_link: online || values.format === 'hybrid' ? values.online_link.trim() : '', start_time: values.start_time, end_time: values.end_time, capacity: number(values.capacity) }
     if (kind === 'bootcamp') return { track: values.track, format: values.format, venue: online ? '' : values.venue.trim(), weeks: Number(values.weeks), days: values.days, start_time: values.start_time, capacity: number(values.capacity), outcomes: values.outcomes.map(item => item.trim()).filter(Boolean) }
-    return { focus: values.focus, area: online ? '' : values.area.trim(), format: values.format, meeting_day: values.meeting_day, start_time: values.start_time, max_members: number(values.max_members) }
+    return { focus: values.focuses.join(' · '), focuses: values.focuses, area: online ? '' : values.area.trim(), format: values.format, meeting_day: values.meeting_day, start_time: values.start_time, max_members: number(values.max_members) }
   }
 
   const draft = {
@@ -83,6 +83,7 @@ function CreateForm({ kind }: { kind: InitiativeKind }) {
   async function submit(event: FormEvent) {
     event.preventDefault()
     if (!user) return
+    if (kind === 'cell' && values.focuses.length === 0) { setError('Choose at least one focus for the cell.'); return }
     if (kind === 'bootcamp' && values.days.length === 0) { setError('Choose at least one day the bootcamp meets.'); return }
     if ((kind === 'event') && values.end_time && values.end_time <= values.start_time) { setError('The end time needs to be after the start time.'); return }
     setError('')
@@ -126,7 +127,7 @@ function CreateForm({ kind }: { kind: InitiativeKind }) {
             </Field>
             {kind === 'event' && <Chips label="Type of event" options={EVENT_CATEGORIES} value={values.category} onChange={value => set('category', value)} />}
             {kind === 'bootcamp' && <Chips label="Track" options={TRACKS} value={values.track} onChange={value => set('track', value)} />}
-            {kind === 'cell' && <Chips label="Focus" options={FOCUSES} value={values.focus} onChange={value => set('focus', value)} />}
+            {kind === 'cell' && <MultiChips label="Focus" hint="choose up to 5" max={5} options={FOCUSES} values={values.focuses} onChange={value => set('focuses', value)} />}
             <Field label={kind === 'cell' ? 'About the cell' : 'Description'}>
               <textarea required minLength={10} maxLength={4000} rows={5} value={values.description} onChange={event => set('description', event.target.value)} placeholder={kind === 'cell' ? 'Who is it for, what happens when you meet, and what to expect the first time.' : kind === 'bootcamp' ? 'What the bootcamp covers, who it’s for and what’s expected of people who sign up.' : 'What will happen, who it’s for and anything people should bring.'} className={`${inputClass} h-auto px-4 py-3 leading-6`} />
             </Field>
@@ -244,6 +245,36 @@ function Chips({ label, options, labels, value, onChange }: { label: string; opt
         {options.map(option => (
           <button key={option} type="button" role="radio" aria-checked={value === option} onClick={() => onChange(option)} className={`h-9 rounded-full border px-3.5 text-xs font-semibold transition-colors ${value === option ? 'border-primary/60 bg-primary/[0.14] text-foreground' : 'border-white/[0.09] bg-white/[0.03] text-muted-foreground hover:text-foreground'}`}>{labels?.[option] ?? option}</button>
         ))}
+      </div>
+    </div>
+  )
+}
+
+/** Pick several options, up to a limit. */
+function MultiChips({ label, hint, max, options, values, onChange }: { label: string; hint: string; max: number; options: string[]; values: string[]; onChange: (values: string[]) => void }) {
+  const full = values.length >= max
+  return (
+    <div role="group" aria-label={label}>
+      <p className="flex items-center justify-between text-xs font-medium text-foreground/90">
+        <span>{label} <span className="text-muted-foreground">({hint})</span></span>
+        <span className={full ? 'font-semibold text-primary' : 'text-muted-foreground'}>{values.length} of {max}</span>
+      </p>
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        {options.map(option => {
+          const on = values.includes(option)
+          return (
+            <button
+              key={option}
+              type="button"
+              aria-pressed={on}
+              disabled={!on && full}
+              onClick={() => onChange(on ? values.filter(item => item !== option) : [...values, option])}
+              className={`h-9 rounded-full border px-3.5 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-35 ${on ? 'border-primary bg-primary text-primary-foreground' : 'border-white/[0.09] bg-white/[0.03] text-muted-foreground hover:text-foreground'}`}
+            >
+              {option}
+            </button>
+          )
+        })}
       </div>
     </div>
   )

@@ -1,7 +1,7 @@
 import { useRef, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, CalendarDays, Chat, Check, Clock, Fire, MapPin, Play, Users, Video } from '../ui/icons'
-import { FORMAT_LABEL, formatDay, formatTime, type BootcampDetails, type CellDetails, type EventDetails, type Initiative } from '../../lib/community'
+import { cellFocuses, FORMAT_LABEL, formatDay, formatTime, type BootcampDetails, type CellDetails, type EventDetails, type Initiative } from '../../lib/community'
 
 /* Generated cover art for listings without media: a warm mesh tinted per category. */
 const PALETTES = [
@@ -24,7 +24,7 @@ function paletteFor(seed: string) {
  */
 export function MediaCover({ initiative, className = '', children }: { initiative: Pick<Initiative, 'media_url' | 'media_type' | 'title'> & { details?: { category?: string; track?: string; focus?: string } }; className?: string; children?: ReactNode }) {
   const video = useRef<HTMLVideoElement>(null)
-  const seed = initiative.details?.category ?? initiative.details?.track ?? initiative.details?.focus ?? initiative.title
+  const seed = initiative.details?.category ?? initiative.details?.track ?? (initiative.details as { focuses?: string[] } | undefined)?.focuses?.[0] ?? initiative.details?.focus ?? initiative.title
   const [a, b, c] = paletteFor(seed)
   return (
     <div
@@ -110,7 +110,7 @@ export function CellCard({ cell }: { cell: Initiative<'cell'> }) {
       <span className="relative z-[2] -mt-7 ml-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/15 bg-[#1a0610] font-heading text-base font-semibold text-primary shadow-[0_10px_30px_rgba(0,0,0,0.45)]">{initials}</span>
       <div className="flex flex-1 flex-col p-5 pt-4">
         <h3 className="font-heading text-lg font-semibold leading-tight">{cell.title}</h3>
-        {details.focus && <p className="mt-1 text-xs font-medium text-primary">{details.focus}</p>}
+        {cellFocuses(details).length > 0 && <div className="mt-2 flex flex-wrap gap-1">{cellFocuses(details).map(item => <span key={item} className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">{item}</span>)}</div>}
         <p className="mt-2 line-clamp-2 text-xs leading-5 text-muted-foreground">{cell.description}</p>
         <div className="mt-4 space-y-1.5 border-t border-white/[0.07] pt-4 text-xs text-muted-foreground">
           <p className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> {details.format === 'online' ? 'Online' : [details.area, cell.city].filter(Boolean).join(', ')}</p>

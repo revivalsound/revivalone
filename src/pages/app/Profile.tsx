@@ -4,6 +4,7 @@ import { ArrowRight, CalendarDays, Camera, Eye, GraduationCap, Loader, LogOut, M
 import { Deck, Notice, inputClass } from '../../components/ui/kit'
 import { useAuth } from '../../lib/AuthContext'
 import { api, supabase } from '../../lib/supabase'
+import { shrinkImage } from '../../lib/images'
 
 type Profile = {
   id: string; full_name: string; email: string; city: string; country: string
@@ -24,7 +25,8 @@ const FIELDS: { key: keyof Profile; label: string; placeholder?: string; disable
 ]
 
 export default function ProfilePage() {
-  const { session, user, signOut } = useAuth()
+  const { session, user, signOut, setProfileLocally, refreshProfile } = useAuth()
+  const [photoStatus, setPhotoStatus] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null)
   const [profile, setProfile] = useState<Profile>(EMPTY)
   const [stats, setStats] = useState<Stats>({ initiatives: 0, events: 0, cells: 0, courses: 0 })
   const [loading, setLoading] = useState(true)
@@ -59,6 +61,7 @@ export default function ProfilePage() {
       const body = await api<{ profile: Profile }>('profile', { method: 'PATCH', token: session.access_token, body: JSON.stringify({ ...profile, avatar_url: avatarUrl }) })
       setProfile(current => ({ ...current, ...body.profile, email: current.email }))
       setMessage('Your profile has been updated.')
+      void refreshProfile()
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Could not save your profile.')
     } finally {
@@ -67,18 +70,30 @@ export default function ProfilePage() {
   }
 
   async function uploadAvatar(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
-    if (!file || !session || !user) return
-    if (!file.type.startsWith('image/') || file.size > 2 * 1024 * 1024) { setError('Choose a JPG, PNG or WebP image under 2 MB.'); return }
-    setUploading(true); setError(''); setMessage('')
-    const extension = file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
-    const path = `${user.id}/avatar-${Date.now()}.${extension}`
-    const { error: uploadError } = await supabase.storage.from('avatars').upload(path, file, { contentType: file.type, upsert: false })
-    if (uploadError) { setUploading(false); setError(uploadError.message); return }
-    const { data } = supabase.storage.from('avatars').getPublicUrl(path)
-    setProfile(current => ({ ...current, avatar_url: data.publicUrl }))
-    await save(undefined, data.publicUrl)
-    setUploading(false)
+    const picked = event.target.files?.[0]
+    event.target.value = ''
+    if (!picked || !session || !user) return
+    if (!picked.type.startsWith('image/')) { setPhotoStatus({ tone: 'error', text: 'Choose a photo (JPG, PNG or WebP).' }); return }
+    setUploading(true); setPhotoStatus(null)
+    try {
+      // Phone photos are large; shrink to a 640px square first.
+      const file = await shrinkImage(picked, { maxSize: 640, square: true })
+      const path = `${user.id}/avatar-${Date.now()}.${file.type === 'image/webp' ? 'webp' : 'jpg'}`
+      const { error: uploadError } = await supabase.storage.from('avatars').upload(path, file, { contentType: file.type, upsert: false })
+      if (uploadError) throw new Error(uploadError.message)
+      const url = supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl
+      const { error: saveError } = await supabase.from('profiles').update({ avatar_url: url, updated_at: new Date().toISOString() }).eq('id', user.id)
+      if (saveError) throw new Error(saveError.message)
+      // Keep the session in step too, then update the photo everywhere.
+      await supabase.auth.updateUser({ data: { avatar_url: url } })
+      setProfile(current => ({ ...current, avatar_url: url }))
+      setProfileLocally({ avatar_url: url })
+      setPhotoStatus({ tone: 'ok', text: 'Profile photo updated.' })
+    } catch (caught) {
+      setPhotoStatus({ tone: 'error', text: caught instanceof Error ? caught.message : 'We couldn’t upload that photo.' })
+    } finally {
+      setUploading(false)
+    }
   }
 
   if (loading) {
@@ -101,12 +116,13 @@ export default function ProfilePage() {
               {profile.avatar_url ? <img src={profile.avatar_url} alt={`${profile.full_name} profile`} className="h-full w-full object-cover" /> : initials}
             </div>
             <label className="absolute -bottom-1 -right-1 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground ring-4 ring-[#7a1438] transition-transform hover:scale-105" title="Change photo">
-              <input type="file" accept="image/png,image/jpeg,image/webp" onChange={uploadAvatar} disabled={uploading} className="sr-only" />
+              <input type="file" accept="image/*" onChange={uploadAvatar} disabled={uploading} className="sr-only" />
               {uploading ? <Loader className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
               <span className="sr-only">Change photo</span>
             </label>
           </div>
           <div className="min-w-0">
+            {photoStatus && <p role="status" className={`mb-3 inline-flex rounded-full px-3 py-1 text-xs font-semibold backdrop-blur-md ${photoStatus.tone === 'ok' ? 'bg-black/35 text-white' : 'bg-red-500/80 text-white'}`}>{photoStatus.text}</p>}
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/70">Member since {joined}</p>
             <h1 className="mt-2 truncate font-heading text-4xl font-semibold tracking-[-0.02em] text-white">{profile.full_name || 'Your profile'}</h1>
             <p className="mt-1.5 flex items-center gap-1.5 text-sm text-white/80"><MapPin className="h-4 w-4" /> {location}</p>
