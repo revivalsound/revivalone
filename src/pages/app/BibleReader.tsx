@@ -222,7 +222,7 @@ export default function BibleReader() {
       )}
 
       {/* Reader toolbar */}
-      <div className="sticky top-14 z-20 -mx-4 bg-background px-4 py-2 shadow-[0_1px_0_rgb(var(--ink)/0.06)] sm:-mx-6 sm:px-6">
+      <div className="sticky top-14 z-20 -mx-4 bg-background px-4 py-2 sm:-mx-6 sm:px-6">
       <div className="flex items-center gap-2 sm:rounded-full sm:border sm:border-white/[0.08] sm:bg-surface sm:p-1.5">
         <button type="button" onClick={() => setPicking(true)} className="inline-flex h-10 min-w-0 items-center gap-2 rounded-full bg-white/[0.05] pl-3 pr-3.5 font-heading text-[14px] font-semibold transition-colors hover:bg-white/[0.09]">
           <Bible className="h-4 w-4 shrink-0 text-primary" /> <span className="truncate">{book.name} {chapterNumber}</span> <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />

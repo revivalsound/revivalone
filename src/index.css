@@ -620,3 +620,17 @@ dialog.revival-dialog::backdrop { background: rgb(0 0 0 / 0.7); -webkit-backdrop
 }
 a.mention:hover { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
 .rich-text a.mention { text-decoration: none; }
+
+/* ── No resting borders or divider lines ──
+   Cards and panels show no outline until they are hovered, pressed or focused;
+   divider lines inside cards and between page sections are gone. Buttons,
+   inputs and tabs keep their outlines so they stay recognisable. */
+:is(.border-white\/\[0\.06\], .border-white\/\[0\.07\], .border-white\/\[0\.08\], .border-white\/10):not(button, input, select, textarea, [role="tab"], [role="radio"], [role="checkbox"]) {
+  border-color: transparent !important;
+}
+:is(a, label, [role="button"], .bolt-card, .group):is(:hover, :active, :focus-visible):is(.border-white\/\[0\.06\], .border-white\/\[0\.07\], .border-white\/\[0\.08\], .border-white\/10) {
+  border-color: rgb(var(--ink) / 0.16) !important;
+}
+:is(.divide-white\/\[0\.06\], .divide-white\/\[0\.07\], .divide-white\/\[0\.08\]) > :not([hidden]) ~ :not([hidden]) {
+  border-color: transparent !important;
+}

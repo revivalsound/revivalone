@@ -8,7 +8,7 @@ export type Format = 'in_person' | 'online' | 'hybrid'
 
 export type EventDetails = { category: string; format: Format; venue: string; online_link: string; start_time: string; end_time: string; capacity: number | null }
 export type BootcampDetails = { track: string; format: Format; venue: string; weeks: number; days: string[]; start_time: string; capacity: number | null; outcomes: string[] }
-export type CellDetails = { focus: string; focuses: string[]; area: string; format: Format; meeting_day: string; meeting_days: string[]; start_time: string; max_members: number | null }
+export type CellDetails = { avatar_url?: string; focus: string; focuses: string[]; area: string; format: Format; meeting_day: string; meeting_days: string[]; start_time: string; max_members: number | null }
 
 export type Initiative<K extends InitiativeKind = InitiativeKind> = {
   id: string

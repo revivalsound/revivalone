@@ -107,7 +107,9 @@ export function CellCard({ cell }: { cell: Initiative<'cell'> }) {
       <MediaCover initiative={cell} className="h-36">
         <span className="absolute right-4 top-4 z-[2] inline-flex items-center gap-1 rounded-full bg-black/40 px-2.5 py-1 text-[10px] font-semibold text-white/90 backdrop-blur-md"><Users className="h-3 w-3" /> {cell.member_count ?? 0}{details.max_members ? ` / ${details.max_members}` : ''}</span>
       </MediaCover>
-      <span className="relative z-[2] -mt-7 ml-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/15 bg-plum font-heading text-base font-semibold text-primary shadow-[0_10px_30px_rgba(0,0,0,0.45)]">{initials}</span>
+      <span className="relative z-[2] -mt-7 ml-5 flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border-2 border-surface bg-plum font-heading text-base font-semibold text-primary shadow-[0_10px_30px_rgba(0,0,0,0.45)]">
+        {details.avatar_url ? <img src={details.avatar_url} alt="" loading="lazy" className="h-full w-full object-cover" /> : initials}
+      </span>
       <div className="flex flex-1 flex-col p-5 pt-4">
         <h3 className="font-heading text-lg font-semibold leading-tight">{cell.title}</h3>
         {cellFocuses(details).length > 0 && <div className="mt-2 flex flex-wrap gap-1">{cellFocuses(details).map(item => <span key={item} className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">{item}</span>)}</div>}
@@ -116,10 +118,6 @@ export function CellCard({ cell }: { cell: Initiative<'cell'> }) {
           <p className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> {details.format === 'online' ? 'Online' : [details.area, cell.city].filter(Boolean).join(', ')}</p>
           {schedule && <p className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> {schedule}</p>}
         </div>
-        <span className="mt-5 inline-flex items-center justify-between rounded-full border border-white/[0.08] bg-white/[0.03] py-1.5 pl-4 pr-1.5 text-xs font-semibold transition-colors group-hover:border-primary/30 group-hover:bg-primary/10">
-          <span className="flex items-center gap-1.5"><Chat className="h-4 w-4 text-primary" /> Open group chat</span>
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground"><ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
-        </span>
       </div>
     </Link>
   )

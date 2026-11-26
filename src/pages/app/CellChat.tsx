@@ -180,7 +180,11 @@ export default function CellChat() {
 
   const info = (
     <div className="space-y-5">
-      <MediaCover initiative={cell} className="h-32 rounded-[20px]" />
+      <div className="relative">
+        <MediaCover initiative={cell} className="h-32 rounded-[20px]" />
+        {details.avatar_url && <img src={details.avatar_url} alt="" className="absolute -bottom-5 left-4 z-[3] h-14 w-14 rounded-2xl border-2 border-surface-raised object-cover shadow-[0_10px_24px_rgba(0,0,0,0.4)]" />}
+      </div>
+      {details.avatar_url && <span className="block h-3" />}
       <div>
         <h2 className="font-heading text-lg font-semibold">{cell.title}</h2>
         {cellFocuses(details).length > 0 && <div className="mt-2 flex flex-wrap gap-1">{cellFocuses(details).map(item => <span key={item} className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">{item}</span>)}</div>}
@@ -221,7 +225,7 @@ export default function CellChat() {
       <section className="flex min-w-0 flex-1 flex-col overflow-hidden border-white/[0.07] bg-[#0b0708]/80 sm:rounded-[28px] sm:border" aria-label={`${cell.title} group chat`}>
         <header className="flex items-center gap-3 border-b border-white/[0.07] px-4 py-3 sm:px-5">
           <Link to="/community/cells" aria-label="All cells" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-white/[0.06] hover:text-foreground"><ArrowLeft className="h-4 w-4" /></Link>
-          <MediaCover initiative={cell} className="h-10 w-10 shrink-0 rounded-xl" />
+          {details.avatar_url ? <img src={details.avatar_url} alt="" className="h-10 w-10 shrink-0 rounded-xl object-cover" /> : <MediaCover initiative={cell} className="h-10 w-10 shrink-0 rounded-xl" />}
           <div className="min-w-0 flex-1">
             <h1 className="truncate font-heading text-[15px] font-semibold">{cell.title}</h1>
             <p className="truncate text-[11px] text-muted-foreground">{members.length || cell.member_count || 0} members{schedule ? ` · meets ${schedule}` : ''}</p>

@@ -1,8 +1,9 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, CalendarDays, Eye, Fire, Loader, Users } from '../../components/ui/icons'
+import { ArrowLeft, ArrowRight, CalendarDays, Camera, Eye, Fire, GalleryAdd, Loader, Users } from '../../components/ui/icons'
 import { Notice, inputClass } from '../../components/ui/kit'
 import MediaPicker from '../../components/community/MediaPicker'
+import { shrinkImage } from '../../lib/images'
 import Select from '../../components/ui/Select'
 import { CellCard, EventCard } from '../../components/community/cards'
 import { useAuth } from '../../lib/AuthContext'
@@ -52,6 +53,17 @@ export function CreateForm({ kind, existing }: { kind: InitiativeKind; existing?
   // When editing, the current cover stays unless it is replaced or removed.
   const [keepMedia, setKeepMedia] = useState(Boolean(existing?.media_url))
   const [file, setFile] = useState<File | null>(null)
+  // Cells also have a square picture (shown where the initials were).
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const [avatarUrl, setAvatarUrl] = useState(() => (existing?.details as { avatar_url?: string } | undefined)?.avatar_url ?? '')
+  const [avatarPreview, setAvatarPreview] = useState('')
+  const avatarInput = useRef<HTMLInputElement>(null)
+  useEffect(() => {
+    if (!avatarFile) { setAvatarPreview(''); return }
+    const url = URL.createObjectURL(avatarFile)
+    setAvatarPreview(url)
+    return () => URL.revokeObjectURL(url)
+  }, [avatarFile])
   const [preview, setPreview] = useState('')
   const [saving, setSaving] = useState<'' | 'uploading' | 'saving'>('')
   const [error, setError] = useState('')
@@ -70,7 +82,7 @@ export function CreateForm({ kind, existing }: { kind: InitiativeKind; existing?
   function details(): Initiative['details'] {
     if (kind === 'event') return { category: values.category, format: values.format, venue: online ? '' : values.venue.trim(), online_link: online || values.format === 'hybrid' ? values.online_link.trim() : '', start_time: values.start_time, end_time: values.end_time, capacity: number(values.capacity) }
     if (kind === 'bootcamp') return { track: values.track, format: values.format, venue: online ? '' : values.venue.trim(), weeks: Number(values.weeks), days: values.days, start_time: values.start_time, capacity: number(values.capacity), outcomes: values.outcomes.map(item => item.trim()).filter(Boolean) }
-    return { focus: values.focuses.join(' · '), focuses: values.focuses, area: online ? '' : values.area.trim(), format: values.format, meeting_day: values.meeting_days[0] ?? '', meeting_days: values.meeting_days, start_time: values.start_time, max_members: number(values.max_members) }
+    return { avatar_url: avatarPreview || avatarUrl, focus: values.focuses.join(' · '), focuses: values.focuses, area: online ? '' : values.area.trim(), format: values.format, meeting_day: values.meeting_days[0] ?? '', meeting_days: values.meeting_days, start_time: values.start_time, max_members: number(values.max_members) }
   }
 
   const draft = {
@@ -94,12 +106,17 @@ export function CreateForm({ kind, existing }: { kind: InitiativeKind; existing?
     try {
       let media = { url: keepMedia ? existing?.media_url ?? '' : '', type: (keepMedia ? existing?.media_type ?? '' : '') as '' | 'image' | 'video' }
       if (file) { setSaving('uploading'); media = await uploadMedia(user.id, file) }
+      let picture = avatarUrl
+      if (kind === 'cell' && avatarFile) {
+        setSaving('uploading')
+        picture = (await uploadMedia(user.id, await shrinkImage(avatarFile, { maxSize: 480, square: true }))).url
+      }
       setSaving('saving')
       if (existing) {
         await updateInitiative(existing.id, {
           title: values.title.trim(), description: values.description.trim(),
           city: online ? 'Online' : values.city.trim(), starts_at: values.date,
-          media_url: media.url, media_type: media.type, details: details(),
+          media_url: media.url, media_type: media.type, details: { ...details(), ...(kind === 'cell' ? { avatar_url: picture } : {}) },
         })
         navigate(kind === 'cell' ? `/community/cells/${existing.id}` : '/events', { replace: true, state: { saved: true } })
         return
@@ -107,7 +124,7 @@ export function CreateForm({ kind, existing }: { kind: InitiativeKind; existing?
       const created = await createInitiative({
         owner_id: user.id, kind, title: values.title.trim(), description: values.description.trim(),
         city: online ? 'Online' : values.city.trim(), starts_at: values.date,
-        media_url: media.url, media_type: media.type, details: details(),
+        media_url: media.url, media_type: media.type, details: { ...details(), ...(kind === 'cell' ? { avatar_url: picture } : {}) },
       })
       navigate(kind === 'cell' ? `/community/cells/${created.id}` : '/events', { state: { created: created.id } })
     } catch (caught) {
@@ -130,7 +147,7 @@ export function CreateForm({ kind, existing }: { kind: InitiativeKind; existing?
 
       <form onSubmit={submit} className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-5">
-          <Panel step="1" title="Cover">
+          <Panel step="1" title={kind === 'cell' ? 'Banner and picture' : 'Cover'}>
             {existing?.media_url && keepMedia && !file ? (
               <div>
                 <p className="text-xs font-medium text-foreground/90">Current cover</p>
@@ -142,7 +159,21 @@ export function CreateForm({ kind, existing }: { kind: InitiativeKind; existing?
                 </div>
               </div>
             ) : (
-              <MediaPicker file={file} onChange={setFile} label={kind === 'cell' ? 'A photo or short video of your group or neighbourhood' : 'Cover image or promo video'} />
+              <MediaPicker file={file} onChange={setFile} label={kind === 'cell' ? 'Banner: a wide photo or short video of your group' : 'Cover image or promo video'} />
+            )}
+            {kind === 'cell' && (
+              <div className="flex items-center gap-4 pt-1">
+                <button type="button" onClick={() => avatarInput.current?.click()} aria-label="Choose the cell picture" className="group relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-white/[0.16] bg-plum font-heading text-lg font-semibold text-primary transition-colors hover:border-primary/50">
+                  {avatarPreview || avatarUrl ? <img src={avatarPreview || avatarUrl} alt="Cell picture" className="h-full w-full object-cover" /> : <GalleryAdd className="h-6 w-6" />}
+                  <span className="absolute inset-0 flex items-center justify-center bg-black/45 text-white opacity-0 transition-opacity group-hover:opacity-100"><Camera className="h-5 w-5" /></span>
+                </button>
+                <input ref={avatarInput} type="file" accept="image/*" className="sr-only" onChange={event => { const picked = event.target.files?.[0]; if (picked?.type.startsWith('image/')) setAvatarFile(picked); event.target.value = '' }} />
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold">Cell picture</p>
+                  <p className="text-xs text-muted-foreground">A square logo or group photo. It shows on the cell card and in the group chat.</p>
+                  {(avatarPreview || avatarUrl) && <button type="button" onClick={() => { setAvatarFile(null); setAvatarUrl('') }} className="mt-1.5 text-xs font-semibold text-red-400 hover:text-red-300">Remove picture</button>}
+                </div>
+              </div>
             )}
           </Panel>
 
