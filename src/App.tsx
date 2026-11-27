@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-route
 import { AuthProvider, useAuth } from './lib/AuthContext'
 import { ThemeProvider } from './lib/theme'
 import { NotificationsProvider } from './lib/notifications'
+import { BibleAudioProvider } from './lib/bibleAudio'
 import Landing from './pages/Landing'
 import RevivalSplash from './components/RevivalSplash'
 import InstallPrompt from './components/InstallPrompt'
@@ -93,6 +94,7 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
       <NotificationsProvider>
+      <BibleAudioProvider>
         <ScrollToTop />
         <Splash />
         <InstallPrompt />
@@ -133,6 +135,7 @@ export default function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
+      </BibleAudioProvider>
       </NotificationsProvider>
       </BrowserRouter>
     </AuthProvider>

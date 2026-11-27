@@ -6,6 +6,7 @@ import { Notice } from '../../components/ui/kit'
 import PostCard, { KIND_META, PostCardSkeleton } from '../../components/posts/PostCard'
 import { useAuth } from '../../lib/AuthContext'
 import SuggestedPeople from '../../components/social/SuggestedPeople'
+import { useBibleAudio } from '../../lib/bibleAudio'
 import { ComingUpCard, PrayerWallsCard, TodaysReadingsCard, VerseOfTheDayCard } from '../../components/bible/TodayCards'
 import { fetchFollowingIds } from '../../lib/social'
 import { fetchFeed, FeedNotReady, PAGE_SIZE, POST_KINDS, type Post, type PostKind } from '../../lib/posts'
@@ -46,6 +47,7 @@ export default function Home() {
   const navigate = useNavigate()
   const compose = () => navigate('/create/post')
   const scrolling = useScrolling()
+  const listening = Boolean(useBibleAudio().track)
   const sentinel = useRef<HTMLDivElement>(null)
 
   const load = useCallback(async (kind: Filter, nextPage: number) => {
@@ -167,7 +169,7 @@ export default function Home() {
         data-hidden={scrolling}
         aria-hidden={scrolling}
         tabIndex={scrolling ? -1 : 0}
-        className="post-fab group fixed bottom-24 right-5 z-30 inline-flex h-14 items-center gap-2 rounded-full bg-primary pl-5 pr-6 font-heading text-[12px] font-semibold uppercase tracking-[0.14em] text-primary-foreground shadow-[0_16px_40px_rgba(255,92,138,0.42)] ring-1 ring-white/20 hover:bg-primary/95 active:scale-[0.97] lg:bottom-8 lg:right-8"
+        className={`post-fab group fixed ${listening ? 'bottom-[10.75rem] lg:bottom-28' : 'bottom-24 lg:bottom-8'} right-5 z-30 inline-flex h-14 items-center gap-2 rounded-full bg-primary pl-5 pr-6 font-heading text-[12px] font-semibold uppercase tracking-[0.14em] text-primary-foreground shadow-[0_16px_40px_rgba(255,92,138,0.42)] ring-1 ring-white/20 hover:bg-primary/95 active:scale-[0.97] lg:right-8`}
       >
         <PenNew className="h-5 w-5 transition-transform group-hover:-rotate-12" strokeWidth={2.2} /> Post
       </button>, document.body)}

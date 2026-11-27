@@ -8,6 +8,7 @@ import ChapterText from '../../components/bible/ChapterText'
 import Sheet from '../../components/ui/Sheet'
 import Select from '../../components/ui/Select'
 import { useTheme } from '../../lib/theme'
+import { NARRATORS, useBibleAudio } from '../../lib/bibleAudio'
 import BookPicker from '../../components/bible/BookPicker'
 import StudyPanel from '../../components/bible/StudyPanel'
 import { useAuth } from '../../lib/AuthContext'
@@ -30,7 +31,6 @@ export function BibleHome() {
   return <Navigate to={`/bible/${last?.translation ?? DEFAULT_TRANSLATION}/${bookSlug(book)}/${last?.chapter ?? 1}`} replace />
 }
 
-const NARRATORS: Record<string, string> = { souer: 'Bob Souer', hays: 'Barry Hays', david: 'David Campbell' }
 
 export default function BibleReader() {
   const params = useParams()
@@ -58,10 +58,7 @@ export default function BibleReader() {
   const [noteOpen, setNoteOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const [saveError, setSaveError] = useState('')
-  const [playing, setPlaying] = useState(false)
-  const [progress, setProgress] = useState(0)
-  const audio = useRef<HTMLAudioElement>(null)
-  const autoplay = useRef(Boolean((location.state as { autoplay?: boolean } | null)?.autoplay))
+  const player = useBibleAudio()
 
   const updatePrefs = (next: Partial<ReaderPrefs>) => setPrefs(current => { const value = { ...current, ...next }; writePrefs(value); return value })
 
@@ -103,19 +100,29 @@ export default function BibleReader() {
     window.scrollTo(0, 0)
   }, [data, location.hash])
 
-  const audioUrl = data?.thisChapterAudioLinks?.[prefs.narrator] ?? Object.values(data?.thisChapterAudioLinks ?? {})[0]
+  const hasAudio = Object.keys(data?.thisChapterAudioLinks ?? {}).length > 0
+  const thisChapter = book ? player.isCurrent({ book: book.id, chapter: chapterNumber }) : false
+  const playing = thisChapter && player.playing
+  const progress = thisChapter && player.duration ? player.time / player.duration : 0
 
-  // Keep playing into the next chapter when narration was on.
+  // When the narration moves on to the next chapter, turn the page with it,
+  // as long as you were on the chapter it just finished.
+  const lastTrack = useRef<{ book: string; chapter: number } | null>(null)
   useEffect(() => {
-    if (!audioUrl || !audio.current || !autoplay.current) return
-    autoplay.current = false
-    void audio.current.play().catch(() => undefined)
-  }, [audioUrl])
+    const previous = lastTrack.current
+    const track = player.track
+    lastTrack.current = track ? { book: track.book, chapter: track.chapter } : null
+    if (!track || !previous || !book || !player.playing) return
+    if (previous.book === book.id && previous.chapter === chapterNumber && (track.book !== previous.book || track.chapter !== previous.chapter)) {
+      const target = bookById(track.book)
+      if (target) navigate(`/bible/${translation}/${bookSlug(target)}/${track.chapter}`)
+    }
+  }, [player.track]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const go = useCallback((target: { book: string; chapter: number } | null | undefined, options: { autoplay?: boolean } = {}) => {
+  const go = useCallback((target: { book: string; chapter: number } | null | undefined) => {
     if (!target) return
     const next = bookById(target.book)
-    if (next) navigate(`/bible/${translation}/${bookSlug(next)}/${target.chapter}`, { state: options })
+    if (next) navigate(`/bible/${translation}/${bookSlug(next)}/${target.chapter}`)
   }, [navigate, translation])
 
   // Arrow keys move between chapters.
@@ -198,10 +205,10 @@ export default function BibleReader() {
   }
 
   function toggleAudio() {
-    const element = audio.current
-    if (!element) return
-    if (element.paused) void element.play()
-    else element.pause()
+    if (!book) return
+    // This chapter is already loaded: pause or resume it. Otherwise start reading it.
+    if (thisChapter) player.toggle()
+    else void player.playChapter({ book: book.id, chapter: chapterNumber, translation, narrator: prefs.narrator })
   }
 
   const current = translationById(translation)!
@@ -209,17 +216,6 @@ export default function BibleReader() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-40 pt-6 sm:px-6 lg:pb-28">
-      {audioUrl && (
-        <audio
-          ref={audio}
-          src={audioUrl}
-          preload="none"
-          onPlay={() => setPlaying(true)}
-          onPause={() => setPlaying(false)}
-          onTimeUpdate={event => setProgress(event.currentTarget.duration ? event.currentTarget.currentTime / event.currentTarget.duration : 0)}
-          onEnded={() => { setPlaying(false); go(data?.nextChapterReference, { autoplay: true }) }}
-        />
-      )}
 
       {/* Reader toolbar */}
       <div className="sticky top-14 z-20 -mx-4 bg-background px-4 py-2 sm:-mx-6 sm:px-6">
@@ -231,7 +227,7 @@ export default function BibleReader() {
           {current.short} <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
         </button>
         <div className="ml-auto flex items-center gap-1">
-          {audioUrl && (
+          {hasAudio && (
             <button type="button" onClick={toggleAudio} aria-label={playing ? 'Pause narration' : 'Listen to this chapter'} className={`inline-flex h-10 items-center gap-2 rounded-full px-3.5 text-[13px] font-semibold transition-colors ${playing ? 'bg-primary text-primary-foreground' : 'bg-white/[0.05] hover:bg-white/[0.09]'}`}>
               {playing ? <PauseCircle className="h-4 w-4" /> : <Headphones className="h-4 w-4 text-primary" />}<span className="hidden sm:inline">{playing ? 'Pause' : 'Listen'}</span>
             </button>
@@ -280,7 +276,7 @@ export default function BibleReader() {
             <Toggle label="Verse numbers" on={prefs.verseNumbers} onChange={value => updatePrefs({ verseNumbers: value })} />
             {data && Object.keys(data.thisChapterAudioLinks ?? {}).length > 1 && (
               <label className="block text-[11px] font-semibold text-muted-foreground">Narrator
-                <Select label="Narrator" value={prefs.narrator} onChange={value => updatePrefs({ narrator: value })} className="mt-2 w-full" options={Object.keys(data.thisChapterAudioLinks ?? {}).map(id => ({ value: id, label: NARRATORS[id] ?? id, description: 'Berean Standard Bible audio' }))} />
+                <Select label="Narrator" value={prefs.narrator} onChange={value => { updatePrefs({ narrator: value }); if (thisChapter && book) void player.playChapter({ book: book.id, chapter: chapterNumber, translation, narrator: value }) }} className="mt-2 w-full" options={Object.keys(data.thisChapterAudioLinks ?? {}).map(id => ({ value: id, label: NARRATORS[id] ?? id, description: 'Berean Standard Bible audio' }))} />
               </label>
             )}
           </div>
@@ -390,10 +386,10 @@ export default function BibleReader() {
       {picking && <BookPicker current={book} chapter={chapterNumber} onPick={(next, chapter) => navigate(`/bible/${translation}/${bookSlug(next)}/${chapter}`)} onClose={() => setPicking(false)} />}
       {noteOpen && <NoteDialog label={selectionLabel} text={selectionText} initial={highlights.get(selectedList[0])?.note ?? ''} onSave={saveNote} onClose={() => setNoteOpen(false)} />}
       {/* Play control for phones, above the bottom navigation */}
-      {audioUrl && playing && selectedList.length === 0 && (
+      {hasAudio && playing && selectedList.length === 0 && (
         <button type="button" onClick={toggleAudio} className="fixed bottom-24 right-4 z-30 flex h-12 items-center gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-[0_12px_30px_rgba(255,92,138,0.4)] lg:hidden"><PauseCircle className="h-5 w-5" /> Pause</button>
       )}
-      {audioUrl && !playing && progress > 0 && progress < 1 && selectedList.length === 0 && (
+      {hasAudio && thisChapter && !playing && progress > 0 && progress < 1 && selectedList.length === 0 && (
         <button type="button" onClick={toggleAudio} className="fixed bottom-24 right-4 z-30 flex h-12 items-center gap-2 rounded-full border border-white/[0.12] glass glass-strong px-4 text-sm font-semibold lg:bottom-6"><Play className="h-4 w-4 text-primary" /> Resume</button>
       )}
     </div>

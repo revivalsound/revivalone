@@ -22,6 +22,7 @@ import {
 } from '../ui/icons'
 import AmbientField from '../AmbientField'
 import PhotoImg from '../ui/PhotoImg'
+import MiniPlayer from '../bible/MiniPlayer'
 import BrandMark from '../brand/BrandMark'
 import { useAuth } from '../../lib/AuthContext'
 import { useTheme } from '../../lib/theme'
@@ -216,6 +217,7 @@ export default function AppShell() {
           </div>
         </nav>
 
+        <MiniPlayer />
         {picking && <CreateDialog onPick={kind => openCreate(kind)} onClose={() => setPicking(false)} />}
       </div>
     </CreateContext.Provider>
