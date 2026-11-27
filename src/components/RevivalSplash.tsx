@@ -19,7 +19,7 @@ export default function RevivalSplash({ message = 'Gathering the flame', leaving
           </div>
         </div>
 
-        <p className="revival-splash__word"><strong>REST</strong></p>
+        <p className="revival-splash__word"><strong>Revival Sound Tent</strong></p>
         <span className="revival-splash__message">{message}</span>
         <div className="revival-splash__track" aria-hidden="true"><i /></div>
       </div>

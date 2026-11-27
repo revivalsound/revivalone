@@ -107,7 +107,7 @@ function ProfileSetup({ userId, destination }: { userId: string; destination: st
         <header className="relative z-10 flex items-center justify-between gap-3 px-5 pt-5 sm:px-7 sm:pt-6">
           <Link to="/" className="flex items-center gap-2.5" aria-label="Revival Sound Tent home">
             <BrandMark size={30} animated />
-            <strong className="font-heading text-lg font-bold">REST</strong>
+            <strong className="font-heading text-lg font-bold">Revival Sound Tent</strong>
           </Link>
           <ActionButton tone="quiet" onClick={skipSetup} disabled={saving}>Skip setup</ActionButton>
         </header>

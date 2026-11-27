@@ -117,7 +117,7 @@ export default function Auth() {
           <header className="relative z-10 flex items-center justify-between px-5 pt-5 sm:px-7 sm:pt-6">
             <Link to="/" className="flex items-center gap-2.5" aria-label="Revival Sound Tent home">
               <BrandMark size={30} animated />
-              <strong className="font-heading text-lg font-bold">REST</strong>
+              <strong className="font-heading text-lg font-bold">Revival Sound Tent</strong>
             </Link>
             <Link to="/" className="inline-flex h-9 items-center gap-2 rounded-full border border-white/[0.09] bg-white/[0.03] px-3.5 text-xs text-muted-foreground transition-colors hover:bg-white/[0.07] hover:text-foreground">
               <ArrowLeft className="h-3.5 w-3.5" /> Back home
@@ -179,7 +179,7 @@ export default function Auth() {
               </div>
 
               <button type="submit" disabled={busy} className="group !mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primary text-sm font-semibold text-primary-foreground shadow-[0_14px_38px_rgba(255,92,138,0.22)] transition-all hover:-translate-y-0.5 hover:bg-primary/90 active:translate-y-0 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0">
-                {busy ? <Loader className="h-5 w-5 animate-spin" /> : isSignUp ? 'Join the movement' : <>Enter <strong className="font-bold">REST</strong></>}
+                {busy ? <Loader className="h-5 w-5 animate-spin" /> : isSignUp ? 'Join the movement' : <>Enter <strong className="font-bold">Revival Sound Tent</strong></>}
                 {!busy && <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />}
               </button>
             </form>

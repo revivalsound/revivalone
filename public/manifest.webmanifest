@@ -1,7 +1,7 @@
 {
   "id": "/home",
   "name": "Revival Sound Tent",
-  "short_name": "REST",
+  "short_name": "Revival Sound Tent",
   "description": "One movement. One revival. One generation. Read the Bible, follow the daily guide, pray together and gather with your community.",
   "start_url": "/home?source=pwa",
   "scope": "/",

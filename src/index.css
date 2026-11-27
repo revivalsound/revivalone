@@ -298,9 +298,12 @@
   position: relative;
   margin: 0;
   font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(2.2rem, 11vw, 3.4rem);
+  font-size: clamp(1.9rem, 8.6vw, 3.2rem);
   font-weight: 700;
-  line-height: 1;
+  line-height: 1.04;
+  max-width: 11ch;
+  text-align: center;
+  text-wrap: balance;
   letter-spacing: -0.03em;
   color: transparent;
   background:

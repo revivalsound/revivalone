@@ -127,7 +127,7 @@ export default function InstallPrompt() {
               <ol className="mt-3 space-y-2.5 text-[13px]">
                 <li className="flex items-center gap-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary font-heading text-xs font-bold text-primary-foreground">1</span> Tap <span className="inline-flex items-center gap-1 rounded-lg bg-white/[0.08] px-2 py-1 font-semibold"><Share className="h-3.5 w-3.5 text-primary" /> Share</span> in Safari’s toolbar</li>
                 <li className="flex items-center gap-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary font-heading text-xs font-bold text-primary-foreground">2</span> Choose <span className="inline-flex items-center gap-1 rounded-lg bg-white/[0.08] px-2 py-1 font-semibold"><AddSquare className="h-3.5 w-3.5 text-primary" /> Add to Home Screen</span></li>
-                <li className="flex items-center gap-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary font-heading text-xs font-bold text-primary-foreground">3</span> Tap <b>Add</b>, then open <Fire className="h-4 w-4 text-primary" /> <strong>REST</strong></li>
+                <li className="flex items-center gap-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary font-heading text-xs font-bold text-primary-foreground">3</span> Tap <b>Add</b>, then open <Fire className="h-4 w-4 text-primary" /> <strong>Revival Sound Tent</strong></li>
               </ol>
               <button type="button" onClick={() => close()} className="mt-4 h-11 w-full rounded-full bg-primary text-sm font-semibold text-primary-foreground">Got it</button>
             </div>

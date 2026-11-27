@@ -35,6 +35,7 @@ async function unsubscribeDevice() {
 
 type Value = {
   unread: number
+  revision: number
   refreshUnread: () => void
   /** Device alerts: shown as system notifications while Revival Sound Tent is open in the background. */
   alerts: 'on' | 'off' | 'blocked' | 'unsupported'
@@ -42,7 +43,7 @@ type Value = {
   disableAlerts: () => void
 }
 
-const NotificationsContext = createContext<Value>({ unread: 0, refreshUnread: () => undefined, alerts: 'off', enableAlerts: async () => undefined, disableAlerts: () => undefined })
+const NotificationsContext = createContext<Value>({ unread: 0, revision: 0, refreshUnread: () => undefined, alerts: 'off', enableAlerts: async () => undefined, disableAlerts: () => undefined })
 export const useNotifications = () => useContext(NotificationsContext)
 
 function alertsState(): Value['alerts'] {
@@ -59,20 +60,25 @@ function alertsState(): Value['alerts'] {
  */
 export function NotificationsProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
+  const userId = user?.id
   const navigate = useNavigate()
   const [unread, setUnread] = useState(0)
+  const [revision, setRevision] = useState(0)
   const [toast, setToast] = useState<AppNotification | null>(null)
   const [alerts, setAlerts] = useState<Value['alerts']>(alertsState)
 
-  const refreshUnread = useCallback(() => { if (user) void unreadCount(user.id).then(setUnread) }, [user])
+  const refreshUnread = useCallback(() => { if (userId) void unreadCount(userId).then(setUnread) }, [userId])
 
   useEffect(() => {
-    if (!user) { setUnread(0); return }
+    if (!userId) { setUnread(0); return }
+    let active = true
     refreshUnread()
-    const channel = subscribeToNotifications(user.id, async id => {
+    const channel = subscribeToNotifications(userId, async id => {
+      if (!active) return
       setUnread(count => count + 1)
+      setRevision(value => value + 1)
       const note = await fetchNotification(id)
-      if (!note) return
+      if (!active || !note) return
       if (document.hidden && alertsState() === 'on') {
         const registration = await navigator.serviceWorker?.getRegistration().catch(() => undefined)
         const options = { body: note.body || undefined, icon: '/icons/icon-192.png', badge: '/icons/icon-96.png', tag: note.id, data: { link: note.link } }
@@ -84,8 +90,12 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     })
     const onFocus = () => refreshUnread()
     window.addEventListener('focus', onFocus)
-    return () => { void supabase.removeChannel(channel); window.removeEventListener('focus', onFocus) }
-  }, [user, refreshUnread])
+    return () => {
+      active = false
+      void supabase.removeChannel(channel)
+      window.removeEventListener('focus', onFocus)
+    }
+  }, [userId, refreshUnread])
 
   useEffect(() => {
     if (!toast) return
@@ -114,7 +124,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   }, [user])
 
   return (
-    <NotificationsContext.Provider value={{ unread, refreshUnread, alerts, enableAlerts, disableAlerts }}>
+    <NotificationsContext.Provider value={{ unread, revision, refreshUnread, alerts, enableAlerts, disableAlerts }}>
       {children}
       {toast && createPortal(
         <button

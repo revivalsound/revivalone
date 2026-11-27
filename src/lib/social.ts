@@ -105,9 +105,12 @@ export async function markAllRead(me: string) {
   await supabase.from('notifications').update({ read_at: new Date().toISOString() }).eq('user_id', me).is('read_at', null)
 }
 
+let notificationChannelInstance = 0
+
 export function subscribeToNotifications(me: string, onNew: (id: string) => void): RealtimeChannel {
   return supabase
-    .channel(`notifications:${me}`)
+    // Channel removal is asynchronous, so a rapid remount needs a fresh topic.
+    .channel(`notifications:${me}:${++notificationChannelInstance}`)
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${me}` }, payload => onNew((payload.new as { id: string }).id))
     .subscribe()
 }

@@ -6,9 +6,8 @@ import { AuthorAvatar } from '../../components/posts/PostCard'
 import SuggestedPeople from '../../components/social/SuggestedPeople'
 import { useAuth } from '../../lib/AuthContext'
 import { useNotifications } from '../../lib/notifications'
-import { fetchNotifications, markAllRead, markRead, SocialNotReady, subscribeToNotifications, type AppNotification, type NotificationType } from '../../lib/social'
+import { fetchNotifications, markAllRead, markRead, type AppNotification, type NotificationType } from '../../lib/social'
 import { timeAgo } from '../../lib/posts'
-import { supabase } from '../../lib/supabase'
 
 const TYPE: Record<NotificationType, { icon: ElementType; tint: string }> = {
   follow: { icon: UserPlus, tint: '#ff5c8a' },
@@ -23,20 +22,28 @@ type Filter = 'all' | 'unread'
 
 export default function Notifications() {
   const { user } = useAuth()
+  const userId = user?.id
   const navigate = useNavigate()
-  const { refreshUnread, alerts, enableAlerts, disableAlerts } = useNotifications()
+  const { revision, refreshUnread, alerts, enableAlerts, disableAlerts } = useNotifications()
   const [items, setItems] = useState<AppNotification[] | null>(null)
   const [error, setError] = useState('')
   const [filter, setFilter] = useState<Filter>('all')
 
   useEffect(() => {
-    if (!user) { setItems([]); return }
+    if (!userId) { setItems([]); return }
     let live = true
-    const load = () => fetchNotifications(user.id).then(list => live && setItems(list)).catch(caught => { if (live) { setItems([]); setError(caught instanceof SocialNotReady || caught instanceof Error ? caught.message : 'We couldn’t load notifications.') } })
-    void load()
-    const channel = subscribeToNotifications(user.id, () => void load())
-    return () => { live = false; void supabase.removeChannel(channel) }
-  }, [user])
+    // The provider owns the subscription; an insert signals this page to reload.
+    void fetchNotifications(userId).then(list => {
+      if (!live) return
+      setItems(list)
+      setError('')
+    }).catch(caught => {
+      if (!live) return
+      setItems(previous => previous ?? [])
+      setError(caught instanceof Error ? caught.message : 'We couldn’t load notifications.')
+    })
+    return () => { live = false }
+  }, [userId, revision])
 
   const shown = (items ?? []).filter(item => filter === 'all' || !item.read_at)
   const unread = (items ?? []).filter(item => !item.read_at).length

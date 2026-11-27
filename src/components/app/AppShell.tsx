@@ -150,7 +150,7 @@ export default function AppShell() {
         <aside className={`sticky top-0 z-30 hidden h-[100dvh] shrink-0 flex-col border-r border-white/[0.06] bg-shell py-4 transition-[width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:flex ${collapsed ? 'w-[68px] items-center px-2' : 'w-[248px] px-3'}`}>
           <Link to="/" className={`mb-5 flex items-center gap-2.5 rounded-lg px-1.5 py-1.5 transition-colors hover:bg-white/[0.04] ${collapsed ? 'justify-center' : ''}`} aria-label="Revival Sound Tent home">
             <BrandMark size={30} animated />
-            {!collapsed && <span className="flex flex-col"><strong className="font-heading text-[14px] font-bold leading-none">REST</strong><span className="mt-1 text-[11px] leading-none text-muted-foreground">One movement</span></span>}
+            {!collapsed && <span className="flex flex-col"><strong className="font-heading text-[14px] font-bold leading-none">Revival Sound Tent</strong><span className="mt-1 text-[11px] leading-none text-muted-foreground">One movement</span></span>}
           </Link>
 
           <nav aria-label="App" className={`flex flex-1 flex-col gap-1 ${collapsed ? 'items-center' : ''}`}>
@@ -183,17 +183,17 @@ export default function AppShell() {
 
         <div className="relative z-10 flex min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between border-b border-white/[0.06] bg-shell px-4 sm:px-6">
-            <div className="flex min-w-0 items-center gap-2.5 text-[13px]">
+            <div className="flex min-w-0 flex-1 items-center gap-2.5 pr-2 text-[13px]">
               <button type="button" onClick={() => setCollapsed(value => !value)} aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} className="hidden h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-white/[0.06] hover:text-foreground lg:flex"><PanelLeft className="h-4 w-4" /></button>
-              <Link to="/" className="flex items-center gap-2 lg:hidden" aria-label="Revival Sound Tent home"><BrandMark size={26} animated /><strong className="font-heading text-[15px] font-bold">REST</strong></Link>
-              <strong className="hidden font-heading font-bold text-muted-foreground lg:inline" title="Revival Sound Tent">REST</strong>
+              <Link to="/" className="flex min-w-0 items-center gap-2 lg:hidden" aria-label="Revival Sound Tent home"><BrandMark size={26} animated /><strong className="truncate whitespace-nowrap font-heading text-[clamp(13px,3.7vw,15px)] font-bold tracking-[-0.01em]">Revival Sound Tent</strong></Link>
+              <strong className="hidden font-heading font-bold text-muted-foreground lg:inline" title="Revival Sound Tent">Revival Sound Tent</strong>
               <ChevronRight className="hidden h-3.5 w-3.5 text-muted-foreground/40 lg:block" />
               <span className="hidden truncate font-semibold lg:inline">{section}</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
               <ThemeToggle />
               {user && <BellButton />}
-              <Link to="/guide" className="inline-flex h-8 items-center gap-1.5 rounded-full border border-white/[0.09] bg-white/[0.03] px-3 text-[12px] font-medium text-foreground/85 transition-colors hover:bg-white/[0.07]"><Sunrise className="h-3.5 w-3.5 text-primary" /> <span className="hidden sm:inline">Today’s guide</span></Link>
+              <Link to="/guide" aria-label="Today’s guide" className="max-[389px]:hidden inline-flex h-8 items-center gap-1.5 rounded-full border border-white/[0.09] bg-white/[0.03] px-3 text-[12px] font-medium text-foreground/85 transition-colors hover:bg-white/[0.07]"><Sunrise className="h-3.5 w-3.5 text-primary" /> <span className="hidden sm:inline">Today’s guide</span></Link>
               {user
                 ? <Link to="/profile" aria-label="Open your profile"><Avatar /></Link>
                 : <button type="button" onClick={() => navigate('/auth')} className="inline-flex h-8 items-center rounded-full bg-primary px-3.5 font-heading text-[10px] font-semibold uppercase tracking-[0.14em] text-primary-foreground">Sign in</button>}

@@ -76,7 +76,7 @@ function AppMockup() {
           <div className="flex h-10 shrink-0 items-center justify-between border-b border-white/[0.06] px-3">
             <div className="flex items-center gap-2 text-[10px]">
               <PanelLeft className="h-3 w-3 text-muted-foreground" />
-              <strong className="hidden font-heading font-bold text-muted-foreground sm:inline">REST</strong>
+              <strong className="hidden font-heading font-bold text-muted-foreground sm:inline">Revival Sound Tent</strong>
               <span className="hidden text-muted-foreground/30 sm:inline">/</span>
               <span className="font-semibold text-foreground">Home</span>
             </div>
@@ -306,7 +306,7 @@ function WordPreview() {
           <div className="mt-auto">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/60">{verse ? formatReference(verse) : 'Today'}</p>
             <p className="mt-3 line-clamp-6 font-scripture text-[1.35rem] leading-[1.55] text-white">{verse?.text ? `“${verse.text}”` : '…'}</p>
-            <span className="mt-5 inline-flex h-10 items-center gap-2 rounded-full bg-primary px-4 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground">Open today’s guide <ArrowRight className="h-3.5 w-3.5" /></span>
+            <span className="mt-5 inline-flex h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-full bg-primary px-4 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground">Open today’s guide <ArrowRight className="h-3.5 w-3.5" /></span>
           </div>
         </div>
       </Link>
@@ -382,9 +382,9 @@ export default function Landing() {
             <HeroField variant="vivid" strike className="inset-0" />
 
             <header className="relative z-20 flex h-16 items-center justify-between px-4 sm:h-20 sm:px-7">
-              <Link to="/" className="flex items-center gap-2.5" aria-label="Revival Sound Tent home">
+              <Link to="/" className="flex min-w-0 items-center gap-2.5" aria-label="Revival Sound Tent home">
                 <BrandMark size={32} animated />
-                <strong className="font-heading text-lg font-bold text-white">REST</strong>
+                <strong className="truncate whitespace-nowrap font-heading text-[clamp(14px,4vw,18px)] font-bold text-white">Revival Sound Tent</strong>
               </Link>
               <nav className="hidden items-center gap-7 xl:flex" aria-label="Sections">
                 {navLinks.map(([href, label]) => (
@@ -393,10 +393,10 @@ export default function Landing() {
                   </a>
                 ))}
               </nav>
-              <div className="flex items-center gap-2">
+              <div className="flex shrink-0 items-center gap-2 pl-2">
                 {!session && <Link to="/auth" className="hidden h-10 items-center px-3 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-white/85 transition-colors hover:text-white sm:inline-flex">Sign in</Link>}
                 <Link to={session ? '/home' : '/auth?mode=sign-up'} className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-4 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground transition-all hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] sm:px-5">
-                  {session ? 'Open the app' : <>Join <strong className="font-bold">REST</strong></>}
+                  {session ? <><span className="sm:hidden">Open</span><span className="hidden sm:inline">Open the app</span></> : <>Join<strong className="hidden font-bold sm:inline"> Revival Sound Tent</strong></>}
                 </Link>
               </div>
             </header>
