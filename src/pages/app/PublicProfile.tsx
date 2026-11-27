@@ -71,7 +71,7 @@ export default function ProfilePage({ self = false }: { self?: boolean }) {
     )
   }
 
-  const name = profile.full_name || 'Revival One member'
+  const name = profile.full_name || 'Revival Sound Tent member'
   const firstName = name.split(/\s+/)[0]
   const location = [profile.city, profile.country].filter(Boolean).join(', ')
   const joined = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' }).format(new Date(profile.created_at))
@@ -81,7 +81,7 @@ export default function ProfilePage({ self = false }: { self?: boolean }) {
   function share() {
     const url = `${window.location.origin}/u/${profile!.id}`
     const done = () => { setCopied(true); window.setTimeout(() => setCopied(false), 1800) }
-    if (navigator.share) void navigator.share({ title: `${name} on Revival One`, url }).catch(() => undefined)
+    if (navigator.share) void navigator.share({ title: `${name} on Revival Sound Tent`, url }).catch(() => undefined)
     else void navigator.clipboard.writeText(url).then(done)
   }
 

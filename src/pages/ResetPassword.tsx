@@ -30,7 +30,7 @@ export default function ResetPassword() {
           <span className="brand-ring brand-ring--on mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-surface"><BrandMark size={44} animated /></span>
           <p className="mt-7 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary">Make a fresh start</p>
           <h1 className="mt-2.5 font-heading text-[2rem] font-semibold leading-tight tracking-[-0.02em]">Choose a new password.</h1>
-          <p className="mt-2.5 text-sm leading-6 text-muted-foreground">Use at least eight characters for your Revival One account.</p>
+          <p className="mt-2.5 text-sm leading-6 text-muted-foreground">Use at least eight characters for your Revival Sound Tent account.</p>
         </div>
         <form onSubmit={updatePassword} className="mt-8 space-y-4">
           {error && <Notice tone="error">{error}</Notice>}

@@ -48,7 +48,7 @@ export function KindChip({ kind, type }: { kind: PostKind; type?: OpportunityTyp
  */
 export default function PostCard({ post, compact = false }: { post: Post; compact?: boolean }) {
   const meta = KIND_META[post.kind]
-  const name = post.author?.full_name || 'A Revival One member'
+  const name = post.author?.full_name || 'A Revival Sound Tent member'
   const excerpt = post.body.replace(/\s+/g, ' ').trim()
 
   return (

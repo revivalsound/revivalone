@@ -1,9 +1,9 @@
-// Revival One service worker: makes the app installable and keeps it opening
+// Revival Sound Tent service worker: makes the app installable and keeps it opening
 // when the connection drops. Pages are network-first (fresh when online, the
 // cached shell when offline); built assets and icons are cache-first; the
 // Bible API is stale-while-revalidate so chapters you've read open offline.
 // API calls and Supabase (accounts, posts, chat) always go to the network.
-const VERSION = 'revival-v3'
+const VERSION = 'revival-v4'
 const SHELL = ['/', '/home', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png', '/assets/revival-flame-mark.png']
 
 self.addEventListener('install', event => {
@@ -65,11 +65,11 @@ self.addEventListener('notificationclick', event => {
   }))
 })
 
-// A push from /api/push: show it, even when Revival One is closed.
+// A push from /api/push: show it, even when Revival Sound Tent is closed.
 self.addEventListener('push', event => {
   let note = {}
-  try { note = event.data ? event.data.json() : {} } catch { note = { title: event.data ? event.data.text() : 'Revival One' } }
-  event.waitUntil(self.registration.showNotification(note.title || 'Revival One', {
+  try { note = event.data ? event.data.json() : {} } catch { note = { title: event.data ? event.data.text() : 'Revival Sound Tent' } }
+  event.waitUntil(self.registration.showNotification(note.title || 'Revival Sound Tent', {
     body: note.body || undefined,
     icon: '/icons/icon-192.png',
     badge: '/icons/icon-96.png',

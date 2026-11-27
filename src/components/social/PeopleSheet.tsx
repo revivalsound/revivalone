@@ -23,7 +23,7 @@ export default function PeopleSheet({ userId, which, name, onClose }: { userId: 
                   <AuthorAvatar author={person} size="h-11 w-11" />
                   <span className="min-w-0">
                     <b className="block truncate text-[14px] font-semibold">{person.full_name || 'Member'}</b>
-                    <small className="block truncate text-xs text-muted-foreground">{[person.city, person.church].filter(Boolean).join(' · ') || 'Revival One member'}</small>
+                    <small className="block truncate text-xs text-muted-foreground">{[person.city, person.church].filter(Boolean).join(' · ') || 'Revival Sound Tent member'}</small>
                   </span>
                 </Link>
                 <FollowButton userId={person.id} size="sm" />

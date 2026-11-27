@@ -50,7 +50,7 @@ export async function updateMyProfile(userId: string, patch: ProfileUpdate) {
   const rich = await profileExtras()
   const row: Record<string, unknown> = { ...patch, updated_at: new Date().toISOString() }
   if (!rich) { delete row.cover_url; delete row.website }
-  const { error } = await supabase.from('profiles').update(row).eq('id', userId)
+  const { error } = await supabase.from('profiles').update(row).eq('id', userId).select('id').single()
   if (error) throw new Error(error.message)
   // Keep the session's copy of the name and photo in step.
   const meta: Record<string, unknown> = {}

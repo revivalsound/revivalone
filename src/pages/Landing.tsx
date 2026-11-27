@@ -43,7 +43,7 @@ import { fetchCourses, type Course } from '../lib/academy'
 import { useVerseOfTheDay } from '../components/bible/TodayCards'
 import { useAuth } from '../lib/AuthContext'
 
-/* ── Hero mockup: a faithful miniature of the real Revival One app (icon rail, home) ── */
+/* ── Hero mockup: a faithful miniature of the real Revival Sound Tent app (icon rail, home) ── */
 
 function MockRailIcon({ icon: Icon, active, badge }: { icon: ElementType; active?: boolean; badge?: string }) {
   return (
@@ -76,7 +76,7 @@ function AppMockup() {
           <div className="flex h-10 shrink-0 items-center justify-between border-b border-white/[0.06] px-3">
             <div className="flex items-center gap-2 text-[10px]">
               <PanelLeft className="h-3 w-3 text-muted-foreground" />
-              <span className="hidden text-muted-foreground sm:inline">Revival One</span>
+              <strong className="hidden font-heading font-bold text-muted-foreground sm:inline">REST</strong>
               <span className="hidden text-muted-foreground/30 sm:inline">/</span>
               <span className="font-semibold text-foreground">Home</span>
             </div>
@@ -127,7 +127,7 @@ function AppMockup() {
   )
 }
 
-/* ── Hero ribbon: small, real pieces of the Revival One app ── */
+/* ── Hero ribbon: small, real pieces of the Revival Sound Tent app ── */
 
 function RibbonPhoto({ src, label, position = 'center' }: { src: string; label?: string; position?: string }) {
   return (
@@ -355,7 +355,7 @@ function WayCard({ name, price, detail, desc, features, featured, texture, cta, 
 }
 
 const navLinks = [
-  ['#why', 'Why Revival One'],
+  ['#why', 'Why Revival Sound Tent'],
   ['#how', 'How it works'],
   ['#inside', 'Inside the app'],
   ['#word', 'Today’s Word'],
@@ -382,9 +382,9 @@ export default function Landing() {
             <HeroField variant="vivid" strike className="inset-0" />
 
             <header className="relative z-20 flex h-16 items-center justify-between px-4 sm:h-20 sm:px-7">
-              <Link to="/" className="flex items-center gap-2.5" aria-label="Revival One home">
+              <Link to="/" className="flex items-center gap-2.5" aria-label="Revival Sound Tent home">
                 <BrandMark size={32} animated />
-                <span className="font-heading text-lg font-semibold text-white">Revival <span className="font-bold">One</span></span>
+                <strong className="font-heading text-lg font-bold text-white">REST</strong>
               </Link>
               <nav className="hidden items-center gap-7 xl:flex" aria-label="Sections">
                 {navLinks.map(([href, label]) => (
@@ -396,7 +396,7 @@ export default function Landing() {
               <div className="flex items-center gap-2">
                 {!session && <Link to="/auth" className="hidden h-10 items-center px-3 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-white/85 transition-colors hover:text-white sm:inline-flex">Sign in</Link>}
                 <Link to={session ? '/home' : '/auth?mode=sign-up'} className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-4 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground transition-all hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] sm:px-5">
-                  {session ? 'Open the app' : 'Join Revival One'}
+                  {session ? 'Open the app' : <>Join <strong className="font-bold">REST</strong></>}
                 </Link>
               </div>
             </header>
@@ -458,13 +458,13 @@ export default function Landing() {
         <section id="why" className="px-4 py-20 sm:py-24">
           <div className="mx-auto max-w-6xl">
             <div className="mx-auto max-w-4xl text-center">
-              <Eyebrow>Why Revival One</Eyebrow>
+              <Eyebrow>Why Revival Sound Tent</Eyebrow>
               <h2 className="font-heading text-[2.2rem] font-semibold leading-[1.08] tracking-[-0.02em] sm:text-5xl lg:text-[3.6rem]">
                 You were not made <HeadlineChip icon={Users} tone="ember" /> to
                 <br />
                 <span className="text-muted-foreground"><HeadlineChip icon={Fire} tone="rose" /> carry it alone.</span>
               </h2>
-              <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-muted-foreground">The early church met daily, prayed together and shared everything. Revival One makes that rhythm easy to find again.</p>
+              <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-muted-foreground">The early church met daily, prayed together and shared everything. Revival Sound Tent makes that rhythm easy to find again.</p>
             </div>
 
             <Deck className="mt-14 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -507,7 +507,7 @@ export default function Landing() {
               </article>
 
               <article className="flex min-h-[184px] items-end justify-between gap-6 rounded-[28px] border border-white/[0.08] bg-black p-7">
-                <p className="max-w-[12rem] text-sm leading-6 text-muted-foreground">Revival One brings the Word, prayer and people into</p>
+                <p className="max-w-[12rem] text-sm leading-6 text-muted-foreground">Revival Sound Tent brings the Word, prayer and people into</p>
                 <p className="font-heading text-5xl font-semibold tracking-[-0.03em] text-primary">One</p>
               </article>
             </Deck>
@@ -603,7 +603,7 @@ export default function Landing() {
                 <div>
                   <p className="mb-6 flex items-center gap-2 font-heading text-[11px] font-semibold uppercase tracking-[0.2em] text-primary"><Fire className="h-4 w-4" /> The movement</p>
                   <h2 className="max-w-3xl font-heading text-[2.1rem] font-semibold leading-[1.08] tracking-[-0.02em] sm:text-5xl">Revival does not start on a stage. It starts in a room of people who pray.</h2>
-                  <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">Every cell, prayer night and outreach on Revival One is a small fire. Together they carry the flame city by city.</p>
+                  <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">Every cell, prayer night and outreach on Revival Sound Tent is a small fire. Together they carry the flame city by city.</p>
 
                   <div className="mt-8 rounded-[24px] border border-primary/25 bg-[linear-gradient(150deg,rgba(255,92,138,0.09),rgba(255,255,255,0.01))] p-6">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Our prayer</p>
@@ -660,12 +660,12 @@ export default function Landing() {
               <h2 className="font-heading text-[2.1rem] font-semibold leading-[1.08] tracking-[-0.02em] sm:text-4xl">Know what to expect before you join.</h2>
             </div>
             <div className="mt-12 space-y-3">
-              <BoltDisclosure title="What is Revival One?">The digital home for believers to connect, grow and carry revival city by city: a daily Word, a prayer wall, revival cells, events and Rev Academy, in one app.</BoltDisclosure>
-              <BoltDisclosure title="Is it free?">Yes. Joining Revival One and using the Word, prayer wall, cells, events and academy is free for every believer.</BoltDisclosure>
+              <BoltDisclosure title="What is Revival Sound Tent?">The digital home for believers to connect, grow and carry revival city by city: a daily Word, a prayer wall, revival cells, events and Rev Academy, in one app.</BoltDisclosure>
+              <BoltDisclosure title="Is it free?">Yes. Joining Revival Sound Tent and using the Word, prayer wall, cells, events and academy is free for every believer.</BoltDisclosure>
               <BoltDisclosure title="What is a revival cell?">A small group that meets in a home or a local space to pray, study Scripture and serve their neighbours. Find one near you or start your own.</BoltDisclosure>
               <BoltDisclosure title="Can I host an event or a bootcamp?">Yes. Create a worship night, prayer gathering, gospel bootcamp or outreach from the app. It is saved as a draft to your account first.</BoltDisclosure>
               <BoltDisclosure title="Which Bible translations can I read?">Today’s Word offers NIV, NKJV, NLT and AMP. Where a translation cannot be shown in the app, we link you to read it on YouVersion.</BoltDisclosure>
-              <BoltDisclosure title="Is Revival One a church?">No. Revival One serves believers from many local churches. We encourage every member to stay rooted in a local church family.</BoltDisclosure>
+              <BoltDisclosure title="Is Revival Sound Tent a church?">No. Revival Sound Tent serves believers from many local churches. We encourage every member to stay rooted in a local church family.</BoltDisclosure>
             </div>
           </div>
         </section>
@@ -688,7 +688,7 @@ export default function Landing() {
 
       <footer className="px-4 py-9">
         <div className="mx-auto flex max-w-6xl flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2.5"><BrandMark size={28} className="opacity-80" /><span className="font-heading text-sm font-semibold">Revival One</span><span className="text-xs text-muted-foreground">&copy; 2026</span></div>
+          <div className="flex items-center gap-2.5"><BrandMark size={28} className="opacity-80" /><span className="font-heading text-sm font-semibold">Revival Sound Tent</span><span className="text-xs text-muted-foreground">&copy; 2026</span></div>
           <nav aria-label="Footer" className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground">
             {[['/home', 'Home'], ['/community', 'Community'], ['/events', 'Events'], ['/academy', 'Academy']].map(([to, label]) => <Link key={to} to={to} className="transition-colors hover:text-foreground">{label}</Link>)}
             <a href="mailto:hello@revival.one" className="transition-colors hover:text-foreground">Contact</a>

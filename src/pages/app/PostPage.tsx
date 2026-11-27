@@ -73,7 +73,7 @@ export default function PostPage() {
   }
 
   const meta = KIND_META[post.kind]
-  const name = post.author?.full_name || 'A Revival One member'
+  const name = post.author?.full_name || 'A Revival Sound Tent member'
   const firstName = name.split(/\s+/)[0]
   const date = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(post.created_at))
   const mine = user?.id === post.author_id

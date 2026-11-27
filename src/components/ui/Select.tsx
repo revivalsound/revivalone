@@ -21,7 +21,7 @@ type Props<T extends string> = {
 type Place = { left: number; top: number; width: number; up: boolean; maxHeight: number }
 
 /**
- * Revival One's dropdown: replaces the device's native picker with a menu that
+ * Revival Sound Tent's dropdown: replaces the device's native picker with a menu that
  * opens from its button with a short spring, fits the screen, and works with
  * the keyboard (arrows, Home/End, Enter, Escape, type to jump).
  */

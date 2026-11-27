@@ -1,7 +1,7 @@
 import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import { canRenderShader, usePrefersReducedMotion, useSeen } from '../lib/shader-support'
 
-/** Spyda's hero mesh-gradient field, in Revival One's rose, ember and plum. */
+/** Spyda's hero mesh-gradient field, in Revival Sound Tent's rose, ember and plum. */
 const MeshGradient = lazy(async () => {
   const { MeshGradient: Shader } = await import('@paper-design/shaders-react')
   return { default: Shader }

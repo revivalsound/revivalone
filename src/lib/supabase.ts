@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 
 // The anon key is public by design (row-level security guards the data). These
-// fall back to the Revival One project the Next.js build already used.
+// fall back to the Revival Sound Tent project the Next.js build already used.
 export const supabaseUrl = import.meta.env.VITE_SUPABASE_URL ?? 'https://yvahpzbkxpgjufnxrisc.supabase.co'
 export const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
   ?? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2YWhwemJreHBnanVmbnhyaXNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyNTQxMzEsImV4cCI6MjEwMDgzMDEzMX0.7lEP0fOch69ByjcKIWeMwU-Bv9uC947RibSaxk-y-W8'

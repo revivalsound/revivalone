@@ -1,5 +1,5 @@
 /**
- * Revival One's icon set: Solar, line-duotone, drawn from the SVGs in Font/ —
+ * Revival Sound Tent's icon set: Solar, line-duotone, drawn from the SVGs in Font/ —
  * the same library and wrapper Spyda uses.
  *
  * The markup lives in solar-icons.generated.ts, built by

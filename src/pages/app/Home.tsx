@@ -93,7 +93,7 @@ export default function Home() {
           <header>
             <p className="mb-3 flex items-center gap-2 font-heading text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground"><span className="h-1.5 w-1.5 rounded-full bg-primary" /> {greeting()}</p>
             <h1 className="font-heading text-[2rem] font-semibold leading-[1.05] tracking-[-0.02em] sm:text-[2.6rem]">
-              {firstName ? <>Welcome back, <span className="text-primary">{firstName}.</span></> : <>The <span className="text-primary">Revival One</span> feed.</>}
+              {firstName ? <>Welcome back, <span className="text-primary">{firstName}.</span></> : <>The <span className="text-primary">Revival Sound Tent</span> feed.</>}
             </h1>
             <p className="mt-2 max-w-xl text-[15px] leading-7 text-muted-foreground">Words, studies, questions and Kingdom opportunities from the community.</p>
           </header>

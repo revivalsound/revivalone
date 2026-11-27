@@ -36,7 +36,7 @@ async function unsubscribeDevice() {
 type Value = {
   unread: number
   refreshUnread: () => void
-  /** Device alerts: shown as system notifications while Revival One is open in the background. */
+  /** Device alerts: shown as system notifications while Revival Sound Tent is open in the background. */
   alerts: 'on' | 'off' | 'blocked' | 'unsupported'
   enableAlerts: () => Promise<void>
   disableAlerts: () => void

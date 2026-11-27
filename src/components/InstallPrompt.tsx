@@ -27,7 +27,7 @@ function iosSafari() {
 }
 
 /**
- * Invites visitors to install Revival One. On Android and desktop Chrome/Edge it
+ * Invites visitors to install Revival Sound Tent. On Android and desktop Chrome/Edge it
  * uses the browser's install prompt behind a card of our own; on iPhone it shows
  * the Add to Home Screen steps. Not shown once installed, or for a few days
  * after "Not now".
@@ -70,7 +70,7 @@ export default function InstallPrompt() {
   if (installed) {
     return createPortal(
       <div className="install-toast theme-dark fixed inset-x-0 bottom-24 z-[80] mx-auto flex w-fit items-center gap-2 rounded-full bg-surface-raised px-5 py-3 text-sm font-semibold text-foreground shadow-[0_18px_40px_rgba(0,0,0,0.45)] lg:bottom-8">
-        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground"><Check className="h-3.5 w-3.5" strokeWidth={2.6} /></span> Revival One is on your home screen
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground"><Check className="h-3.5 w-3.5" strokeWidth={2.6} /></span> Revival Sound Tent is on your home screen
       </div>,
       document.body,
     )
@@ -99,7 +99,7 @@ export default function InstallPrompt() {
             </span>
           </div>
           <p className="mt-5 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">Get the app</p>
-          <h2 id="install-title" className="mt-1.5 text-center font-heading text-[1.6rem] font-semibold leading-tight tracking-[-0.02em]">Install Revival One</h2>
+          <h2 id="install-title" className="mt-1.5 text-center font-heading text-[1.6rem] font-semibold leading-tight tracking-[-0.02em]">Install Revival Sound Tent</h2>
           <p className="mx-auto mt-2 max-w-[18rem] text-center text-sm leading-6 text-muted-foreground">Open it from your home screen like any app. No app store needed.</p>
 
           <ul className="mt-5 space-y-2">
@@ -127,7 +127,7 @@ export default function InstallPrompt() {
               <ol className="mt-3 space-y-2.5 text-[13px]">
                 <li className="flex items-center gap-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary font-heading text-xs font-bold text-primary-foreground">1</span> Tap <span className="inline-flex items-center gap-1 rounded-lg bg-white/[0.08] px-2 py-1 font-semibold"><Share className="h-3.5 w-3.5 text-primary" /> Share</span> in Safari’s toolbar</li>
                 <li className="flex items-center gap-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary font-heading text-xs font-bold text-primary-foreground">2</span> Choose <span className="inline-flex items-center gap-1 rounded-lg bg-white/[0.08] px-2 py-1 font-semibold"><AddSquare className="h-3.5 w-3.5 text-primary" /> Add to Home Screen</span></li>
-                <li className="flex items-center gap-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary font-heading text-xs font-bold text-primary-foreground">3</span> Tap <b>Add</b>, then open <Fire className="h-4 w-4 text-primary" /> Revival One</li>
+                <li className="flex items-center gap-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary font-heading text-xs font-bold text-primary-foreground">3</span> Tap <b>Add</b>, then open <Fire className="h-4 w-4 text-primary" /> <strong>REST</strong></li>
               </ol>
               <button type="button" onClick={() => close()} className="mt-4 h-11 w-full rounded-full bg-primary text-sm font-semibold text-primary-foreground">Got it</button>
             </div>

@@ -230,7 +230,7 @@ export default function PrayerRoom() {
           ) : !session ? (
             <>
               <h2 className="font-heading text-2xl font-semibold">Sign in to join</h2>
-              <p className="mt-2 text-sm text-muted-foreground">Prayer walls are open to Revival One members.</p>
+              <p className="mt-2 text-sm text-muted-foreground">Prayer walls are open to Revival Sound Tent members.</p>
               <Link to={`/auth?next=/prayer/${code}`} className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground">Sign in <ArrowRight className="h-4 w-4" /></Link>
             </>
           ) : (

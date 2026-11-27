@@ -2,7 +2,7 @@ import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import { canRenderShader, usePrefersReducedMotion, useSeen } from '../../lib/shader-support'
 
 /**
- * The Revival One flame in liquid metal — Spyda's BrandMark, pointed at the
+ * The Revival Sound Tent flame in liquid metal — Spyda's BrandMark, pointed at the
  * flame. The paper-design shader stays in its own chunk and only loads once a
  * mark is on screen.
  */

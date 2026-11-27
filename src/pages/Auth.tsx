@@ -1,11 +1,12 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, Eye, EyeOff, Fire, HandHeart, Loader, Lock, Mail, MapPin, ShieldCheck, User, Users } from '../components/ui/icons'
+import { ArrowLeft, ArrowRight, Eye, EyeOff, Fire, HandHeart, Loader, Lock, Mail, MapPin, User, Users } from '../components/ui/icons'
 import BrandMark from '../components/brand/BrandMark'
 import HeroField from '../components/HeroField'
 import { Notice, inputClass } from '../components/ui/kit'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthContext'
+import { afterSignIn } from '../lib/profileSetup'
 
 /** The left panel: the movement's promise over the hero field, with a few live-looking cards. */
 function Showcase({ quote }: { quote: ReactNode }) {
@@ -38,10 +39,9 @@ export default function Auth() {
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const { session, loading: sessionLoading } = useAuth()
-  const next = params.get('next') || '/home'
+  const next = params.get('next')
   const [isSignUp, setIsSignUp] = useState(params.get('mode') === 'sign-up')
   const [fullName, setFullName] = useState('')
-  const [city, setCity] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -50,7 +50,7 @@ export default function Auth() {
   const [message, setMessage] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!sessionLoading && session) navigate(next, { replace: true })
+    if (!sessionLoading && session) navigate(afterSignIn(session.user, next), { replace: true })
   }, [navigate, next, session, sessionLoading])
 
   const switchMode = (signUp: boolean) => {
@@ -68,10 +68,14 @@ export default function Auth() {
     try {
       if (isSignUp) {
         if (password.length < 8) throw new Error('Use at least 8 characters for your password.')
+        if (fullName.trim().length < 2) throw new Error('Enter the name you want to use on your profile.')
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/auth/callback`, data: { full_name: fullName, city } },
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            data: { full_name: fullName.trim(), profile_setup: 'pending' },
+          },
         })
         if (signUpError) throw signUpError
         if (!data.session) {
@@ -111,9 +115,9 @@ export default function Auth() {
           <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[55%] bg-[radial-gradient(60%_70%_at_50%_0%,rgba(176,32,79,0.3),transparent_70%)]" />
 
           <header className="relative z-10 flex items-center justify-between px-5 pt-5 sm:px-7 sm:pt-6">
-            <Link to="/" className="flex items-center gap-2.5" aria-label="Revival One home">
+            <Link to="/" className="flex items-center gap-2.5" aria-label="Revival Sound Tent home">
               <BrandMark size={30} animated />
-              <span className="font-heading text-lg font-semibold">Revival One</span>
+              <strong className="font-heading text-lg font-bold">REST</strong>
             </Link>
             <Link to="/" className="inline-flex h-9 items-center gap-2 rounded-full border border-white/[0.09] bg-white/[0.03] px-3.5 text-xs text-muted-foreground transition-colors hover:bg-white/[0.07] hover:text-foreground">
               <ArrowLeft className="h-3.5 w-3.5" /> Back home
@@ -146,21 +150,12 @@ export default function Auth() {
               {message && <Notice tone="ok">{message}</Notice>}
 
               {isSignUp && (
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
+                <div>
                     <label htmlFor="auth-name" className="mb-2 block text-xs font-medium text-foreground/90">Full name</label>
                     <div className="relative">
                       <User className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      <input id="auth-name" required autoComplete="name" value={fullName} onChange={event => setFullName(event.target.value)} placeholder="Your name" className={`${inputClass} pl-11 pr-4`} />
+                      <input id="auth-name" required minLength={2} maxLength={100} autoComplete="name" value={fullName} onChange={event => setFullName(event.target.value)} placeholder="Your name" className={`${inputClass} pl-11 pr-4`} />
                     </div>
-                  </div>
-                  <div>
-                    <label htmlFor="auth-city" className="mb-2 block text-xs font-medium text-foreground/90">City</label>
-                    <div className="relative">
-                      <MapPin className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      <input id="auth-city" required autoComplete="address-level2" value={city} onChange={event => setCity(event.target.value)} placeholder="Lagos" className={`${inputClass} pl-11 pr-4`} />
-                    </div>
-                  </div>
                 </div>
               )}
 
@@ -184,7 +179,7 @@ export default function Auth() {
               </div>
 
               <button type="submit" disabled={busy} className="group !mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primary text-sm font-semibold text-primary-foreground shadow-[0_14px_38px_rgba(255,92,138,0.22)] transition-all hover:-translate-y-0.5 hover:bg-primary/90 active:translate-y-0 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0">
-                {busy ? <Loader className="h-5 w-5 animate-spin" /> : isSignUp ? 'Join the movement' : 'Enter Revival One'}
+                {busy ? <Loader className="h-5 w-5 animate-spin" /> : isSignUp ? 'Join the movement' : <>Enter <strong className="font-bold">REST</strong></>}
                 {!busy && <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />}
               </button>
             </form>
@@ -195,9 +190,6 @@ export default function Auth() {
             </p>
           </div>
 
-          <footer className="relative z-10 flex flex-col items-center gap-1 px-5 pb-5 text-center text-[11px] text-muted-foreground/80 sm:pb-6">
-            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-primary" /> Secure sign-in with Supabase</span>
-          </footer>
         </section>
       </div>
     </div>

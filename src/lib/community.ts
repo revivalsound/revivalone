@@ -30,7 +30,7 @@ export const FORMAT_LABEL: Record<Format, string> = { in_person: 'In person', on
 
 /** Thrown when supabase/community.sql hasn't been run yet. */
 export class CommunityNotReady extends Error {
-  constructor() { super('This part of Revival One isn’t switched on yet. Run supabase/community.sql in Supabase to turn it on.') }
+  constructor() { super('This part of Revival Sound Tent isn’t switched on yet. Run supabase/community.sql in Supabase to turn it on.') }
 }
 
 function fail(error: { code?: string; message: string }): never {

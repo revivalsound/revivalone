@@ -23,7 +23,7 @@ export default function SuggestedPeople({ limit = 6, title = 'People to follow',
               <AuthorAvatar author={person} size={compact ? 'h-9 w-9' : 'h-11 w-11'} />
               <span className="min-w-0">
                 <b className="block truncate text-[13px] font-semibold">{person.full_name}</b>
-                <small className="block truncate text-[11px] text-muted-foreground">{[person.city, person.church].filter(Boolean).join(' · ') || 'Revival One member'}</small>
+                <small className="block truncate text-[11px] text-muted-foreground">{[person.city, person.church].filter(Boolean).join(' · ') || 'Revival Sound Tent member'}</small>
               </span>
             </Link>
             <FollowButton userId={person.id} size="sm" />

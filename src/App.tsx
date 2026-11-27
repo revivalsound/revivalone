@@ -12,6 +12,7 @@ import InstallPrompt from './components/InstallPrompt'
 const Auth = lazy(() => import('./pages/Auth'))
 const AuthCallback = lazy(() => import('./pages/AuthCallback'))
 const ResetPassword = lazy(() => import('./pages/ResetPassword'))
+const Onboarding = lazy(() => import('./pages/Onboarding'))
 const AppShell = lazy(() => import('./components/app/AppShell'))
 const Home = lazy(() => import('./pages/app/Home'))
 const Community = lazy(() => import('./pages/app/Community'))
@@ -61,7 +62,12 @@ function RequireAuth({ children }: { children: ReactNode }) {
   const { session, loading } = useAuth()
   const location = useLocation()
   if (loading) return <ScreenLoader />
-  if (!session) return <Navigate to={`/auth?next=${encodeURIComponent(location.pathname)}`} replace />
+  if (!session) {
+    const next = location.pathname === '/onboarding'
+      ? new URLSearchParams(location.search).get('next') || '/home'
+      : location.pathname + location.search + location.hash
+    return <Navigate to={`/auth?next=${encodeURIComponent(next)}`} replace />
+  }
   return <>{children}</>
 }
 
@@ -98,6 +104,7 @@ export default function App() {
             <Route path="/sign-up" element={<Navigate to="/auth?mode=sign-up" replace />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/onboarding" element={<RequireAuth><Onboarding /></RequireAuth>} />
             <Route element={<AppShell />}>
               <Route path="/home" element={<Home />} />
               <Route path="/community" element={<Navigate to="/community/cells" replace />} />

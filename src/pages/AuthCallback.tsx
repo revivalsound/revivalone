@@ -1,25 +1,38 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BrandMark from '../components/brand/BrandMark'
 import { supabase } from '../lib/supabase'
+import { afterSignIn } from '../lib/profileSetup'
+
+async function completeSignIn() {
+  const params = new URLSearchParams(window.location.search)
+  const code = params.get('code')
+  if (code) {
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+    if (error) throw error
+    if (data.session) return afterSignIn(data.session.user, params.get('next'))
+  } else {
+    await new Promise(resolve => window.setTimeout(resolve, 500))
+  }
+  const { data, error } = await supabase.auth.getSession()
+  if (error) throw error
+  return data.session ? afterSignIn(data.session.user, params.get('next')) : '/auth'
+}
 
 export default function AuthCallback() {
   const navigate = useNavigate()
-  const [message, setMessage] = useState('Confirming your Revival One account…')
+  const [message, setMessage] = useState('Confirming your Revival Sound Tent account…')
+  const completion = useRef<Promise<string> | null>(null)
 
   useEffect(() => {
-    const code = new URLSearchParams(window.location.search).get('code')
-    const complete = async () => {
-      if (code) {
-        const { error } = await supabase.auth.exchangeCodeForSession(code)
-        if (error) { setMessage(error.message); return }
-      } else {
-        await new Promise(resolve => window.setTimeout(resolve, 500))
-      }
-      const { data } = await supabase.auth.getSession()
-      navigate(data.session ? '/home' : '/auth', { replace: true })
-    }
-    void complete()
+    let active = true
+    completion.current ??= completeSignIn()
+    void completion.current.then(destination => {
+      if (active) navigate(destination, { replace: true })
+    }, error => {
+      if (active) setMessage(error instanceof Error ? error.message : 'Couldn’t confirm your account. Try signing in.')
+    })
+    return () => { active = false }
   }, [navigate])
 
   return (

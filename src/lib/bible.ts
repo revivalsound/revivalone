@@ -1,5 +1,5 @@
 /**
- * Bible data for Revival One, served by the Free Use Bible API
+ * Bible data for Revival Sound Tent, served by the Free Use Bible API
  * (https://bible.helloao.org, github.com/HelloAOLab/bible-api): 1000+ translations,
  * audio narration, Tyndale study notes, public-domain commentaries, cross
  * references and the verse-of-the-day dataset. No key needed.
