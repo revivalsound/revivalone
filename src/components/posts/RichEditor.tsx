@@ -105,6 +105,25 @@ function Toolbar({ editor }: { editor: Editor }) {
   })
   const chain = () => editor.chain().focus()
 
+  // With a caret rather than highlighted text, format the current paragraph.
+  // Otherwise a font change only affects future typing and appears broken.
+  const textStyleChain = () => {
+    const { from, to, empty, $from } = editor.state.selection
+    const next = chain()
+    return empty && $from.parent.content.size > 0
+      ? next.setTextSelection({ from: $from.start(), to: $from.end() })
+      : next.setTextSelection({ from, to })
+  }
+  function applyTypography(property: 'font' | 'size', value: string) {
+    const { from, to, empty, $from } = editor.state.selection
+    const next = textStyleChain()
+    if (property === 'font') value ? next.setFontFamily(value) : next.unsetFontFamily()
+    else value ? next.setFontSize(value) : next.unsetFontSize()
+    // Do not leave the paragraph selected: the next keystroke must not replace it.
+    if (empty && $from.parent.content.size > 0) next.setTextSelection({ from, to })
+    next.run()
+  }
+
   function setLink() {
     const previous = editor.getAttributes('link').href as string | undefined
     const url = window.prompt('Link address (https://…)', previous ?? 'https://')
@@ -130,8 +149,8 @@ function Toolbar({ editor }: { editor: Editor }) {
           { value: 'h3', label: 'Heading 3', description: 'Small heading', preview: { fontFamily: '"Space Grotesk", sans-serif', color: 'rgb(var(--primary-soft))' } },
         ]}
       />
-      <Select size="sm" keepFocus label="Font" value={state.font} onChange={value => (value ? chain().setFontFamily(value).run() : chain().unsetFontFamily().run())} options={FONTS.map(font => ({ value: font.value, label: font.name, preview: font.value ? { fontFamily: font.value } : undefined }))} />
-      <Select size="sm" keepFocus label="Text size" value={state.size} onChange={value => (value ? chain().setFontSize(value).run() : chain().unsetFontSize().run())} options={SIZES.map(size => ({ value: size.value, label: size.name, description: size.value || '17px' }))} />
+      <Select size="sm" keepFocus label="Font" value={state.font} onChange={value => applyTypography('font', value)} options={FONTS.map(font => ({ value: font.value, label: font.name, preview: font.value ? { fontFamily: font.value } : undefined }))} />
+      <Select size="sm" keepFocus label="Text size" value={state.size} onChange={value => applyTypography('size', value)} options={SIZES.map(size => ({ value: size.value, label: size.name, description: size.value || '17px' }))} />
       <Divider />
       <Tool label="Bold (Ctrl+B)" active={state.bold} onClick={() => chain().toggleBold().run()}><b className="font-heading text-sm">B</b></Tool>
       <Tool label="Italic (Ctrl+I)" active={state.italic} onClick={() => chain().toggleItalic().run()}><i className="font-scripture text-sm">I</i></Tool>

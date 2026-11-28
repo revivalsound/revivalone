@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import type { MediaEdit } from './mediaEditing'
 
 export const POST_KINDS = ['word', 'study', 'question', 'opportunity'] as const
 export type PostKind = typeof POST_KINDS[number]
@@ -25,7 +26,7 @@ export type Post = {
   media?: PostMedia[]
 }
 
-export type PostMedia = { url: string; type: 'image' | 'video' }
+export type PostMedia = { url: string; type: 'image' | 'video'; edit?: MediaEdit }
 export const MAX_POST_MEDIA = 6
 
 export type PublicProfile = {
@@ -47,16 +48,30 @@ export let richPosts = true
 export let mentionsReady = false
 let columnsCheck: Promise<void> | null = null
 // Every request waits on the same check, so none can run ahead of it.
-function ensureColumns() {
+function ensureColumns(refresh = false) {
+  if (refresh) columnsCheck = null
   columnsCheck ??= (async () => {
     const [rich, tagged] = await Promise.all([
       supabase.from('posts').select('body_html, media').limit(1),
       supabase.from('posts').select('mentions').limit(1),
     ])
-    if (rich.error?.code === '42703') { richPosts = false; SELECT = BASE }
-    mentionsReady = tagged.error?.code !== '42703'
-  })()
+    const missingColumn = (code?: string) => code === '42703' || code === 'PGRST204'
+    if (rich.error && !missingColumn(rich.error.code)) fail(rich.error)
+    if (tagged.error && !missingColumn(tagged.error.code)) fail(tagged.error)
+    richPosts = !rich.error
+    SELECT = richPosts ? `${BASE}, body_html, media` : BASE
+    mentionsReady = !tagged.error
+  })().catch(error => {
+    columnsCheck = null // A network failure must not disable publishing for the session.
+    throw error
+  })
   return columnsCheck
+}
+
+/** Check before uploading files; retry a negative check after a database update. */
+export async function ensurePostMediaReady() {
+  await ensureColumns(!richPosts)
+  if (!richPosts) throw new Error('Photo and video sharing is temporarily unavailable. Your draft is still here; please try again shortly.')
 }
 
 /** Thrown when supabase/posts.sql hasn't been run yet, so screens can say so plainly. */
@@ -122,8 +137,8 @@ export async function fetchSimilar(post: Post, limit = 3) {
 }
 
 export async function createPost(input: NewPost) {
-  await ensureColumns()
-  if (!richPosts && input.media?.length) throw new Error('Photos and videos on posts aren’t switched on yet. Run supabase/posts-rich.sql in Supabase.')
+  if (input.media?.length) await ensurePostMediaReady()
+  else await ensureColumns()
   const { mentions, ...fields } = input
   const base = richPosts ? fields : (({ body_html: _html, media: _media, ...rest }) => rest)(fields)
   const row = mentionsReady && mentions?.length ? { ...base, mentions } : base

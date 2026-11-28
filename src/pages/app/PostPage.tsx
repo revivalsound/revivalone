@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, Bible, Check, Clock, Copy, ExternalLink, Loader, MapPin, Trash } from '../../components/ui/icons'
+import { ArrowLeft, ArrowRight, Bible, Clock, ExternalLink, Loader, MapPin, Trash } from '../../components/ui/icons'
 import { Deck, Notice } from '../../components/ui/kit'
 import PostCard, { AuthorAvatar, KIND_META, KindChip, PostCardSkeleton } from '../../components/posts/PostCard'
+import PostActions from '../../components/posts/PostActions'
+import PostComments from '../../components/posts/PostComments'
+import MediaFrame from '../../components/posts/MediaFrame'
+import MediaViewer from '../../components/posts/MediaViewer'
 import { useAuth } from '../../lib/AuthContext'
 import FollowButton from '../../components/social/FollowButton'
 import { sanitizePostHtml } from '../../lib/richText'
@@ -17,7 +21,6 @@ export default function PostPage() {
   const [error, setError] = useState('')
   const [fromAuthor, setFromAuthor] = useState<Post[] | null>(null)
   const [similar, setSimilar] = useState<Post[] | null>(null)
-  const [copied, setCopied] = useState(false)
   const [confirming, setConfirming] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
@@ -37,14 +40,6 @@ export default function PostPage() {
       .catch(caught => { if (live) { setError(caught instanceof Error ? caught.message : 'We couldn’t load this post.'); setState('error') } })
     return () => { live = false }
   }, [id])
-
-  async function share() {
-    const url = window.location.href
-    try {
-      if (navigator.share) await navigator.share({ title: post?.title, url })
-      else { await navigator.clipboard.writeText(url); setCopied(true); window.setTimeout(() => setCopied(false), 1800) }
-    } catch { /* the share sheet was dismissed */ }
-  }
 
   async function remove() {
     if (!post) return
@@ -133,9 +128,7 @@ export default function PostPage() {
           {post.tags.length > 0 && <div className="mt-8 flex flex-wrap gap-2">{post.tags.map(tag => <span key={tag} className="rounded-full border border-white/[0.08] px-3 py-1 text-xs text-muted-foreground">#{tag}</span>)}</div>}
 
           <div className="mt-10 flex flex-wrap items-center gap-2 border-t border-white/[0.07] pt-6">
-            <button type="button" onClick={share} className="inline-flex h-10 items-center gap-2 rounded-full border border-white/[0.1] bg-surface px-4 text-[13px] font-semibold transition-colors hover:bg-surface-raised">
-              {copied ? <><Check className="h-4 w-4 text-primary" /> Link copied</> : <><Copy className="h-4 w-4 text-primary" /> Share</>}
-            </button>
+            <PostActions postId={post.id} title={post.title} />
             {mine && (confirming ? (
               <span className="inline-flex items-center gap-2">
                 <span className="text-[13px] text-muted-foreground">Delete this post for good?</span>
@@ -147,6 +140,7 @@ export default function PostPage() {
             ))}
           </div>
           {error && <div className="mt-4"><Notice tone="error">{error}</Notice></div>}
+          <PostComments key={post.id} postId={post.id} />
 
           {/* About the writer */}
           <Link to={`/u/${post.author_id}`} className="bolt-card bolt-card--hover mt-8 flex items-center gap-4 rounded-[24px] border border-white/[0.07] bg-surface-raised p-5 transition-colors hover:bg-surface">
@@ -194,32 +188,18 @@ function Suggestions({ title, lede, posts, link, empty }: { title: string; lede?
 /** A post's photos and videos. Photos open full screen. */
 function Gallery({ media }: { media: PostMedia[] }) {
   const [open, setOpen] = useState<number | null>(null)
-  useEffect(() => {
-    if (open === null) return
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOpen(null)
-      if (event.key === 'ArrowRight') setOpen(value => (value === null ? value : (value + 1) % media.length))
-      if (event.key === 'ArrowLeft') setOpen(value => (value === null ? value : (value - 1 + media.length) % media.length))
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open, media.length])
   return (
     <>
-      <div className={`mt-8 grid gap-2 ${media.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+      <div className={`mt-8 grid items-start gap-2 ${media.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
         {media.map((item, index) => (
           <div key={item.url} className={`overflow-hidden rounded-[22px] border border-white/[0.07] bg-black ${media.length === 1 ? '' : media.length % 2 === 1 && index === 0 ? 'col-span-2' : ''}`}>
             {item.type === 'image'
-              ? <button type="button" onClick={() => setOpen(index)} className="block w-full"><img src={item.url} alt={`Photo ${index + 1}`} loading="lazy" className={`w-full object-cover ${media.length === 1 ? 'max-h-[640px]' : 'aspect-[4/3]'}`} /></button>
-              : <video src={item.url} controls playsInline preload="metadata" className={`w-full bg-black ${media.length === 1 ? 'max-h-[640px]' : 'aspect-[4/3] object-cover'}`} />}
+              ? <button type="button" aria-label={`Preview attachment ${index + 1}`} onClick={() => setOpen(index)} className="block w-full"><MediaFrame item={item} alt={`Photo ${index + 1}`} /></button>
+              : <div><MediaFrame item={item} controls /><button type="button" onClick={() => setOpen(index)} className="h-10 w-full bg-surface text-xs font-medium">Open preview</button></div>}
           </div>
         ))}
       </div>
-      {open !== null && media[open]?.type === 'image' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm" onClick={() => setOpen(null)} role="dialog" aria-label="Photo">
-          <img src={media[open].url} alt="" className="max-h-full max-w-full rounded-2xl object-contain" />
-        </div>
-      )}
+      {open !== null && <MediaViewer media={media} index={open} onIndex={setOpen} onClose={() => setOpen(null)} />}
     </>
   )
 }

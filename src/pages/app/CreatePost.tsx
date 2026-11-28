@@ -1,20 +1,24 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, Bible, CloudUpload, Loader, Play, Trash, X } from '../../components/ui/icons'
+import { ArrowLeft, ArrowRight, Bible, CloudUpload, Eye, Loader, Pen, Trash, X } from '../../components/ui/icons'
 import { Notice, inputClass } from '../../components/ui/kit'
 import RichEditor from '../../components/posts/RichEditor'
+import MediaEditor from '../../components/posts/MediaEditor'
+import MediaFrame from '../../components/posts/MediaFrame'
+import MediaViewer from '../../components/posts/MediaViewer'
+import type { MediaEdit } from '../../lib/mediaEditing'
 import { KIND_META, OPPORTUNITY_META } from '../../components/posts/PostCard'
 import { useAuth } from '../../lib/AuthContext'
 import { uploadMedia, MAX_IMAGE_BYTES, MAX_VIDEO_BYTES } from '../../lib/community'
 import { shrinkImage } from '../../lib/images'
-import { createPost, MAX_POST_MEDIA, OPPORTUNITY_TYPES, parseTags, POST_KINDS, type OpportunityType, type PostKind } from '../../lib/posts'
+import { createPost, ensurePostMediaReady, MAX_POST_MEDIA, OPPORTUNITY_TYPES, parseTags, POST_KINDS, type OpportunityType, type PostKind } from '../../lib/posts'
 import { sanitizePostHtml, textToHtml } from '../../lib/richText'
 import { mentionedUsers } from '../../lib/mentions'
 
 /** What another screen can prefill when it opens the editor (a shared verse, a journal entry). */
 export type PostDraft = { kind?: PostKind; title?: string; body?: string; scripture?: string; tags?: string }
 
-type Picked = { key: string; file: File; preview: string; type: 'image' | 'video' }
+type Picked = { key: string; file: File; preview: string; type: 'image' | 'video'; edit?: MediaEdit }
 
 const PROMPTS: Record<PostKind, string> = {
   word: 'Share the word, what it means to you and how it can encourage someone today.',
@@ -36,12 +40,16 @@ export default function CreatePost() {
   const [tags, setTags] = useState(draft.tags ?? '')
   const [link, setLink] = useState('')
   const [media, setMedia] = useState<Picked[]>([])
+  const [editing, setEditing] = useState<string | null>(null)
+  const [preview, setPreview] = useState<number | null>(null)
+  const mediaRef = useRef(media)
+  mediaRef.current = media
   const [status, setStatus] = useState('')
   const [error, setError] = useState('')
   const input = useRef<HTMLInputElement>(null)
   const [initialHtml] = useState(() => (draft.body ? textToHtml(draft.body) : ''))
 
-  useEffect(() => () => media.forEach(item => URL.revokeObjectURL(item.preview)), []) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => mediaRef.current.forEach(item => URL.revokeObjectURL(item.preview)), [])
 
   function addFiles(files: FileList | null) {
     if (!files) return
@@ -71,7 +79,9 @@ export default function CreatePost() {
     if (content.text.length < 10 && media.length === 0) { setError('Write a little more, or add a photo or video.'); return }
     if (link && !/^https?:\/\//i.test(link)) { setError('Links need to start with https://'); return }
     setError('')
+    setStatus('Preparing your post…')
     try {
+      if (media.length) await ensurePostMediaReady()
       const uploaded = []
       for (const [index, item] of media.entries()) {
         setStatus(`Uploading ${item.type} ${index + 1} of ${media.length}…`)
@@ -79,7 +89,8 @@ export default function CreatePost() {
         if (item.type === 'image' && file.type !== 'image/gif') file = await shrinkImage(file, { maxSize: 1800, quality: 0.85 })
         if (item.type === 'image' && file.size > MAX_IMAGE_BYTES) throw new Error('One of the photos is too large, even after shrinking.')
         const result = await uploadMedia(user.id, file)
-        uploaded.push({ url: result.url, type: item.type })
+        // Image resizing preserves aspect ratio, so edits stay resolution-independent.
+        uploaded.push({ url: result.url, type: item.type, ...(item.edit ? { edit: item.edit } : {}) })
       }
       setStatus('Publishing…')
       const post = await createPost({
@@ -100,6 +111,8 @@ export default function CreatePost() {
       setStatus('')
     }
   }
+
+  const editingItem = media.find(item => item.key === editing)
 
   return (
     <form onSubmit={submit} className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
@@ -151,10 +164,13 @@ export default function CreatePost() {
             {media.length > 0 && (
               <div className={`grid gap-2 ${media.length === 1 ? 'grid-cols-1' : 'grid-cols-2 sm:grid-cols-3'}`}>
                 {media.map((item, index) => (
-                  <div key={item.key} className={`group relative overflow-hidden rounded-[18px] border border-white/[0.08] bg-black ${media.length === 1 ? 'aspect-video' : 'aspect-square'}`}>
-                    {item.type === 'image' ? <img src={item.preview} alt={`Attachment ${index + 1}`} className="h-full w-full object-cover" /> : <video src={item.preview} muted playsInline className="h-full w-full object-cover" />}
-                    {item.type === 'video' && <span className="absolute left-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/55 text-white"><Play className="h-3.5 w-3.5" /></span>}
-                    <button type="button" onClick={() => remove(item.key)} aria-label="Remove" className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-md hover:bg-red-500/80"><X className="h-4 w-4" /></button>
+                  <div key={item.key} className="self-start overflow-hidden rounded-[18px] border border-white/[0.08] bg-surface-raised">
+                    <button type="button" aria-label={`Preview attachment ${index + 1}`} className="block w-full" onClick={() => setPreview(index)}><MediaFrame item={{ url: item.preview, type: item.type, edit: item.edit }} alt={`Attachment ${index + 1}`} /></button>
+                    <div className="flex items-center gap-1 p-2">
+                      <button type="button" aria-label={`Preview attachment ${index + 1}`} onClick={() => setPreview(index)} className="media-icon"><Eye className="h-4 w-4" /></button>
+                      <button type="button" aria-label={`Edit attachment ${index + 1}`} onClick={() => setEditing(item.key)} className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full px-2 text-xs font-semibold hover:bg-white/[0.07]"><Pen className="h-4 w-4 text-primary" /><span className="hidden lg:inline">Edit</span></button>
+                      <button type="button" onClick={() => remove(item.key)} aria-label={`Remove attachment ${index + 1}`} className="media-icon ml-auto text-muted-foreground hover:text-red-300"><X className="h-4 w-4" /></button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -184,9 +200,11 @@ export default function CreatePost() {
           </button>
           {status && <p className="text-center text-xs text-muted-foreground lg:hidden">{status}</p>}
           <p className="text-center text-[11px] text-muted-foreground">Posts appear in the Home feed and on your profile. <Link to={user ? `/u/${user.id}` : '/home'} className="text-primary">See yours</Link></p>
-          {media.length > 0 && <button type="button" onClick={() => setMedia([])} className="mx-auto flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"><Trash className="h-3.5 w-3.5" /> Remove all media</button>}
+          {media.length > 0 && <button type="button" onClick={() => { media.forEach(item => URL.revokeObjectURL(item.preview)); setMedia([]) }} className="mx-auto flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"><Trash className="h-3.5 w-3.5" /> Remove all media</button>}
         </aside>
       </div>
+      {preview !== null && media[preview] && <MediaViewer media={media.map(item => ({ url: item.preview, type: item.type, edit: item.edit }))} index={preview} onIndex={setPreview} onClose={() => setPreview(null)} />}
+      {editingItem && <MediaEditor key={editingItem.key} item={{ url: editingItem.preview, type: editingItem.type, edit: editingItem.edit }} onClose={() => setEditing(null)} onSave={edit => { setMedia(current => current.map(entry => entry.key === editing ? { ...entry, edit } : entry)); setEditing(null) }} />}
     </form>
   )
 }

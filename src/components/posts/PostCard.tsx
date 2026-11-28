@@ -1,6 +1,9 @@
-import type { CSSProperties, ElementType } from 'react'
+import { useState, type CSSProperties, type ElementType } from 'react'
 import { Link } from 'react-router-dom'
 import PhotoImg from '../ui/PhotoImg'
+import PostActions from './PostActions'
+import MediaFrame from './MediaFrame'
+import MediaViewer from './MediaViewer'
 import { excerptHtml } from '../../lib/richText'
 import { ArrowRight, Bible, Briefcase, Clock, Play, GraphUp, HandHeart, HandMoney, HandStars, Notebook, Question, Sparkles } from '../ui/icons'
 import { initialsOf, readingMinutes, timeAgo, type Author, type OpportunityType, type Post, type PostKind, type PostMedia } from '../../lib/posts'
@@ -89,6 +92,7 @@ export default function PostCard({ post, compact = false }: { post: Post; compac
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/[0.08] text-foreground transition-all duration-300 group-hover:border-transparent group-hover:bg-[var(--post-accent)] group-hover:text-[#140609]"><ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" /></span>
           </span>
         </footer>
+        <div className="mt-3 border-t border-white/[0.07] pt-2"><PostActions postId={post.id} title={post.title} /></div>
       </div>
     </article>
   )
@@ -107,19 +111,18 @@ export function PostCardSkeleton() {
 
 /** Up to four photos or videos on a feed card, in a tidy grid. */
 function MediaPreview({ media, compact }: { media: PostMedia[]; compact: boolean }) {
+  const [open, setOpen] = useState<number | null>(null)
   const shown = media.slice(0, compact ? 1 : 4)
   const extra = media.length - shown.length
   return (
-    <div className={`relative mt-4 grid gap-1.5 overflow-hidden rounded-[18px] ${shown.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+    <><div className={`relative z-[2] mt-4 grid items-start gap-1.5 overflow-hidden rounded-[18px] ${shown.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
       {shown.map((item, index) => (
-        <div key={item.url} className={`relative overflow-hidden bg-black ${shown.length === 1 ? 'aspect-[16/9]' : shown.length === 3 && index === 0 ? 'row-span-2 aspect-auto' : 'aspect-[4/3]'}`}>
-          {item.type === 'image'
-            ? <img src={item.url} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
-            : <video src={`${item.url}#t=0.1`} muted playsInline preload="metadata" className="h-full w-full object-cover" />}
+        <button type="button" aria-label={`Preview attachment ${index + 1}`} onClick={() => setOpen(index)} key={item.url} className="relative block w-full overflow-hidden rounded-xl bg-black">
+          <MediaFrame item={item} alt={`Attachment ${index + 1}`} />
           {item.type === 'video' && <span className="absolute left-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-md"><Play className="h-3.5 w-3.5" /></span>}
           {extra > 0 && index === shown.length - 1 && <span className="absolute inset-0 flex items-center justify-center bg-black/55 font-heading text-xl font-semibold text-white">+{extra}</span>}
-        </div>
+        </button>
       ))}
-    </div>
+    </div>{open !== null && <MediaViewer media={media} index={open} onIndex={setOpen} onClose={() => setOpen(null)} />}</>
   )
 }
