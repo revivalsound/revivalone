@@ -36,7 +36,8 @@ export type PublicProfile = {
 
 export type NewPost = Pick<Post, 'kind' | 'title' | 'body' | 'scripture' | 'link_url' | 'tags'> & { opportunity_type: OpportunityType | null; body_html?: string; media?: PostMedia[]; mentions?: string[] }
 
-const BASE = 'id, author_id, kind, opportunity_type, title, body, scripture, link_url, tags, created_at, author:profiles(id, full_name, avatar_url, city, church)'
+// Likes also connect posts to profiles; always select the direct author relationship.
+const BASE = 'id, author_id, kind, opportunity_type, title, body, scripture, link_url, tags, created_at, author:profiles!posts_author_id_fkey(id, full_name, avatar_url, city, church)'
 let SELECT = `${BASE}, body_html, media`
 
 /**

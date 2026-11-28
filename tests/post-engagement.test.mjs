@@ -37,3 +37,15 @@ test('empty and oversized comments never reach the database', async () => {
   const module = await loadEngagement({ from() { assert.fail('Invalid comment must not be sent') } })
   for (const body of ['  ', 'a'.repeat(3001)]) await assert.rejects(module.addComment('first', body), /3,000/)
 })
+
+test('comments explicitly select their author relationship', async () => {
+  const module = await loadEngagement({ from() {
+    const query = {
+      select(columns) { assert.match(columns, /author:profiles!post_comments_author_id_fkey\(/); return query },
+      eq() { return query }, order() { return query },
+      async range() { return { data: [], error: null } },
+    }
+    return query
+  } })
+  assert.deepEqual(await module.fetchComments('post'), [])
+})

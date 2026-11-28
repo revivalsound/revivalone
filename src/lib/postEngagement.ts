@@ -41,7 +41,7 @@ export async function setPostLiked(postId: string, userId: string, liked: boolea
   engagementChanged(postId)
 }
 
-const COMMENT = 'id, post_id, author_id, body, created_at, author:profiles(id, full_name, avatar_url, city)'
+const COMMENT = 'id, post_id, author_id, body, created_at, author:profiles!post_comments_author_id_fkey(id, full_name, avatar_url, city)'
 export const COMMENT_PAGE = 20
 export async function fetchComments(postId: string, page = 0) {
   const { data, error } = await supabase.from('post_comments').select(COMMENT).eq('post_id', postId).order('created_at', { ascending: false }).order('id').range(page * COMMENT_PAGE, (page + 1) * COMMENT_PAGE - 1)
